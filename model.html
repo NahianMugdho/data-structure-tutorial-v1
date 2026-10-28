@@ -1,4 +1,63 @@
 <!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DS</title><link rel="stylesheet" href="style.css"></head><body>
 <section class="slide"><h2>Model Test — ৩০টি random প্রশ্ন</h2><p>সব section-এর প্রশ্ন থেকে। প্রতিবার <b>Shuffle</b> চাপলে নতুন ৩০টি।</p><button onclick="nw()">Shuffle / নতুন টেস্ট</button><button onclick="sub()">জমা দাও</button><span id="sc"></span><div id="qz"></div></section>
-<script src="bank.js"></script><script src="app.js"></script><script>let cur=[];function nw(){cur=shuf(BANK).slice(0,30);cur.forEach(q=>{const c=q.o[q.a],o=shuf(q.o);q.o=o;q.a=o.indexOf(c)});$('#qz').dataset.exam=1;renderQ(cur,$('#qz'),'m');$('#sc').textContent=''}
-function sub(){let s=0;cur.forEach((q,i)=>{const c=document.querySelector('input[name=m'+i+']:checked'),ok=c&&+c.dataset.j==q.a;if(ok)s++;$('#mr'+i).innerHTML='<span class="'+(ok?'good':'bad')+'">'+(ok?'সঠিক ✔':'সঠিক: '+q.o[q.a])+'</span> '+q.e});$('#sc').textContent=' স্কোর: '+s+' / 30'}nw()</script></body></html>
+<script src="bank.js"></script><script src="app.js"></script>
+
+
+
+<script>
+let modelQuestions = [];
+
+function nw() {
+    // Copy question objects to avoid modifying BANK
+    modelQuestions = shuf(BANK)
+        .slice(0, 30)
+        .map(q => {
+            const correctOption = q.o[q.a];
+            const options = shuf(q.o);
+
+            return {
+                ...q,
+                o: options,
+                a: options.indexOf(correctOption)
+            };
+        });
+
+    const quizElement = $('#qz');
+    quizElement.dataset.exam = '1';
+
+    renderQ(modelQuestions, quizElement, 'm');
+    $('#sc').textContent = '';
+}
+
+function sub() {
+    let score = 0;
+
+    modelQuestions.forEach((q, i) => {
+        const selected = document.querySelector(
+            `input[name="m${i}"]:checked`
+        );
+
+        const correct = selected &&
+            Number(selected.dataset.j) === q.a;
+
+        if (correct) score++;
+
+        $('#mr' + i).innerHTML =
+            '<span class="' + (correct ? 'good' : 'bad') + '">' +
+            (correct ? 'সঠিক ✔' : 'সঠিক: ' + q.o[q.a]) +
+            '</span> ' + q.e;
+    });
+
+    $('#sc').textContent =
+        ' স্কোর: ' + score + ' / ' + modelQuestions.length;
+}
+
+nw();
+</script>
+
+
+
+
+
+
+</body></html>
