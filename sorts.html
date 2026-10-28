@@ -1,0 +1,113 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sorting</title><link rel="stylesheet" href="style.css"></head><body>
+<section class="slide"><h2>Sorting কী ও কেন?</h2>
+<p>Sorting হলো element-গুলোকে কোনো উদ্দেশ্যে নির্দিষ্ট ক্রমে (ছোট→বড় বা বর্ণানুক্রমে) সাজানো। অভিধানে শব্দ আর ফোন ডিরেক্টরিতে নাম বর্ণানুক্রমে থাকে বলেই খোঁজা সহজ। সাজানো data-তে Binary search চালানো যায়।</p>
+<div class="card"><b>দুই ধরন:</b> <b>Internal sorting</b> — সব element main memory-তে। <b>External sorting</b> — কিছু element secondary storage-এ (যেমন Merge sort বিশাল ফাইলে)। এই পেজে internal sorting।</div>
+<div class="card"><b>আমরা যা শিখব:</b> Bubble · Selection · Insertion · Quick · Merge · Heap। প্রতিটির জন্য: ধারণা → ধাপে ধাপে হিসাব (program দিয়ে তৈরি) → code → complexity।</div></section>
+
+<section class="slide"><h2>Bubble Sort</h2>
+<p>Array-কে বারবার পাশাপাশি দুটি দুটি করে তুলনা করা হয় (X[i] বনাম X[i+1]); ক্রম ভুল হলে অদলবদল (swap)। প্রতি pass-এ সবচেয়ে বড় মান “বুদবুদের মতো” ডানে ভেসে যায়। এর আরেক নাম <b>exchange sort</b>। n টি element-এ <b>n−1 pass</b> লাগে।</p>
+<div id="tb1"></div><div class="card" id="bn"></div>
+<pre>void bubblesort(int x[], int n){
+  int i, j, temp;
+  for(i = 0; i &lt; n; i++)
+    for(j = 0; j &lt; n - i - 1; j++)
+      if(x[j] &gt; x[j+1]){ temp = x[j]; x[j] = x[j+1]; x[j+1] = temp; } }</pre>
+<div class="card"><b>Complexity:</b> n−1 pass × প্রতি pass-এ ≈ n−1 তুলনা = (n−1)² = n²−2n+1 ⇒ <b>O(n²)</b>। (সঠিক গণনায় pass-এ তুলনা কমে বলে মোট n(n−1)/2।) Element বেশি হলে বহু অকার্যকর।</div></section>
+
+<section class="slide"><h2>Selection Sort</h2>
+<p>প্রতি pass-এ বাকি অংশ থেকে <b>সবচেয়ে ছোট</b> element খুঁজে তাকে সামনের ঘরের সাথে swap করা হয়। Pass 1: x[0..n−1]-এর ক্ষুদ্রতম x[0]-এর সাথে swap; Pass 2: x[1..n−1]-এর ক্ষুদ্রতম x[1]-এর সাথে; … মোট (n−1) pass এবং <b>সর্বোচ্চ n−1 swap</b>।</p>
+<div id="tb2"></div>
+<pre>void selectionSort(int low, int high){
+  int i, j, temp, minindex;
+  for(i = low; i &lt;= high; i++){
+     minindex = i;
+     for(j = i+1; j &lt;= high; j++)
+        if(a[j] &lt; a[minindex]) minindex = j;
+     temp = a[i]; a[i] = a[minindex]; a[minindex] = temp; } }</pre>
+<div class="card"><b>Recursive রূপ:</b> selectionSort(n) → x[n..]-এর ক্ষুদ্রতম খুঁজে x[n]-এর সাথে swap, তারপর selectionSort(n+1); n শেষ index-এ পৌঁছালে থামে। <b>Complexity:</b> O(n²), তবে swap কম — তাই insertion/bubble-এ অনেক swap লাগলে selection পছন্দের।</div></section>
+
+<section class="slide"><h2>Insertion Sort</h2>
+<p>বামের অংশ sorted ধরে রাখা হয়। ডান থেকে একটি করে নতুন element (key) নিয়ে sorted অংশে সঠিক জায়গা খুঁজে ঢোকানো হয় — তাস সাজানোর মতো। যে element বড়, সে এক ঘর ডানে সরে।</p>
+<div id="tb3"></div>
+<div class="card"><b>Complexity:</b> Best (প্রায় sorted) <b>O(n)</b>, Average/Worst O(n²)। <b>কখন ভালো:</b> array-তে মাত্র কয়েকটি item জায়গার বাইরে থাকলে; live leaderboard-এর মতো প্রায় sorted data। এটি stable।</div></section>
+
+<section class="slide"><h2>Quick Sort — Divide &amp; Conquer</h2>
+<p>একটি <b>pivot</b> বেছে array-কে দুই ভাগে ভাগ করা হয়: pivot-এর চেয়ে ছোটগুলো বামে, বড়গুলো ডানে। তারপর দুই ভাগেই একই কাজ recursively করা হয়। সব ভাগ শেষ হলে পুরো array sorted।</p>
+<div class="card"><b>partition() কীভাবে কাজ করে:</b> pivot = প্রথম element। ‘up’ pointer বাম থেকে ডানে চলে pivot-এর চেয়ে <b>বড়</b> element খোঁজে; ‘down’ pointer ডান থেকে বামে চলে pivot-এর চেয়ে <b>ছোট</b> element খোঁজে। দুটিই পেলে (up &lt; down) swap। up ও down পার হয়ে গেলে pivot ও a[down] অদলবদল — pivot তার চূড়ান্ত জায়গায়।</div>
+<pre>quicksort(p, q){ if(p &lt; q){ j = PARTITION(a, p, q+1); quicksort(p, j-1); quicksort(j+1, q); } }
+partition(a, m, p){ v = a[m]; up = m; down = p;
+  do{ repeat up = up+1 until (a[up] &gt;= v);
+      repeat down = down-1 until (a[down] &lt;= v);
+      if(up &lt; down) interchange(a, up, down);
+  } while(up &lt; down);
+  a[m] = a[down]; a[down] = v; return down; }</pre>
+<p><b>PDF-এর ১৩ element-এর উদাহরণ</b> (38 08 16 06 79 57 24 56 02 58 04 70 45) — প্রতিটি partition-এর পর:</p><div id="tb4"></div>
+<div class="card"><b>Complexity:</b> গড় ও best O(n log n); pivot যদি সবসময় সবচেয়ে ছোট/বড় হয় তবে worst O(n²)। ভালো pivot = median। অগোছালো data-য় সাধারণত সবচেয়ে দ্রুত। Quick sort stable নয়।</div></section>
+
+<section class="slide"><h2>Merge Sort</h2>
+<p>Array-কে বারবার অর্ধেক করে ভাগ করা হয় যতক্ষণ না প্রতিটি ভাগে ১টি element; তারপর দুটি sorted অংশকে তুলনা করে <b>merge</b> করে বড় sorted অংশ বানানো হয়। প্রতিবার দুই অংশের সামনের element তুলনা করে ছোটটি নেওয়া হয়।</p>
+<div id="tb5"></div>
+<div class="card"><b>Complexity:</b> সব ক্ষেত্রে <b>O(n log n)</b>; বাড়তি O(n) memory লাগে; stable। বিশাল ফাইল (external sorting) ও library catalog-এ উপযোগী।</div></section>
+
+<section class="slide"><h2>Heap Sort</h2>
+<p>Heap হলো complete binary tree। <b>Max heap-এ root সবচেয়ে বড়।</b> ধাপ: (১) array থেকে max heap বানাও। (২) root (সবচেয়ে বড়) শেষের ঘরে swap করো এবং heap-এর আকার ১ কমিয়ে heapify করো। (৩) পুরো array sorted না হওয়া পর্যন্ত চালাও। Heap নিয়ে বিস্তারিত: <a href="tree.html">Tree পেজ</a>।</p>
+<div id="tb6"></div>
+<div class="card"><b>Complexity:</b> সব ক্ষেত্রে <b>O(n log n)</b>; বাড়তি memory প্রায় লাগে না (in-place); stable নয়। Priority queue ও OS-এর task scheduling-এ heap ব্যবহৃত।</div></section>
+
+<section class="slide"><h2>অ্যানিমেশন ল্যাব</h2>
+<div class="card" id="ex"><b>বাংলায় ব্যাখ্যা:</b> একটি বোতাম চাপো। হলুদ = এখন তুলনা/বদল হচ্ছে।</div>
+<button onclick="run('sel')">Selection</button><button onclick="run('ins')">Insertion</button><button onclick="run('quick')">Quick</button><button onclick="run('heap')">Heap</button><button onclick="run('merge')">Merge</button><button onclick="run('bub')">Bubble</button><button onclick="rnd()">নতুন array</button><div class="bars" id="bb"></div><p id="m"></p></section>
+
+<section class="slide"><h2>Sort তুলনা</h2>
+<table><tr><th>Sort</th><th>Best</th><th>Average</th><th>Worst</th><th>বাড়তি memory</th><th>Stable?</th></tr>
+<tr><td>Bubble</td><td>O(n)*</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>হ্যাঁ</td></tr><tr><td>Selection</td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>না</td></tr><tr><td>Insertion</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>হ্যাঁ</td></tr><tr><td>Quick</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>না</td></tr><tr><td>Merge</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>হ্যাঁ</td></tr><tr><td>Heap</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(1)</td><td>না</td></tr></table>
+<p>*যদি “swap হয়নি” পতাকা ব্যবহার করা হয়; PDF-এর সাধারণ রূপে O(n²)।</p>
+<div class="card"><b>কোথায় কোনটি:</b> Quick — database record sort · Merge — external sort · Bubble — শেখানো/ছোট list · Insertion — প্রায় sorted data (leaderboard) · Heap — priority queue, OS task scheduling।</div></section>
+
+<section class="slide"><h2>Exercise (PDF) — সমাধান</h2><div id="exs"></div></section>
+<section class="slide"><h2>অনুশীলন প্রশ্ন (Sorting)</h2><div id="qz"></div></section>
+<script src="bank.js"></script><script src="fig.js"></script><script src="app.js"></script><script>
+renderQ(BANK.filter(q=>q.s=='ss'&&!/[Ss]earch|খুঁজ|catalog|attendance|সার্চ/.test(q.q)),$('#qz'),'so');
+function bub(a){const A=[...a],r=[];let c=0,s=0;for(let i=0;i<A.length-1;i++){for(let j=0;j<A.length-1-i;j++){c++;if(A[j]>A[j+1]){[A[j],A[j+1]]=[A[j+1],A[j]];s++}}r.push(['Pass '+(i+1),A.join(' '),'সবচেয়ে বড় '+A[A.length-1-i]+' জায়গায়'])}return{r,c,s}}
+function sel(a){const A=[...a],r=[];for(let i=0;i<A.length-1;i++){let m=i;for(let j=i+1;j<A.length;j++)if(A[j]<A[m])m=j;[A[i],A[m]]=[A[m],A[i]];r.push(['Pass '+(i+1),'ক্ষুদ্রতম '+A[i]+' ⇄ index '+i,A.join(' ')])}return r}
+function ins(a){const A=[...a],r=[];for(let i=1;i<A.length;i++){const k=A[i];let j=i-1;while(j>=0&&A[j]>k){A[j+1]=A[j];j--}A[j+1]=k;r.push(['key = '+k,A.slice(0,i+1).join(' ')+' | '+A.slice(i+1).join(' ')])}return r}
+function part(A,m,p){const v=A[m];let up=m,dn=p;do{do{up++}while(up<p&&A[up]<v);do{dn--}while(A[dn]>v);if(up<dn){const t=A[up];A[up]=A[dn];A[dn]=t}}while(up<dn);A[m]=A[dn];A[dn]=v;return dn}
+function qk(a){const A=[...a],r=[];const q=(l,h)=>{if(l>=h)return;const v=A[l],j=part(A,l,h+1);r.push(['pivot '+v+' (ঘর '+(l+1)+'–'+(h+1)+')','pivot এখন ঘর '+(j+1),A.join(' ')]);q(l,j-1);q(j+1,h)};q(0,A.length-1);return r}
+function mg(a){const A=[...a],r=[];const m=(l,h)=>{if(l>=h)return;const k=(l+h)>>1;m(l,k);m(k+1,h);const t=[];let i=l,j=k+1;while(i<=k||j<=h){if(j>h||(i<=k&&A[i]<=A[j]))t.push(A[i++]);else t.push(A[j++])}t.forEach((x,z)=>A[l+z]=x);r.push(['merge ঘর '+(l+1)+'–'+(h+1),A.slice(l,h+1).join(' '),A.join(' ')])};m(0,A.length-1);return r}
+function hp(a){const A=[...a],n=A.length,r=[];const sd=(i,m)=>{for(;;){let l=2*i+1,x=l+1,g=i;if(l<m&&A[l]>A[g])g=l;if(x<m&&A[x]>A[g])g=x;if(g==i)return;[A[i],A[g]]=[A[g],A[i]];i=g}};for(let i=(n>>1)-1;i>=0;i--)sd(i,n);r.push(['Max-heap তৈরি',A.join(' ')]);for(let e=n-1;e>0;e--){[A[0],A[e]]=[A[e],A[0]];sd(0,e);r.push(['root ⇄ ঘর '+(e+1)+'; heap আকার '+e,A.join(' ')])}return r}
+const E=[33,44,22,11,66,55];let b=bub(E);
+$('#tb1').innerHTML='<p>উদাহরণ: '+E.join(' ')+' (ছোট→বড়)</p>'+tb(['Pass','ফল','মন্তব্য'],b.r);$('#bn').innerHTML='৬টি element-এ <b>৫ pass</b> (n−1)। এই উদাহরণে মোট তুলনা '+b.c+', swap '+b.s+'।';
+$('#tb2').innerHTML='<p>উদাহরণ: 70 80 50 45 55 75 65 60</p>'+tb(['Pass','কাজ','ফল'],sel([70,80,50,45,55,75,65,60]));
+$('#tb3').innerHTML='<p>উদাহরণ: 3 1 4 5 9 2 6 5 (Exercise 9) — “|”-এর বাম পাশ sorted</p>'+tb(['ধাপ','ফল'],ins([3,1,4,5,9,2,6,5]));
+$('#tb4').innerHTML=tb(['Partition','ফল','পুরো array'],qk([38,8,16,6,79,57,24,56,2,58,4,70,45]));
+$('#tb5').innerHTML='<p>উদাহরণ: 38 27 43 3 9 82 10</p>'+tb(['ধাপ','merge-এর ফল','পুরো array'],mg([38,27,43,3,9,82,10]));
+$('#tb6').innerHTML='<p>উদাহরণ: 33 44 22 11 66 55</p>'+tb(['ধাপ','array'],hp(E));
+// exercises
+const e2=bub([7,1,3,4,10,9,8,6,5,2]);let P=[5,3,8,9,1,7,0,2,6,4];const pj=part(P,0,10);
+const c7=[3,0,2,4,5,8,7,6,9].filter((x,i,a)=>a.slice(0,i).every(y=>y<x)&&a.slice(i+1).every(y=>y>x));
+function hins(a){const H=[];a.forEach(v=>{H.push(v);let i=H.length-1;while(i>0){const p=(i-1)>>1;if(H[p]>H[i]){[H[p],H[i]]=[H[i],H[p]];i=p}else break}});return H}
+const H8=hins([10,12,1,14,6,5,8,15,3,9,7,4,11,13,2]);
+$('#exs').innerHTML='<div class="card"><b>১.</b> Recursive binary search ও complexity: <a href="search-sort.html">Searching পেজ</a> — T(n)=T(n/2)+1 ⇒ O(log n)।</div>'+
+'<div class="card"><b>২. Bubble sort, n=10:</b> প্রত্যাশিত pass = n−1 = <b>9</b>; তুলনা — PDF-সূত্র (n−1)×(n−1) = 81, সঠিক গণনায় n(n−1)/2 = 45; worst-case swap = 45। <b>7 1 3 4 10 9 8 6 5 2</b>-এ আসলে: pass '+e2.r.length+', তুলনা <b>'+e2.c+'</b>, swap <b>'+e2.s+'</b> (swap সংখ্যা = inversion সংখ্যা)। ফল: '+e2.r[e2.r.length-1][1]+'</div>'+
+'<div class="card"><b>৩.</b> x-এর সংখ্যা ও প্রথম অবস্থান: <a href="search-sort.html">Searching পেজ</a>-এর শেষের দিকে code।</div>'+
+'<div class="card"><b>৪. Matrix row-wise ও column-wise sort:</b> <pre>for(i=0;i&lt;R;i++) sort(m[i], C);        // প্রতিটি সারি আলাদা sort\nfor(j=0;j&lt;C;j++){ for(i=0;i&lt;R;i++) col[i]=m[i][j]; sort(col,R); for(i=0;i&lt;R;i++) m[i][j]=col[i]; }</pre>প্রতিটি সারি/কলাম আলাদা array ধরে যেকোনো sort (যেমন bubble) চালানো হয়।</div>'+
+'<div class="card"><b>৫. Heap sort নাকি Quick sort (সীমিত memory)?</b> <b>Heap sort</b>: in-place (বাড়তি O(1)), worst case O(n log n)। Quick sort-এ recursion stack লাগে (O(log n) থেকে worst O(n)) এবং worst case O(n²)।</div>'+
+'<div class="card"><b>৬.</b> 5 3 8 9 1 7 0 2 6 4, pivot 5, partition-এর পর: <b>'+P.join(' ')+'</b> (pivot 5 এখন ঘর '+(pj+1)+'; বামে সব ছোট, ডানে সব বড়)।</div>'+
+'<div class="card"><b>৭.</b> 3,0,2,4,5,8,7,6,9 — pivot হতে পারে যার বামে সব ছোট ও ডানে সব বড়: <b>'+c7.join(', ')+'</b>।</div>'+
+'<div class="card"><b>৮.</b> 10,12,1,14,6,5,8,15,3,9,7,4,11,13,2 পরপর min-heap-এ insert করলে array: <b>'+H8.join(' ')+'</b><div id="h8"></div></div>'+
+'<div class="card"><b>৯.</b> 3,1,4,5,9,2,6,5 insertion sort: উপরের Insertion slide-এ ধাপে ধাপে দেখানো আছে; ফল <b>1 2 3 4 5 5 6 9</b>।</div>';
+$('#h8').innerHTML=fig(AS(H8));
+// animation lab
+let D=[33,44,22,11,66,55,38,9],busy=0;const dr=(a,h=[])=>$('#bb').innerHTML=a.map((v,i)=>'<div class="bar '+(h.includes(i)?'cmp':'')+'" style="height:'+v*2+'px">'+v+'</div>').join('');
+function rnd(){D=Array.from({length:8},()=>Math.floor(Math.random()*70)+5);dr(D)}
+function fr(alg){const f=[],A=[...D],p=(h=[])=>f.push([[...A],h]);p();
+if(alg=='bub')for(let i=0;i<A.length-1;i++)for(let j=0;j<A.length-1-i;j++){p([j,j+1]);if(A[j]>A[j+1]){[A[j],A[j+1]]=[A[j+1],A[j]];p([j,j+1])}}
+if(alg=='sel')for(let i=0;i<A.length-1;i++){let m=i;for(let j=i+1;j<A.length;j++){p([m,j]);if(A[j]<A[m])m=j}[A[i],A[m]]=[A[m],A[i]];p([i,m])}
+if(alg=='ins')for(let i=1;i<A.length;i++){let j=i;while(j>0&&A[j-1]>A[j]){p([j-1,j]);[A[j-1],A[j]]=[A[j],A[j-1]];j--}p([j])}
+if(alg=='quick'){const qs=(l,h)=>{if(l>=h)return;let pv=A[h],i=l;for(let j=l;j<h;j++){p([j,h]);if(A[j]<pv){[A[i],A[j]]=[A[j],A[i]];i++}}[A[i],A[h]]=[A[h],A[i]];p([i]);qs(l,i-1);qs(i+1,h)};qs(0,A.length-1)}
+if(alg=='merge'){const ms=(l,r)=>{if(l>=r)return;const m=(l+r)>>1;ms(l,m);ms(m+1,r);const t=[];let i=l,j=m+1;while(i<=m||j<=r){if(j>r||(i<=m&&A[i]<=A[j]))t.push(A[i++]);else t.push(A[j++])}for(let k=0;k<t.length;k++){A[l+k]=t[k];p([l+k])}};ms(0,A.length-1)}
+if(alg=='heap'){const n=A.length,sd=(i,m)=>{for(;;){let l=2*i+1,r=l+1,g=i;if(l<m&&A[l]>A[g])g=l;if(r<m&&A[r]>A[g])g=r;if(g==i)return;p([i,g]);[A[i],A[g]]=[A[g],A[i]];i=g}};for(let i=(n>>1)-1;i>=0;i--)sd(i,n);for(let e=n-1;e>0;e--){[A[0],A[e]]=[A[e],A[0]];p([0,e]);sd(0,e)}}
+p();return f}
+const X={bub:'পাশাপাশি দুটি তুলনা; ভুল ক্রমে হলে swap। প্রতি pass-এ সবচেয়ে বড় মান ডানে বসে।',sel:'বাকি অংশের সবচেয়ে ছোটটি খুঁজে সামনের ঘরের সাথে swap। সর্বোচ্চ n−1 swap।',ins:'বাম অংশ sorted ধরে প্রতিটি নতুন মানকে সঠিক জায়গায় ঢোকানো।',quick:'শেষ মানকে pivot ধরে ছোটগুলো বামে, বড়গুলো ডানে; তারপর দুই পাশে একই কাজ। (এখানে সহজ Lomuto partition, উপরের টেবিলে PDF-এর up/down পদ্ধতি।)',heap:'প্রথমে max-heap; তারপর root শেষে পাঠিয়ে heap ঠিক করা।',merge:'অর্ধেক অর্ধেক ভাগ করে sorted দুই অংশ জোড়া লাগানো।'};
+async function run(a){if(busy)return;busy=1;$('#ex').innerHTML='<b>বাংলায় ব্যাখ্যা:</b> '+X[a];const f=fr(a);for(let i=0;i<f.length;i++){dr(f[i][0],f[i][1]);$('#m').textContent=(i+1)+' / '+f.length+' ধাপ';await sleep(300)}busy=0}dr(D)
+</script></body></html>

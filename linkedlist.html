@@ -1,0 +1,27 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linked</title><link rel="stylesheet" href="style.css"></head><body>
+<section class="slide"><h2>Linked List কী?</h2>
+<p>Array-তে element পাশাপাশি ঘরে থাকে; Linked list-এ প্রতিটি <b>node</b>-এ দুটি অংশ: <b>data</b> ও পরের node-এর ঠিকানা (<b>next pointer</b>)। শেষ node-এর next = NULL। শুরুর node-কে ধরে রাখে <b>head</b>। ফলে memory-তে ছড়ানো থাকলেও শিকলের মতো যুক্ত থাকে।</p>
+<div class="card"><b>ধরন:</b> Singly (শুধু next), Doubly (prev ও next — প্রতি node-এ ২টি pointer), Circular (শেষ node-এর next = প্রথম node)।</div>
+<table><tr><th></th><th>Array</th><th>Linked list</th></tr><tr><td>Access (i-তম)</td><td>O(1) — সরাসরি index</td><td>O(n) — head থেকে হাঁটতে হয়</td></tr><tr><td>Head-এ insert</td><td>O(n) (সবাইকে সরাতে হয়)</td><td>O(1)</td></tr><tr><td>Tail-এ insert</td><td>O(1) (জায়গা থাকলে)</td><td>O(n) (tail pointer থাকলে O(1))</td></tr><tr><td>Binary search</td><td>করা যায়</td><td>কার্যকর নয় (random access নেই)</td></tr><tr><td>আকার</td><td>স্থির</td><td>প্রয়োজনমতো বাড়ে/কমে</td></tr></table></section>
+<section class="slide"><h2>Linked list ইন্টারেক্টিভ</h2>
+<div class="card"><b>কীভাবে চালাবে:</b> মান লিখে head/tail/নির্দিষ্ট অবস্থানে insert করো; মান লিখে delete বা search করো; Reverse চাপলে সব তীর উল্টে যায়। Search-এ কয়টি node ঘুরতে হলো তা দেখাবে।</div>
+<input id="v" type="number" value="5" style="width:70px"> অবস্থান <input id="p" type="number" value="1" style="width:55px">
+<button onclick="L.unshift(+$('#v').value);d('head-এ insert O(1)')">Head-এ insert</button><button onclick="L.push(+$('#v').value);d('tail-এ insert — শেষ পর্যন্ত হাঁটা O(n)')">Tail-এ insert</button><button onclick="at()">অবস্থানে insert</button><button onclick="del()">মান delete</button><button onclick="sr()">Search</button><button onclick="L.reverse();d('Reverse — প্রতিটি pointer উল্টে গেল O(n)')">Reverse</button>
+<div id="ll" style="margin:14px 0"></div><p id="lm"></p>
+<pre>struct node { int data; struct node *next; };
+void insertHead(struct node **h,int v){ struct node *n=malloc(sizeof *n); n->data=v; n->next=*h; *h=n; }
+void deleteValue(struct node **h,int v){ while(*h &amp;&amp; (*h)->data!=v) h=&amp;(*h)->next;
+   if(*h){ struct node *t=*h; *h=t->next; free(t);} }</pre></section>
+<section class="slide"><h2>2D Array-র ঠিকানা (Row-major / Column-major)</h2>
+<p>Array memory-তে এক লাইনে থাকে। দুই-মাত্রার array R×C-কে সারি ধরে (row-major) বা কলাম ধরে (column-major) সাজানো যায়:</p>
+<div class="card">Row-major: ঠিকানা = Base + size × (i × C + j) · Column-major: ঠিকানা = Base + size × (j × R + i) (i, j = 0 থেকে শুরু)।</div>
+<p>R <input id="R" type="number" value="20" style="width:60px"> C <input id="C" type="number" value="50" style="width:60px"> element size <input id="S" type="number" value="4" style="width:55px"> Base <input id="B" type="number" value="2000" style="width:75px"> i <input id="i" type="number" value="10" style="width:55px"> j <input id="j" type="number" value="10" style="width:55px"> <button onclick="ad()">হিসাব</button></p><p id="am"></p></section>
+<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section>
+<script src="bank.js"></script><script src="fig.js"></script><script src="app.js"></script><script>
+quiz('ll','#qz');let L=[3,7,9];
+function d(t){$('#ll').innerHTML='<span class="box">head</span><span class="arr">→</span>'+L.map(v=>'<span class="box">'+v+'</span><span class="arr">→</span>').join('')+'<span class="box">NULL</span>';if(t)$('#lm').textContent=t}
+function at(){const p=Math.max(1,Math.min(L.length+1,+$('#p').value));L.splice(p-1,0,+$('#v').value);d('অবস্থান '+p+'-এ insert — p−1 ধাপ হাঁটতে হয়েছে')}
+function del(){const i=L.indexOf(+$('#v').value);if(i<0)return d('মান নেই');L.splice(i,1);d('delete — '+(i+1)+'টি node ঘুরে পাওয়া গেছে')}
+function sr(){const i=L.indexOf(+$('#v').value);d(i<0?'পাওয়া যায়নি, '+L.length+'টি node ঘুরতে হলো':'পাওয়া গেছে, '+(i+1)+'টি node ঘুরে')}
+function ad(){const R=+$('#R').value,C=+$('#C').value,S=+$('#S').value,B=+$('#B').value,i=+$('#i').value,j=+$('#j').value;$('#am').innerHTML='Row-major: '+B+' + '+S+'×('+i+'×'+C+'+'+j+') = <b>'+(B+S*(i*C+j))+'</b><br>Column-major: '+B+' + '+S+'×('+j+'×'+R+'+'+i+') = <b>'+(B+S*(j*R+i))+'</b>'}
+d();ad();</script></body></html>

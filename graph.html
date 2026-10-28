@@ -1,0 +1,61 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Graph</title><link rel="stylesheet" href="style.css"></head><body>
+<section class="slide"><h2>Graph — মৌলিক ধারণা</h2>
+<p>Graph = <b>vertex (node)</b>-এর সেট + তাদের যুক্তকারী <b>edge</b>-এর সেট। Tree-র বিপরীতে graph-এ cycle থাকতে পারে। Tree হলো এমন graph যা connected ও cycle-হীন (n vertex ⇒ n−1 edge)।</p>
+<table><tr><th>পরিভাষা</th><th>অর্থ</th></tr><tr><td>Directed / Undirected</td><td>edge-এ দিক আছে / নেই</td></tr><tr><td>Weighted</td><td>প্রতি edge-এ খরচ/দূরত্ব (weight)</td></tr><tr><td>Path / Cycle</td><td>vertex-এর ধারা / যে path শুরুর vertex-এই ফেরে</td></tr><tr><td>Connected</td><td>যেকোনো দুই vertex-এর মধ্যে path আছে</td></tr><tr><td>Degree</td><td>কোনো vertex-এ যুক্ত edge সংখ্যা</td></tr></table>
+<div class="card">n vertex-এর complete undirected graph-এ edge = n(n−1)/2। <b>ব্যবহার:</b> সড়ক/নেটওয়ার্ক, সামাজিক সংযোগ, গেমের মানচিত্র, রাউটিং।</div>
+<p>এই পেজের উদাহরণ graph (weighted, undirected):</p><div id="g0" style="max-width:460px"></div><div id="rep"></div>
+<div class="card"><b>Representation:</b> Adjacency matrix (V×V টেবিল; space O(V²); edge আছে কি না O(1)) · Adjacency list (প্রতি vertex-এর প্রতিবেশীর তালিকা; space O(V+E))।</div></section>
+
+<section class="slide"><h2>BFS ও DFS</h2>
+<div class="card"><b>কীভাবে চালাবে:</b> বোতাম চাপলে A থেকে শুরু করে node-গুলো ক্রমানুসারে হলুদ হবে এবং ক্রম নিচে লেখা হবে। BFS কাছের প্রতিবেশীদের আগে (queue); DFS একটি পথে যতদূর যায়, শেষ হলে ফিরে অন্য পথে (stack/recursion)।</div>
+<div id="g1" style="max-width:460px"></div><button onclick="tr('bfs')">BFS (queue)</button><button onclick="tr('dfs')">DFS (stack)</button><p id="m1"></p>
+<table><tr><th></th><th>BFS</th><th>DFS</th></tr><tr><td>Data structure</td><td>Queue</td><td>Stack / recursion</td></tr><tr><td>Complexity</td><td>O(V+E)</td><td>O(V+E)</td></tr><tr><td>ব্যবহার</td><td>unweighted graph-এ এক vertex থেকে সব vertex-এর দূরত্ব/ছোট পথ; বন্ধু-সুপারিশ</td><td>maze/puzzle পথ, cycle খোঁজা, গভীর ফোল্ডার খোঁজা</td></tr></table></section>
+
+<section class="slide"><h2>Shortest Path — Dijkstra</h2>
+<p><b>Single source</b> shortest path: এক উৎস (A) থেকে বাকি সব vertex-এ সবচেয়ে কম খরচের পথ। <b>নেগেটিভ weight চলবে না।</b> কৌশল (greedy): অনির্ধারিত vertex-দের মধ্যে যার দূরত্ব সবচেয়ে কম সেটিকে চূড়ান্ত করো, তার প্রতিবেশীদের দূরত্ব ছোট হলে আপডেট (relax) করো।</p>
+<div class="card"><b>কীভাবে চালাবে:</b> “পরের ধাপ” চাপো; হলুদ node = চূড়ান্ত হওয়া; নিচের টেবিলে প্রতিটি vertex-এর বর্তমান দূরত্ব; হলুদ edge = এখন পর্যন্ত পাওয়া shortest-path tree।</div>
+<div id="g2" style="max-width:460px"></div><button onclick="dj(0)">রিসেট</button><button onclick="dj(1)">পরের ধাপ</button><div id="d2"></div>
+<div class="card"><b>Complexity:</b> array দিয়ে O(V²); min-heap দিয়ে O((V+E) log V)। BFS দিয়েও unweighted graph-এ shortest path হয়, কিন্তু weighted-এ Dijkstra লাগে।</div></section>
+
+<section class="slide"><h2>Bellman-Ford ও SPFA</h2>
+<p><b>Bellman-Ford</b> single-source shortest path, যেখানে <b>edge-এর weight নেগেটিভ</b> হতে পারে। পদ্ধতি: (V−1) বার সব edge relax করো। নেগেটিভ cycle থাকলে shortest path অর্থহীন (V-তম বারেও কমলে নেগেটিভ cycle ধরা পড়ে)। Complexity O(V·E)।</p>
+<p>উদাহরণ (directed): A→B = 4, A→C = 5, B→C = −3, C→D = 2; উৎস A:</p><div id="bf"></div>
+<div class="card"><b>SPFA (Shortest Path Faster Algorithm):</b> Bellman-Ford-এরই queue-ভিত্তিক দ্রুত রূপ — শুধু যে vertex-এর দূরত্ব বদলেছে তাদের queue-তে রেখে relax করে। single-source; গড়ে খুব দ্রুত, তাত্ত্বিক worst case O(V·E)।</div></section>
+
+<section class="slide"><h2>Floyd-Warshall — সব জোড়ার shortest path</h2>
+<p><b>All-pairs</b> shortest path, Dynamic Programming দিয়ে। প্রতিটি vertex k-কে “মাঝের স্টেশন” ধরে পরীক্ষা: <code>d[i][j] = min(d[i][j], d[i][k] + d[k][j])</code>। Complexity O(V³)।</p>
+<div class="card"><b>কীভাবে চালাবে:</b> “পরের k” চাপলে একটি করে vertex মাঝের স্টেশন হিসেবে যুক্ত হবে এবং কমে যাওয়া দূরত্ব হলুদ হবে। (উপরের graph, undirected)</div>
+<button onclick="fw(0)">রিসেট</button><button onclick="fw(1)">পরের k</button><div id="fw"></div></section>
+
+<section class="slide"><h2>Minimum Spanning Tree (MST)</h2>
+<p><b>Spanning tree:</b> সব vertex যুক্ত অথচ cycle-হীন subgraph (V−1 edge)। <b>MST:</b> weighted graph-এ মোট weight সবচেয়ে কম spanning tree। নেটওয়ার্কে loop আটকাতে (spanning tree protocol) ও কম খরচে তার/পাইপ টানতে ব্যবহৃত।</p>
+<div class="card"><b>Kruskal (greedy):</b> সব edge weight অনুযায়ী ছোট→বড় সাজাও; একে একে নাও, তবে cycle তৈরি হলে বাদ দাও। V−1 edge হলে শেষ। Complexity O(E log E)।</div>
+<div class="card"><b>Prim (greedy):</b> একটি vertex থেকে শুরু; প্রতিবার ইতোমধ্যে নেওয়া অংশ থেকে বেরোনো সবচেয়ে সস্তা edge নাও। Complexity O(V²) বা heap-এ O(E log V)।</div>
+<div class="card"><b>কীভাবে চালাবে:</b> Kruskal/Prim বোতাম চাপলে একটি করে edge বিবেচনা হয় — সবুজাভ হলুদ = নেওয়া হলো, নিচের লেখায় কেন নেওয়া/বাদ দেওয়া হলো তা থাকবে।</div>
+<div id="g3" style="max-width:460px"></div><button onclick="mst('k',0)">Kruskal রিসেট</button><button onclick="mst('k',1)">Kruskal পরের</button><button onclick="mst('p',0)">Prim রিসেট</button><button onclick="mst('p',1)">Prim পরের</button><p id="m3"></p></section>
+
+<section class="slide"><h2>Algorithm সারসংক্ষেপ</h2>
+<table><tr><th>Algorithm</th><th>উদ্দেশ্য</th><th>নেগেটিভ edge?</th><th>Complexity</th></tr><tr><td>BFS / DFS</td><td>traversal; unweighted shortest path (BFS)</td><td>–</td><td>O(V+E)</td></tr><tr><td>Dijkstra</td><td>single-source shortest path</td><td>না</td><td>O(V²) / O((V+E)log V)</td></tr><tr><td>Bellman-Ford</td><td>single-source shortest path</td><td>হ্যাঁ</td><td>O(VE)</td></tr><tr><td>SPFA</td><td>Bellman-Ford-এর queue রূপ</td><td>হ্যাঁ</td><td>গড়ে দ্রুত, worst O(VE)</td></tr><tr><td>Floyd-Warshall</td><td>all-pairs shortest path (DP)</td><td>হ্যাঁ (নেগেটিভ cycle ছাড়া)</td><td>O(V³)</td></tr><tr><td>Kruskal</td><td>MST (edge বাছাই)</td><td>–</td><td>O(E log E)</td></tr><tr><td>Prim</td><td>MST (vertex বাড়ানো)</td><td>–</td><td>O(V²) / O(E log V)</td></tr><tr><td>A*</td><td>গেম/রোবটে heuristic-সহ shortest path</td><td>–</td><td>heuristic-নির্ভর</td></tr></table>
+<div class="card">পরীক্ষার ফাঁদ: weighted graph-এ সবচেয়ে কার্যকর shortest path = Dijkstra (DFS বা BFS নয়); নেগেটিভ weight থাকলে Bellman-Ford; সব জোড়া হলে Floyd-Warshall।</div></section>
+<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section>
+<script src="bank.js"></script><script src="fig.js"></script><script src="app.js"></script><script>
+quiz('gr','#qz');
+const V=['A','B','C','D','E','F'],PS={A:[50,130],B:[150,45],C:[150,215],D:[290,45],E:[290,215],F:[385,130]},EG=[['A','B',4],['A','C',2],['B','C',1],['B','D',5],['C','D',8],['C','E',10],['D','E',2],['D','F',6],['E','F',3]],INF=1e9;
+const key=(a,b)=>[a,b].sort().join(''),adj=n=>EG.filter(e=>e[0]==n||e[1]==n).map(e=>[e[0]==n?e[1]:e[0],e[2]]).sort();
+function dg(id,hn=[],he=[],lab={}){$('#'+id).innerHTML='<svg viewBox="0 0 440 260" width="100%">'+EG.map(e=>{const p=PS[e[0]],q=PS[e[1]],on=he.includes(key(e[0],e[1]));return '<line x1="'+p[0]+'" y1="'+p[1]+'" x2="'+q[0]+'" y2="'+q[1]+'" style="'+(on?'stroke:var(--hl);stroke-width:5':'')+'"/><text x="'+(p[0]+q[0])/2+'" y="'+((p[1]+q[1])/2-5)+'" style="font-size:12px">'+e[2]+'</text>'}).join('')+V.map(v=>'<g class="nd '+(hn.includes(v)?'on':'')+'"><circle cx="'+PS[v][0]+'" cy="'+PS[v][1]+'" r="17"/><text x="'+PS[v][0]+'" y="'+(PS[v][1]+5)+'">'+v+'</text>'+(lab[v]!==undefined?'<text x="'+PS[v][0]+'" y="'+(PS[v][1]+34)+'" style="font-size:12px">'+lab[v]+'</text>':'')+'</g>').join('')+'</svg>'}
+dg('g0');dg('g1');dg('g3');
+$('#rep').innerHTML='<p><b>Adjacency list:</b></p>'+tb(['Vertex','প্রতিবেশী (weight)'],V.map(v=>[v,adj(v).map(a=>a[0]+'('+a[1]+')').join(', ')]))+'<p><b>Adjacency matrix (weight):</b></p>'+tb([''].concat(V),V.map(a=>[a].concat(V.map(b=>{const e=EG.find(e=>key(e[0],e[1])==key(a,b));return e?e[2]:'–'}))));
+async function tr(t){const seen=['A'],q=['A'],o=[];while(q.length){const n=t=='bfs'?q.shift():q.pop();o.push(n);dg('g1',o);$('#m1').textContent=o.join(' → ');await sleep(700);const a=adj(n).map(x=>x[0]);(t=='bfs'?a:a.reverse()).forEach(x=>{if(!seen.includes(x)){seen.push(x);q.push(x)}})}}
+function dijF(){const d={},vis=[],pv={},fr=[];V.forEach(v=>d[v]=INF);d.A=0;for(let k=0;k<V.length;k++){let u=null;V.forEach(v=>{if(!vis.includes(v)&&(u===null||d[v]<d[u]))u=v});vis.push(u);adj(u).forEach(a=>{if(d[u]+a[1]<d[a[0]]){d[a[0]]=d[u]+a[1];pv[a[0]]=u}});fr.push({u,d:{...d},vis:[...vis],pv:{...pv}})}return fr}
+const DF=dijF();let di=-1;
+function dj(s){di=s?Math.min(di+1,DF.length-1):-1;if(di<0){dg('g2',[],[],{A:0});$('#d2').innerHTML='<p>শুরু: A = 0, বাকি সব ∞</p>';return}const f=DF[di];dg('g2',f.vis,Object.keys(f.pv).filter(v=>f.vis.includes(v)).map(v=>key(v,f.pv[v])),Object.fromEntries(V.map(v=>[v,f.d[v]>=INF?'∞':f.d[v]])));
+$('#d2').innerHTML='<p>ধাপ '+(di+1)+': <b>'+f.u+'</b> চূড়ান্ত (দূরত্ব '+f.d[f.u]+') এবং তার প্রতিবেশীদের দূরত্ব আপডেট।</p>'+tb(['Vertex'].concat(V),[['দূরত্ব'].concat(V.map(v=>f.d[v]>=INF?'∞':f.d[v])),['চূড়ান্ত?'].concat(V.map(v=>f.vis.includes(v)?'✔':''))])}dj(0);
+(function(){const E=[['A','B',4],['A','C',5],['B','C',-3],['C','D',2]],N=['A','B','C','D'],d={A:0,B:INF,C:INF,D:INF},rows=[['শুরু'].concat(N.map(v=>d[v]>=INF?'∞':d[v]))];for(let i=1;i<N.length;i++){E.forEach(e=>{if(d[e[0]]<INF&&d[e[0]]+e[2]<d[e[1]])d[e[1]]=d[e[0]]+e[2]});rows.push(['Pass '+i].concat(N.map(v=>d[v]>=INF?'∞':d[v])))}$('#bf').innerHTML=tb(['ধাপ'].concat(N),rows)+'<p>B→C = −3 থাকায় C-এর দূরত্ব 5 থেকে কমে 4−3 = 1 হয়েছে; Dijkstra এখানে ভুল ফল দিতে পারত।</p>'})();
+const FW=(()=>{let D=V.map(a=>V.map(b=>a==b?0:(EG.find(e=>key(e[0],e[1])==key(a,b))||[0,0,INF])[2])),fr=[{k:-1,D:D.map(r=>[...r]),ch:[]}];for(let k=0;k<V.length;k++){const ch=[];D=D.map(r=>[...r]);for(let i=0;i<V.length;i++)for(let j=0;j<V.length;j++)if(D[i][k]+D[k][j]<D[i][j]){D[i][j]=D[i][k]+D[k][j];ch.push(i+','+j)}fr.push({k,D:D.map(r=>[...r]),ch})}return fr})();let fi=0;
+function fw(s){fi=s?Math.min(fi+1,FW.length-1):0;const f=FW[fi];$('#fw').innerHTML='<p>'+(f.k<0?'শুরু: সরাসরি edge-এর খরচ (∞ = সংযোগ নেই)':'k = '+V[f.k]+' মাঝের স্টেশন; '+f.ch.length+'টি দূরত্ব কমেছে')+'</p>'+tb([''].concat(V),V.map((a,i)=>['<b>'+a+'</b>'].concat(V.map((b,j)=>(f.ch.includes(i+','+j)?'<span style="background:var(--hl);color:#000;padding:0 4px">':'<span>')+(f.D[i][j]>=INF?'∞':f.D[i][j])+'</span>'))))}fw(0);
+function kF(){const S=[...EG].sort((a,b)=>a[2]-b[2]),p={};V.forEach(v=>p[v]=v);const f=x=>p[x]==x?x:(p[x]=f(p[x]));const ch=[],fr=[];let tot=0;S.forEach(e=>{const a=f(e[0]),b=f(e[1]);let ok=a!=b;if(ok){p[a]=b;ch.push(key(e[0],e[1]));tot+=e[2]}fr.push({e,ok,ch:[...ch],tot})});return fr}
+function pF(){const inn=['A'],ch=[],fr=[];let tot=0;while(inn.length<V.length){let best=null;EG.forEach(e=>{const a=inn.includes(e[0]),b=inn.includes(e[1]);if(a!=b&&(!best||e[2]<best[2]))best=e});const nv=inn.includes(best[0])?best[1]:best[0];inn.push(nv);ch.push(key(best[0],best[1]));tot+=best[2];fr.push({e:best,nv,ch:[...ch],tot,inn:[...inn]})}return fr}
+const KF=kF(),PF=pF();let ki=-1,pi=-1;
+function mst(t,s){if(t=='k'){ki=s?Math.min(ki+1,KF.length-1):-1;if(ki<0){dg('g3');$('#m3').textContent='Kruskal: edge-গুলো weight অনুযায়ী: '+[...EG].sort((a,b)=>a[2]-b[2]).map(e=>e[0]+e[1]+'('+e[2]+')').join(', ');return}const f=KF[ki];dg('g3',[],f.ch);$('#m3').textContent='edge '+f.e[0]+f.e[1]+' (weight '+f.e[2]+'): '+(f.ok?'নেওয়া হলো (cycle হয়নি)':'বাদ — cycle তৈরি হতো')+'। এ পর্যন্ত মোট weight = '+f.tot+(ki==KF.length-1?' ⇒ MST মোট = '+f.tot:'')}
+else{pi=s?Math.min(pi+1,PF.length-1):-1;if(pi<0){dg('g3',['A']);$('#m3').textContent='Prim: A থেকে শুরু';return}const f=PF[pi];dg('g3',f.inn,f.ch);$('#m3').textContent='সবচেয়ে সস্তা বেরোনো edge '+f.e[0]+f.e[1]+' ('+f.e[2]+') ⇒ '+f.nv+' যুক্ত। মোট weight = '+f.tot}}
+</script></body></html>

@@ -1,0 +1,76 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Complexity</title><link rel="stylesheet" href="style.css"></head><body>
+<section class="slide"><h2>Time Complexity কী?</h2>
+<p>একটি algorithm চালাতে processor-কে কতগুলো <b>মৌলিক operation</b> করতে হয়, তার হিসাবই time complexity। যে algorithm-এর operation কম, সে বেশি দ্রুত (faster)। ঘড়ির সেকেন্ডে সময় মাপলে কম্পিউটারভেদে ফল বদলায়, তাই আমরা operation গুনি।</p>
+<div class="card"><b>গোনার নিয়ম:</b> Assignment (=) → ১; Arithmetic (+ − * /) → ১; Comparison (&gt; &lt; ==) → ১; return → ১। Algorithm-এর মোট operation = সব আলাদা operation-এর যোগফল।</div>
+<div class="card"><b>উদাহরণ ১:</b> <code>int function1(int x){ x = x + 1; return x * 5; }</code><br>x+1 → ১ (যোগ) + ১ (assign) = ২; x*5 → ১ + return ১ = ২; মোট <b>4 operation</b>।</div>
+<div class="card"><b>উদাহরণ ২ (loop):</b> <pre>int sum = 0;                 // 1
+for(int i=1; i&lt;=n; i++)      // i=1 → 1;  i&lt;=n → n+1 বার;  i++ → n বার
+    sum = sum + i;           // 2n   (যোগ + assign)
+return sum;                  // 1
+T(n) = 1 + 1 + (n+1) + n + 2n + 1 = <b>4n + 4</b></pre>n=1 হলে 8 operation (হাতের নোটের “Total time: 8”)। Loop-এর ভেতরের কাজ যত বার চলে, খরচও তত বার যোগ হয়।</div></section>
+
+<section class="slide"><h2>তুলনা: Linear search কত operation খায়?</h2>
+<pre>int linearsearch(int A[], int n, int value){
+  for(i=0; i&lt;n; i++)          // 1 + (n+1) + n
+     if(A[i]==value)          // n বার তুলনা
+         return i;            // সফল হলে
+  return -1; }                // 1</pre>
+<p>সবচেয়ে খারাপ ক্ষেত্রে (value নেই বা শেষে): <b>T(n) = 1 + (n+1) + n + n + 1 = 3n + 3</b>। অর্থাৎ n=10 হলে <b>33 operation</b>, n=100 হলে 303, n বাড়লে operation ও সমানুপাতে বাড়ে।</p>
+<div class="card"><b>Input size-এর ওপর নির্ভর করে না এমন:</b> <code>int fun(int a,int b){ x=a*b; return x; }</code> → T(n) = 2 + 1 = 3 সবসময় (constant)। Input যত বড়ই হোক সময় একই।</div>
+<div class="card"><b>Best/Worst case:</b> একই algorithm-এ input-এর ধরনভেদে সময় আলাদা হয়। যদি time complexity সবচেয়ে বেশি হতে পারে এমন input ধরি, সেটিই <b>Worst case time complexity</b>। সাধারণত worst case-ই বিশ্লেষণ করা হয়, কারণ এটি “এর বেশি সময় কখনোই লাগবে না” এই নিশ্চয়তা দেয়।</div></section>
+
+<section class="slide"><h2>Time Complexity দিয়ে algorithm তুলনা</h2>
+<p>ধরা যাক দুটি algorithm: <b>T₁(n) = n²</b> এবং <b>T₂(n) = 215·n</b>। ছোট n-এ T₁ কম, কিন্তু n বাড়লে T₁ অনেক দ্রুত বাড়ে।</p>
+<div id="cmp"></div>
+<div class="card">n = 215 পর্যন্ত n² ≤ 215n; n=215-এ দুটি সমান (46225); তার পর থেকে n² সবসময় বেশি। <b>সিদ্ধান্ত:</b> input বড় হলে T₂ (linear) জেতে — তাই আমরা “n বড় হলে কে কেমন” তা দেখি। এই বড় n-এর আচরণই <b>asymptotic</b> বিশ্লেষণ।</div></section>
+
+<section class="slide"><h2>শুধু সবচেয়ে বড় term রাখি</h2>
+<p>T₁(n) = 67n² + 58n + 35, ধরা যাক n = 10⁷। তখন 67n² ≈ 67×10¹⁴ আর 58n ≈ 58×10⁷; দ্বিতীয় অংশ প্রথমটির তুলনায় এত ছোট যে ধরার দরকার নেই। তাই <b>T₁(n) = O(n²)</b> (শুধু বড় term, constant বাদ)। একইভাবে T₂(n) = 55n² + 10√n + 3 = O(n²)।</p>
+<div class="card">নিচের সবগুলো <b>O(n²)</b>: 7n²+2n+37, n²+√n, 75n²। নিচের সবগুলো <b>O(n)</b>: 6n+39, 6n+log n+39, 85n।</div>
+<div class="card"><b>বৃদ্ধির ক্রম (ছোট→বড়):</b> 1 &lt; log n &lt; √n &lt; n &lt; n log n &lt; n² &lt; 2ⁿ &lt; n!</div>
+<table><tr><th>Notation</th><th>নাম</th><th>উদাহরণ ফাংশন</th></tr><tr><td>O(1)</td><td>Constant</td><td>f(n)=2, 5, 5000</td></tr><tr><td>O(log n)</td><td>Logarithmic</td><td>i*=2 loop</td></tr><tr><td>O(n)</td><td>Linear</td><td>2n+3, 5000n+700, n/3000+6</td></tr><tr><td>O(n²)</td><td>Quadratic</td><td>দুই nested loop</td></tr><tr><td>O(n³)</td><td>Cubic</td><td>তিন nested loop</td></tr><tr><td>O(2ⁿ), O(3ⁿ)</td><td>Exponential</td><td>সব subset</td></tr></table></section>
+
+<section class="slide"><h2>Big-O অ্যারিথমেটিক ও loop বিশ্লেষণ</h2>
+<div class="card"><b>যোগ নিয়ম:</b> O(f(n)) + O(g(n)) = O(সবচেয়ে বড়টি)। <b>গুণ নিয়ম:</b> O(f(n)) × O(g(n)) = O(f(n)·g(n))।</div>
+<pre>int n = 5;                       // O(1)
+int sum = 0;                     // O(1)
+for(int i=1; i&lt;=n; i++) sum += i;    // O(n)
+for(i=1; i&lt;=n; i++)              // O(n)
+   for(j=1; j&lt;=n; j++) ;          // × O(n)  ⇒ O(n²)
+মোট = O(1)+O(1)+O(n)+O(n²) = <b>O(n²)</b>
+
+for(int i=1; i&lt;=n; i++)          // O(n)
+   for(j=1; j&lt;=n; j=j*2) ;       // × O(log n)  ⇒ <b>O(n log n)</b></pre>
+<table><tr><th>Loop ধরন</th><th>Complexity</th><th>কেন</th></tr><tr><td>Constant বার চলে (i≤c)</td><td>O(1)</td><td>swap() ফাংশনও O(1)</td></tr><tr><td>i += c বা i −= c</td><td>O(n)</td><td>n/c বার</td></tr><tr><td>i *= c বা i /= c</td><td>O(log n)</td><td>প্রতিবার c-গুণ/ভাগ</td></tr><tr><td>Nested loop</td><td>O(nᶜ)</td><td>ভেতরের statement-এর মোট বার</td></tr></table></section>
+
+<section class="slide"><h2>Worst, Average ও Best case</h2>
+<p><b>Worst case:</b> সবচেয়ে বেশি সময় (upper bound)। Linear search-এ element শেষে বা নেই ⇒ n তুলনা ⇒ Θ(n)।<br><b>Best case:</b> সবচেয়ে কম সময় (lower bound)। element প্রথম ঘরে ⇒ ১ তুলনা ⇒ Θ(1)।<br><b>Average case:</b> সম্ভাব্য সব ইনপুটের সময়ের গড়। Element i-তম ঘরে থাকলে i তুলনা:</p>
+<div class="card">গড় = (1+2+…+n)/n = [n(n+1)/2]/n = (n+1)/2 ⇒ <b>Θ(n)</b></div>
+<div class="card">বাস্তবে প্রায় সবসময় worst case বিশ্লেষণ করা হয় (নিশ্চয়তা দেয়)। Average case কঠিন — সব ইনপুটের বণ্টন জানতে হয়। Best case-এর মূল্য কম, কারণ worst case-এ algorithm অনেক খারাপ চলতে পারে।</div></section>
+
+<section class="slide"><h2>Asymptotic Notation: O, Ω, Θ</h2>
+<div class="card"><b>Big-O (upper bound):</b> f(n) = O(g(n)) যদি ধনাত্মক c ও n₀ থাকে যাতে <b>0 ≤ f(n) ≤ c·g(n)</b> সব n ≥ n₀-এর জন্য।</div>
+<div class="card"><b>Big-Ω (lower bound):</b> f(n) = Ω(g(n)) যদি <b>0 ≤ c·g(n) ≤ f(n)</b> সব n ≥ n₀।</div>
+<div class="card"><b>Θ (tight bound):</b> f(n) = Θ(g(n)) যদি c₁·g(n) ≤ f(n) ≤ c₂·g(n), অর্থাৎ O ও Ω দুটিই সত্য।</div>
+<div class="card"><b>উদাহরণ (Big-O):</b> f(n) = 4n³+10n²+5n+8, g(n) = n³। n ≥ 1-এর জন্য f(n) ≤ (4+10+5+8)n³ = 27n³ ⇒ c=27, n₀=1 দিয়ে প্রমাণিত, f(n) = O(n³)। (বইয়ে c=5, n≥4 লেখা আছে — এটি ঠিক নয়: n=4-এ f=444 > 5×64=320। c=5-এর জন্য n₀=11 লাগে।)</div>
+<div class="card"><b>উদাহরণ (Big-Ω):</b> f(n)=3n+2, g(n)=n। c=3 নিলে 3n ≤ 3n+2 সব n-এ সত্য ⇒ f(n) = Ω(n)। আবার 3n+2 ≤ 4n (n≥2) ⇒ O(n) ⇒ <b>Θ(n)</b>।</div></section>
+
+<section class="slide"><h2>প্রশ্ন: কোন loop সবচেয়ে efficient?</h2>
+<p>চারটি function; সবগুলোতে একটি for loop ও ভেতরে একই কাজ। n ধনাত্মক input size।</p>
+<table><tr><th>Loop</th><th>কত বার চলে</th><th>Complexity</th></tr><tr><td>A: for(i=0;i&lt;n;i++)</td><td>n বার</td><td>O(n)</td></tr><tr><td>B: for(i=0;i&lt;n;i+=2)</td><td>n/2 বার (constant বাদ)</td><td>O(n)</td></tr><tr><td>C: for(i=1;i&lt;n;i*=2)</td><td>i = 1,2,4,…,2ᵏ; 2ᵏ=n ⇒ k = log₂n</td><td><b>O(log n)</b></td></tr><tr><td>D: for(i=n;i&gt;−1;i/=2)</td><td>i কখনো −1-এর নিচে যায় না (শেষে 0/2=0), condition সবসময় সত্য ⇒ থামে না</td><td>অসীম</td></tr></table>
+<div class="card"><b>উত্তর: C।</b> log n &lt; n/2 ≈ n তাই C সবচেয়ে দ্রুত; D তো শেষই হয় না।</div></section>
+
+<section class="slide"><h2>ইন্টারেক্টিভ ল্যাব</h2>
+<div class="card"><b>কীভাবে চালাবে:</b> n-এর slider সরাও এবং loop বেছে নাও — loop আসলে কত বার চলে ও কোন complexity-র সাথে মেলে তা সাথে সাথে দেখাবে। নিচের টেবিলে ফাংশনগুলোর মানও বদলাবে।</div>
+n = <input id="n" type="range" min="1" max="64" value="16"> <b id="nv"></b>
+<select id="lp" onchange="lab()"><option value="0">for(i=0;i&lt;n;i++)</option><option value="1">for(i=0;i&lt;n;i+=2)</option><option value="2">for(i=1;i&lt;n;i*=2)</option><option value="3">for(i=n;i&gt;0;i/=2)</option><option value="4">nested n × n</option><option value="5">nested n × log n</option></select>
+<p id="res"></p><table id="t"></table></section>
+<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section>
+<script src="bank.js"></script><script src="fig.js"></script><script src="app.js"></script><script>
+quiz('cx','#qz');
+$('#cmp').innerHTML=tb(['n','T₁ = n²','T₂ = 215n','ছোট কে?'],[1,2,10,100,215,216,1000].map(n=>[n,n*n,215*n,n*n<215*n?'T₁':n*n==215*n?'সমান':'T₂']));
+function cnt(k,n){let c=0,i;if(k==0)for(i=0;i<n;i++)c++;if(k==1)for(i=0;i<n;i+=2)c++;if(k==2)for(i=1;i<n;i*=2)c++;if(k==3)for(i=n;i>0;i=Math.floor(i/2))c++;if(k==4)c=n*n;if(k==5)c=n*cnt(2,n);return c}
+const NM=['O(n)','O(n)','O(log n)','O(log n)','O(n²)','O(n log n)'];
+function lab(){const n=+$('#n').value,k=+$('#lp').value;$('#nv').textContent=n;$('#res').innerHTML='ভেতরের statement চলবে <b>'+cnt(k,n)+'</b> বার ⇒ '+NM[k];
+$('#t').innerHTML=tb(['ফাংশন','মান'],[['1',1],['log n',Math.round(Math.log2(n)*100)/100],['n',n],['n log n',Math.round(n*Math.log2(n))],['n²',n*n],['2ⁿ',n>50?'বিশাল':2**n]])}
+$('#n').oninput=lab;lab();</script></body></html>

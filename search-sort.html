@@ -1,0 +1,109 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Searching</title><link rel="stylesheet" href="style.css"></head><body>
+<section class="slide"><h2>Searching — খোঁজার কৌশল</h2>
+<p>কম্পিউটার প্রোগ্রামিংয়ের দুটি দিক: (১) data সাজিয়ে রাখা (data structure) এবং (২) সঠিক algorithm বেছে সমস্যা সমাধান। Searching হলো কোনো element data-র <b>কোন অবস্থানে</b> আছে তা বের করা। দুটি প্রধান পদ্ধতি:</p>
+<div class="card"><b>১. Linear (Sequential) search</b> — শুরু থেকে এক এক করে দেখা; list sorted না হলেও চলে।<br><b>২. Binary search</b> — sorted list-এর মাঝখানে দেখে প্রতিবার অর্ধেক বাদ দেওয়া।</div>
+<div class="card">যা সাজানো আছে তা খোঁজা সহজ: দোকানে পোশাক size/দামে সাজানো, শ্রেণিকক্ষে নাম বর্ণানুক্রমে, লাইব্রেরিতে বই বর্ণানুক্রমে — এজন্য sorting ও searching একসাথে শেখা হয়।</div></section>
+
+<section class="slide"><h2>Linear Search</h2>
+<p>List (ordered বা unordered) শুরু থেকে এক এক করে দেখা হয়, কাঙ্ক্ষিত element পাওয়া গেলে search সফল, নইলে ব্যর্থ। কতগুলো তুলনা লাগবে তা element কোথায় আছে তার ওপর নির্ভর করে: প্রথমে থাকলে ১টি, দ্বিতীয়ে ২টি, … গড়ে প্রায় (n+1)/2টি; না থাকলে n-টিই। <b>Time complexity: O(n)</b>।</p>
+<pre>linsrch(a[n], x){
+  index = 0; flag = 0;
+  while (index &lt; n) do {
+     if (x == a[index]) { flag = 1; break; }
+     index++;
+  }
+  if (flag == 1) "found" else "not found" }</pre>
+<div class="card"><b>উদাহরণ ১:</b> unsorted list 45 39 8 54 77 38 24 16 4 7 9 20। নিচে যেকোনো মান বেছে খুঁজে দেখো কত তুলনা লাগে।</div>
+<select id="lk"></select><button onclick="lin()">Linear search</button><div class="cells" id="la"></div><p id="lm"></p>
+<div class="card"><b>উদাহরণ ২:</b> index 0..8-এ −15 −6 0 7 9 23 54 82 101। x=7 ⇒ index 3-এ পাওয়া যায় (সফল); x=82 ⇒ index 7-এ (সফল); x=42 ⇒ পাওয়া যায় না (ব্যর্থ, ৯টি তুলনা)।</div></section>
+
+<section class="slide"><h2>Linear search-এর C program</h2>
+<pre>/* non-recursive */
+for(i = 0; i &lt; n; i++){ if(number[i] == data){ flag = 1; break; } }
+if(flag == 1) printf("Data found at location: %d", i+1);
+else          printf("Data not found");
+
+/* recursive */
+void linear_search(int a[], int data, int position, int n){
+  if(position &lt; n){
+     if(a[position] == data) printf("Data Found at %d", position);
+     else linear_search(a, data, position+1, n);
+  } else printf("Data not found"); }</pre>
+<div class="card">Recursive সংস্করণ প্রতিবার position ১ বাড়িয়ে নিজেকে ডাকে; position n ছুঁলে (base case) “not found”। সময় একই O(n), তবে recursion-এ call stack ব্যবহার হয়।</div></section>
+
+<section class="slide"><h2>Binary Search</h2>
+<p>List অবশ্যই <b>sorted</b>। মাঝের ঘর (mid) দেখি: a[mid] = x হলে পেলাম; x &lt; a[mid] হলে শুধু বামের অংশে, x &gt; a[mid] হলে শুধু ডানের অংশে খুঁজি। প্রতিবার অর্ধেক বাদ পড়ে, তাই n কে ২ দিয়ে ভাগ করতে করতে ১-এ পৌঁছাতে প্রায় log₂n ধাপ লাগে ⇒ <b>O(log n)</b> (সফল ও ব্যর্থ দুই ক্ষেত্রেই)।</p>
+<pre>binsrch(a[], n, x){
+  low = 1; high = n;
+  while (low &lt;= high) do {
+     mid = (low + high)/2
+     if (x &lt; a[mid]) high = mid − 1;
+     else if (x &gt; a[mid]) low = mid + 1;
+     else return mid;
+  }
+  return 0; }</pre>
+<div class="card">প্রতি ধাপে low বাড়ে অথবা high কমে — দুটি সংখ্যা পরস্পরের দিকে এগোয় এবং শেষে low &gt; high হলে element নেই বোঝা যায়।</div></section>
+
+<section class="slide"><h2>Binary search অ্যানিমেশন</h2>
+<div class="card"><b>কীভাবে চালাবে:</b> মান লিখে “শুরু” চাপো, তারপর “পরের ধাপ” চাপতে থাকো। হলুদ = mid; ঝাপসা = বাদ পড়া অংশ; সবুজ = পাওয়া গেছে। নিচে প্রতি ধাপের low/high/mid ও সিদ্ধান্ত লেখা হবে।</div>
+<div class="cells" id="ba"></div>
+<p>খুঁজবো: <input id="x" type="number" value="38" style="width:80px"><button onclick="bsInit()">শুরু</button><button onclick="bsStep()">পরের ধাপ</button></p><p id="bm"></p><div id="bl"></div></section>
+
+<section class="slide"><h2>Binary search: কত তুলনা? (সব element)</h2>
+<p>Array: 4 7 8 9 16 20 24 38 39 45 54 77 (১২টি)। নিচের টেবিল program দিয়ে গোনা হয়েছে।</p><div id="b12"></div>
+<div class="card" id="s12"></div>
+<p>Array: −15 −6 0 7 9 23 54 82 101 (৯টি):</p><div id="b9"></div><div class="card" id="s9"></div></section>
+
+<section class="slide"><h2>Binary search-এর C program</h2>
+<pre>/* non-recursive */
+low = 0; high = n-1;
+while(low &lt;= high){
+   mid = (low + high)/2;
+   if(number[mid] == data){ flag = 1; break; }
+   else if(data &lt; number[mid]) high = mid - 1;
+   else low = mid + 1; }
+
+/* recursive (Exercise 1) */
+void bin_search(int a[], int data, int low, int high){
+  int mid;
+  if(low &lt;= high){
+     mid = (low + high)/2;
+     if(a[mid] == data) printf("found at %d", mid+1);
+     else if(data &lt; a[mid]) bin_search(a, data, low, mid-1);
+     else bin_search(a, data, mid+1, high);
+  } else printf("not found"); }</pre>
+<div class="card"><b>Exercise 1: complexity।</b> প্রতি call-এ সমস্যা অর্ধেক হয় এবং ১টি তুলনা লাগে: T(n) = T(n/2) + 1 ⇒ T(n) = O(log₂n)।</div></section>
+
+<section class="slide"><h2>Exercise 3: x কতবার আছে ও প্রথম অবস্থান</h2>
+<pre>count = 0; first = -1;
+for(i = 0; i &lt; n; i++){
+   if(arr[i] == x){ count++; if(first == -1) first = i; } }
+printf("%d বার, প্রথম index %d", count, first);</pre>
+<div class="card">একবার পুরো array দেখতে হয় ⇒ O(n)। (Sorted হলে binary search দিয়ে প্রথম ও শেষ অবস্থান বের করে count = শেষ − প্রথম + 1; সময় O(log n)।)</div>
+<div class="card"><b>Linear বনাম Binary:</b> Linear — sorting লাগে না, ছোট/unsorted data-তে ভালো, best O(1), worst O(n)। Binary — sorted দরকার, বড় data-তে অনেক দ্রুত O(log n), array-তে (random access) কার্যকর, linked list-এ নয়।</div></section>
+
+<section class="slide"><h2>Scenario: কোন searching কোথায়?</h2>
+<table><tr><th>ঘটনা</th><th>সমাধান ও কারণ</th></tr>
+<tr><td>পোশাকের দোকান — size (Small→XL) বা দাম অনুযায়ী সাজানো</td><td>Sort: Insertion/Quick/Merge; Search: ছোট দোকানে Linear, sorted হলে Binary</td></tr>
+<tr><td>হাজার হাজার বইয়ের লাইব্রেরি</td><td>বর্ণানুক্রমে সাজাও (Merge sort), Binary search — data sorted থাকে, খোঁজা খুব দ্রুত</td></tr>
+<tr><td>ছোট unsorted attendance sheet-এ student ID খোঁজা</td><td>Linear search — সহজ, sorting লাগে না; best O(1), worst O(n)</td></tr>
+<tr><td>অভিধানে শব্দ (বড় sorted data)</td><td>Binary search — O(log n), বিশাল sorted data-তে অত্যন্ত দ্রুত</td></tr>
+<tr><td>ATM-এ কোটি কোটি ক্লায়েন্টের মধ্যে তথ্য আসা</td><td>Hashing (গড় O(1)), sorted/indexed হলে Binary search O(log n), database-এ B-Tree/B+ Tree (বিশাল data, দ্রুত disk access)</td></tr></table>
+<div class="card"><b>অন্যান্য searching:</b> DFS — maze/puzzle পথ; BFS — সামাজিক মাধ্যমে বন্ধুর মধ্যে ছোট পথ; A* — গেম/রোবটে সবচেয়ে ভালো পথ। (দেখো: <a href="graph.html">Graph পেজ</a>)</div></section>
+<section class="slide"><h2>অনুশীলন প্রশ্ন (Searching)</h2><div id="qz"></div></section>
+<script src="bank.js"></script><script src="fig.js"></script><script src="app.js"></script><script>
+renderQ(BANK.filter(q=>q.s=='ss'&&/[Ss]earch|খুঁজ|catalog|attendance|সার্চ/.test(q.q)),$('#qz'),'sr');
+const LL=[45,39,8,54,77,38,24,16,4,7,9,20];$('#lk').innerHTML=LL.concat([99]).map(v=>'<option>'+v+'</option>').join('');
+async function lin(){const x=+$('#lk').value;let f=0;for(let i=0;i<LL.length;i++){$('#la').innerHTML=LL.map((v,j)=>'<div class="cell '+(j==i?'mid':'')+(j<i?' dim':'')+'">'+v+'</div>').join('');$('#lm').textContent=(i+1)+'টি তুলনা…';await sleep(350);if(LL[i]==x){$('#la').innerHTML=LL.map((v,j)=>'<div class="cell '+(j==i?'ok':'dim')+'">'+v+'</div>').join('');$('#lm').textContent=x+' পাওয়া গেছে, '+(i+1)+'টি তুলনায়';return}}$('#lm').textContent=x+' নেই — '+LL.length+'টি তুলনার পরও ব্যর্থ'}
+const A=[4,7,8,9,16,20,24,38,39,45,54,77];let lo,hi,cnt;
+function showB(m,f){$('#ba').innerHTML=A.map((v,i)=>'<div class="cell '+(i<lo||i>hi?'dim':'')+(i==m?(f?' ok':' mid'):'')+'">'+v+'<br><small>'+(i+1)+'</small></div>').join('')}
+function bsInit(){lo=0;hi=A.length-1;cnt=0;showB(-1);$('#bm').textContent='low=1, high=12';$('#bl').innerHTML=''}
+function bsStep(){if(lo===undefined)bsInit();if(lo>hi){$('#bm').textContent='low > high ⇒ পাওয়া যায়নি';return}const x=+$('#x').value,m=(lo+hi)>>1;cnt++;const L=lo+1,H=hi+1;showB(m,A[m]==x);
+let d=A[m]==x?'পাওয়া গেছে!':(x<A[m]?'x < a[mid] ⇒ high = mid−1':'x > a[mid] ⇒ low = mid+1');$('#bl').innerHTML+='<div>ধাপ '+cnt+': low='+L+', high='+H+', mid='+(m+1)+', a[mid]='+A[m]+' — '+d+'</div>';
+if(A[m]==x){$('#bm').textContent=x+' পাওয়া গেছে, '+cnt+'টি তুলনায়';lo=1;hi=0;return}if(x<A[m])hi=m-1;else lo=m+1}
+bsInit();
+function bc(a,x){let l=0,h=a.length-1,c=0;while(l<=h){const m=(l+h)>>1;c++;if(a[m]==x)return c;if(x<a[m])h=m-1;else l=m+1}return -c}
+function summ(a,id,sid){const s=a.map(x=>bc(a,x));$(id).innerHTML=tb(['Element'].concat(a),[['তুলনা'].concat(s)]);
+const g=[a[0]-1].concat(a.slice(0,-1).map((v,i)=>(v+a[i+1])/2),[a[a.length-1]+1]).map(x=>-bc(a,x));
+$(sid).innerHTML='সফল search-এ মোট '+s.reduce((p,c)=>p+c)+' ⇒ গড় '+s.reduce((p,c)=>p+c)+'/'+a.length+' ≈ <b>'+(s.reduce((p,c)=>p+c)/a.length).toFixed(2)+'</b> তুলনা; সর্বোচ্চ '+Math.max(...s)+'।<br>ব্যর্থ search-এর '+g.length+'টি সম্ভাবনায় তুলনা: '+g.join(', ')+' ⇒ গড় '+g.reduce((p,c)=>p+c)+'/'+g.length+' = <b>'+(g.reduce((p,c)=>p+c)/g.length).toFixed(2)+'</b>'}
+summ(A,'#b12','#s12');summ([-15,-6,0,7,9,23,54,82,101],'#b9','#s9');</script></body></html>

@@ -1,0 +1,67 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stack</title><link rel="stylesheet" href="style.css"></head><body>
+<section class="slide"><h2>Stack কী?</h2>
+<p>Stack একটি <b>Abstract Data Type (ADT)</b>। বাস্তবের স্তূপের মতো — তাসের ডেক বা থালার স্তূপ: নতুন থালা শুধু উপরে রাখা যায়, আবার তোলাও যায় শুধু উপর থেকে। Stack-এও সব operation <b>এক প্রান্ত (top)</b> থেকে হয়; যেকোনো সময় শুধু top element-টাই পাওয়া যায়।</p>
+<div class="card"><b>LIFO = Last In First Out:</b> যে element সবার শেষে ঢুকেছে সেটিই সবার আগে বের হয়। ঢোকানোর operation = <b>PUSH</b>, সরানোর operation = <b>POP</b>। (ভুল নাম: FIFO — সেটি Queue-র; Stack-এর অন্য নাম LIFO list, Pile, Push-down list।)</div>
+<div style="display:flex;gap:30px;align-items:flex-end"><div><b>Push</b> ⬇<div class="stk"><div class="cell">30 (top)</div><div class="cell">20</div><div class="cell">10</div></div></div><div><b>Pop</b> ⬆ → 30 বের হলো<div class="stk"><div class="cell">20 (top)</div><div class="cell">10</div></div></div></div></section>
+
+<section class="slide"><h2>Stack-এর operation ও implementation</h2>
+<p>Stack বানানো যায় Array, Structure, Pointer বা Linked list দিয়ে; আকার স্থির (fixed) বা প্রয়োজনে বাড়ানো (dynamic) হতে পারে। Array দিয়ে বানালে আকার স্থির।</p>
+<table><tr><th>Operation</th><th>কাজ</th></tr><tr><td>push()</td><td>element stack-এ রাখা (storing)</td></tr><tr><td>pop()</td><td>top element সরানো/পাওয়া (accessing)</td></tr><tr><td>peek()</td><td>সরানো ছাড়া শুধু top দেখা</td></tr><tr><td>isFull()</td><td>stack পূর্ণ কি না (পূর্ণে push ⇒ <b>Overflow</b>)</td></tr><tr><td>isEmpty()</td><td>stack খালি কি না (খালিতে pop ⇒ <b>Underflow</b>)</td></tr></table>
+<pre>int stack[MAXSIZE]; int top = -1;
+int isempty(){ return top == -1; }        int isfull(){ return top == MAXSIZE-1; }
+int peek(){ return stack[top]; }
+int pop(){  if(!isempty()) return stack[top--]; else printf("Stack is empty"); }
+void push(int d){ if(!isfull()) stack[++top] = d; else printf("Stack is full"); }</pre>
+<div class="card">Linked list দিয়ে stack বানালে push করলে নতুন node <b>list-এর সামনে (head-এ)</b> বসে এবং pop-ও head থেকে — দুটিই O(1)। Array stack-এও push/pop O(1)।</div></section>
+
+<section class="slide"><h2>Stack ইন্টারেক্টিভ (size 5)</h2>
+<div class="card"><b>কীভাবে চালাবে:</b> সংখ্যা লিখে Push দাও, Pop/Peek করো। ৫টি ভরলে Push-এ Overflow, খালি থাকলে Pop-এ Underflow বার্তা আসবে। সবচেয়ে উপরেরটিই আগে বের হয় — LIFO।</div>
+<div style="display:flex;gap:24px;align-items:flex-end"><div class="stk" id="st"></div><div><input id="v" type="number" value="1" style="width:70px"><button onclick="push()">Push</button><button onclick="pop()">Pop</button><button onclick="peek()">Peek</button><p id="sm"></p></div></div></section>
+
+<section class="slide"><h2>Stack-এর প্রয়োগ</h2>
+<table><tr><th>প্রয়োগ</th><th>কীভাবে stack কাজে লাগে</th></tr><tr><td>Memory management / Function call (recursion)</td><td>প্রতিটি call-এর local variable ও return ঠিকানা stack-এ; শেষ call আগে ফেরে (Java recursion-এ OS stack ব্যবহার করে)</td></tr><tr><td>Parenthesis checking</td><td>( পেলে push, ) পেলে pop; শেষে খালি থাকলে balanced</td></tr><tr><td>String reversal</td><td>অক্ষর push করে pop করলে উল্টো ক্রম</td></tr><tr><td>Backtracking</td><td>আগের অবস্থায় ফেরা (maze, undo)</td></tr><tr><td>Syntax parsing / Java compiler (postfix)</td><td>Compiler expression ও গঠন যাচাই করে</td></tr><tr><td>HTML tag matching</td><td>খোলা tag push, বন্ধ tag-এ pop ও মিলানো</td></tr><tr><td>Expression evaluation/conversion</td><td>infix→prefix/postfix রূপান্তর ও postfix মান নির্ণয়</td></tr><tr><td>Java Virtual Machine</td><td>JVM নিজেই stack ব্যবহার করে</td></tr></table>
+<div class="card">আরও: Tower of Hanoi, factorial (recursion), DFS (graph), iterative Quick sort।</div></section>
+
+<section class="slide"><h2>Infix, Prefix, Postfix ও Expression</h2>
+<p><b>Infix:</b> A+B (operator মাঝে) · <b>Prefix:</b> +AB · <b>Postfix:</b> AB+। Postfix-এ বন্ধনী ও precedence লাগে না — তাই কম্পিউটার সহজে মান বের করে। Precedence: ^ &gt; * / &gt; + −।</p>
+<div class="card"><b>Infix → Postfix (stack দিয়ে):</b> operand হলে সরাসরি output-এ; ( হলে push; ) হলে ( পর্যন্ত pop করে output-এ; operator হলে stack-এর top-এর precedence সমান/বেশি থাকলে আগে pop করে output-এ, তারপর নিজে push; শেষে বাকি সব pop।</div>
+<div class="card"><b>Postfix মান নির্ণয়:</b> operand হলে push; operator হলে দুটি pop (দ্বিতীয়টি ডানের operand), অপারেশন করে ফল push। শেষে stack-এ একটিই মান থাকে।</div>
+<p>Infix লিখো (যেমন a+(b-c)*d বা 4+3*(6*3-12)):</p><input id="inf" value="a+(b-c)*d" style="width:260px"><button onclick="cv()">Postfix বানাও</button><p id="po"></p><div id="pt"></div>
+<p>Postfix মান বের করো (স্পেস দিয়ে লেখো, যেমন 6 3 2 4 + - *):</p><input id="pf" value="6 3 2 4 + - *" style="width:260px"><button onclick="ev()">মান নির্ণয়</button><div id="et"></div></section>
+
+<section class="slide"><h2>Queue — FIFO</h2>
+<p>Queue-তে নতুন element <b>পিছনে (rear)</b> ঢোকে (enqueue) এবং <b>সামনে (front)</b> থেকে বের হয় (dequeue) — টিকিট কাউন্টারের লাইনের মতো। First In First Out। Stack-এ একই প্রান্তে ঢোকা-বেরোনো, Queue-তে দুই প্রান্তে।</p>
+<div class="cells" id="qq" style="min-height:44px"></div><button onclick="enq()">Enqueue</button><button onclick="deq()">Dequeue</button>
+<div class="card"><b>বাংলায় ব্যাখ্যা:</b> Enqueue চাপলে নতুন সংখ্যা ডানে (rear) যুক্ত হয়; Dequeue চাপলে সবচেয়ে বাম (front) সংখ্যা বেরিয়ে যায়।</div>
+<div class="card"><b>অন্যান্য queue:</b> Circular queue (array শেষ হলে শুরুতে ঘোরে; পূর্ণ: (rear+1)%n == front), Deque (দুই প্রান্তেই insert/delete), Priority queue (heap দিয়ে; সবচেয়ে বেশি অগ্রাধিকার আগে)। BFS-এ queue, DFS-এ stack।</div></section>
+
+<section class="slide"><h2>ধাঁধা: P, Q, R, S, T</h2>
+<p>পাঁচটি item P,Q,R,S,T একে একে stack-এ push হলো। stack ৪ বার pop করে প্রতিটি queue-তে ঢোকানো হলো। queue থেকে ২টি delete করে stack-এ push করা হলো। এখন stack থেকে ১টি pop — কোনটি?</p><div id="pq"></div></section>
+
+<section class="slide"><h2>পূর্ববর্তী বছরের প্রশ্ন (ব্যাখ্যাসহ)</h2><div id="py"></div>
+<h3>Q9 ধাপে ধাপে: push(1), push(2), pop, push(1), push(2), pop, pop, pop, push(2), pop</h3><div id="q9"></div></section>
+
+<section class="slide"><h2>Practice প্রশ্ন (ব্যাখ্যাসহ)</h2><div id="pp"></div></section>
+<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section>
+<script src="bank.js"></script><script src="fig.js"></script><script src="app.js"></script><script>
+quiz('st','#qz');
+let st=[],q=[],k=1;const msg=t=>$('#sm').textContent=t;
+function rs(){$('#st').innerHTML=st.map(v=>'<div class="cell">'+v+'</div>').join('')}
+function push(){if(st.length>=5)return msg('Overflow!');st.push($('#v').value);rs();msg('push সম্পন্ন')}
+function pop(){if(!st.length)return msg('Underflow!');msg('pop: '+st.pop());rs()}
+function peek(){msg(st.length?'top = '+st[st.length-1]:'খালি')}
+function rq(){$('#qq').innerHTML=q.map(v=>'<div class="cell">'+v+'</div>').join('')}
+function enq(){q.push(k++);rq()}function deq(){q.shift();rq()}
+const toks=s=>s.match(/\d+|[A-Za-z]|[-+*\/^()]/g)||[];
+function toPost(s){const pr={'+':1,'-':1,'*':2,'/':2,'^':3},out=[],S=[],rows=[];let mx=0;for(const t of toks(s)){if(/[\dA-Za-z]/.test(t[0]))out.push(t);else if(t=='(')S.push(t);else if(t==')'){while(S.length&&S[S.length-1]!='(')out.push(S.pop());S.pop()}else{while(S.length&&S[S.length-1]!='('&&(pr[S[S.length-1]]>pr[t]||(pr[S[S.length-1]]==pr[t]&&t!='^')))out.push(S.pop());S.push(t)}mx=Math.max(mx,S.length);rows.push([t,S.join(' '),out.join(' ')])}while(S.length)out.push(S.pop());rows.push(['(শেষ)','',out.join(' ')]);return{out:out.join(' '),rows,mx}}
+function cv(){const r=toPost($('#inf').value);$('#po').innerHTML='Postfix: <b>'+r.out+'</b> (stack-এ একসাথে সর্বোচ্চ '+r.mx+'টি symbol)';$('#pt').innerHTML=tb(['পড়া symbol','Stack','Output'],r.rows)}
+function evP(s){const S=[],rows=[];for(const t of s.trim().split(/\s+/)){if(/^-?\d+(\.\d+)?$/.test(t))S.push(+t);else{const b=S.pop(),a=S.pop();S.push(t=='+'?a+b:t=='-'?a-b:t=='*'?a*b:t=='/'?a/b:Math.pow(a,b))}rows.push([t,S.join(', ')])}return rows}
+function ev(){const r=evP($('#pf').value);$('#et').innerHTML=tb(['Symbol','Stack'],r)+'<p>ফল = <b>'+r[r.length-1][1]+'</b></p>'}cv();ev();
+function sim(ops){const S=[],pp=[],rows=[];for(const o of ops){if(o[0]=='push')S.push(o[1]);else pp.push(S.pop());rows.push([o[0]=='push'?'Push '+o[1]:'Pop',S.length?S.join(', '):'Empty',pp.join(', ')])}return rows}
+$('#q9').innerHTML=tb(['Operation','Stack','Pop sequence'],sim([['push',1],['push',2],['pop'],['push',1],['push',2],['pop'],['pop'],['pop'],['push',2],['pop']]));
+(function(){const S=[],Q=[],L=[];'PQRST'.split('').forEach(c=>S.push(c));L.push('Push: P,Q,R,S,T ⇒ stack (নিচ→উপর) = '+S.join(' '));for(let i=0;i<4;i++)Q.push(S.pop());L.push('৪ বার pop ⇒ queue (front→rear) = '+Q.join(' ')+'; stack = '+S.join(' '));const d=[Q.shift(),Q.shift()];L.push('Queue থেকে ২টি delete ⇒ '+d.join(', ')+' বের হলো; queue = '+Q.join(' '));d.forEach(x=>S.push(x));L.push('সেই দুটি stack-এ push ⇒ stack = '+S.join(' '));L.push('এখন pop ⇒ <b>'+S.pop()+'</b>');$('#pq').innerHTML=L.map(x=>'<div class="card">'+x+'</div>').join('')})();
+const PY=[['১','a+(b−c)*d-এর postfix? [SBL-SO 2020]','abc−d*+','প্রথমে বন্ধনী (b−c) ⇒ bc−; তারপর *d ⇒ bc−d*; শেষে a+ ⇒ abc−d*+'],['২','কোন DS-এ front থেকে delete, rear-এ insert? [ICB 2017]','Queue','FIFO'],['৩','Push ও pop কীসের সাথে সম্পর্কিত? [AME 2018]','Stack',''],['৪','কোন নামটি stack-এর সাথে সম্পর্কিত নয়? [ICB 2017, HBFC/KB 2018]','FIFO list','FIFO Queue-র; stack LIFO/Pile/Push-down list'],['৬','OS recursion পরিচালনায় কোন DS? [IT/ICT 2018]','Stack','Call stack'],['৭','5 size-এর পূর্ণ stack-এ push করলে? [AP 2018]','Overflow',''],['৮','Parenthesis balance / postfix evaluation-এ কোন DS? [AP 2018, ICB 2017]','Stack',''],['৯','push(1),push(2),pop,push(1),push(2),pop,pop,pop,push(2) [BB AP 2016]','2 2 1 1 2','নিচের ধাপ-টেবিল দেখো'],['১০','Stack operation কী কী? [SBL 2016]','push, pop',''],['১১','push(1),push(2),pop(),push(4),push(5),pop() শেষে stack? [SBL&JBL 2020]','1, 4','[1,2]→[1]→[1,4]→[1,4,5]→[1,4]']];
+$('#py').innerHTML=tb(['নং','প্রশ্ন','উত্তর','ব্যাখ্যা'],PY);
+const PP=[['১','Stack-এ element ঢোকানো প্রক্রিয়ার নাম?','Push',''],['২','Stack-এর application কোনটি?','সবগুলো','function call, stock span, expression evaluation'],['৩','Linked list stack-এ নতুন node push করলে?','list-এর সামনে বসে','head-এ O(1)'],['৪','খালি stack থেকে remove করলে?','Underflow',''],['৫','Stack-এর entries “ordered” মানে?','ক্রমিক (sequential) entry','একটির পর একটি'],['৬','Stack থেকে সরানো হয় কোন ক্রমে?','Reverse (উল্টো)','LIFO'],['৭','কোনটি stack ব্যবহার করে?','সবগুলো','parentheses balancing, local variable tracking, compiler syntax analyzer'],['৮','Postfix 6 3 2 4 + − * এর মান?','<b>−18</b>','2 4 + = 6; 3 6 − = −3; 6 × (−3) = −18। (PDF-এ উত্তর d “15–100” — ভুল)'],['৯','4+3*(6*3−12) → postfix-এ stack-এ একসাথে সর্বোচ্চ symbol?','4','+ * ( * (উপরের converter-এ যাচাই করো)'],['১০','কোনটি stack-এর application?','সবগুলো','factorial, Tower of Hanoi, infix→postfix'],['১১','Stack-কে আরও কী বলে?','Last in first out',''],['১২','কোনটি linear DS?','Stack','Graph/Tree non-linear']];
+$('#pp').innerHTML=tb(['নং','প্রশ্ন','উত্তর','ব্যাখ্যা'],PP);
+</script></body></html>

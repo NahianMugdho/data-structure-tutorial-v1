@@ -1,0 +1,136 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tree</title><link rel="stylesheet" href="style.css"></head><body>
+<section class="slide"><h2>Tree কী?</h2>
+<p>Tree একটি <b>non-linear</b> data structure যেখানে data <b>hierarchical</b> (উপর-নিচ ধাপে) সাজানো থাকে। ফোল্ডারের ভেতরে ফোল্ডার, পরিবারের বংশতালিকা — সবই tree। এটি <b>recursive</b> সংজ্ঞা: প্রতিটি child নিজেই একটি ছোট tree (subtree)।</p>
+<div class="card"><b>Tree-র সংজ্ঞা (তিনভাবে):</b> (১) Node ও edge দিয়ে গঠিত hierarchical structure। (২) Cycle ছাড়া connected graph। (৩) যে graph-এ যেকোনো দুই vertex-এর মধ্যে <b>ঠিক একটি</b> পথ আছে।</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><div id="f0a"></div><p>✘ Tree নয় — E-F যুক্ত হওয়ায় C,E,F cycle তৈরি করেছে।</p></div><div style="flex:1;min-width:200px"><div id="f0b"></div><p>✔ Tree — কোনো cycle নেই।</p></div></div>
+<div class="card"><b>গুরুত্বপূর্ণ বৈশিষ্ট্য:</b> প্রতি জোড়া vertex-এর মধ্যে একটাই পথ · n vertex হলে ঠিক <b>n−1 edge</b> · Graph tree ⇔ minimally connected · n vertex ও n−1 edge-এর যেকোনো connected graph একটি tree · cycle থাকবে না · root থেকে যেকোনো node-এ একটাই পথ।</div></section>
+
+<section class="slide"><h2>Tree-র পরিভাষা (ইন্টারেক্টিভ)</h2>
+<p>নিচের tree-টি PDF-এর উদাহরণ। একটি পরিভাষার বোতাম চাপলে সংজ্ঞা আসবে এবং সংশ্লিষ্ট node হলুদ হবে।</p>
+<div id="tb"></div><div id="f1"></div><div class="card" id="tx">একটি বোতাম বেছে নাও।</div></section>
+
+<section class="slide"><h2>প্রতিটি node-এর Degree, Depth, Height</h2>
+<table><tr><th>Node</th><th>A</th><th>B</th><th>C</th><th>G</th><th>I</th><th>H</th><th>E</th><th>F</th><th>J</th><th>K</th><th>D</th></tr>
+<tr><th>Degree (child সংখ্যা)</th><td>2</td><td>3</td><td>2</td><td>0</td><td>2</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><th>Depth/Level (root থেকে edge)</th><td>0</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>3</td><td>3</td><td>3</td></tr>
+<tr><th>Height (সবচেয়ে লম্বা নিচের পথ)</th><td>3</td><td>2</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></table>
+<div class="card"><b>মনে রাখার নিয়ম:</b> Depth = উপর থেকে নিচে গোনা (root=0); Height = নিচ থেকে উপরে গোনা (leaf=0)। Tree-র height = root-এর height = 3; Tree-র degree = সবচেয়ে বেশি degree = Degree(B) = 3। “Level” ও “depth” একই অর্থে ব্যবহৃত হয়। Level 0: A · Level 1: B,C · Level 2: G,I,H,E,F · Level 3: J,K,D।</div></section>
+
+<section class="slide"><h2>Tree-র ধরন</h2>
+<p><b>General tree:</b> child সংখ্যার কোনো সীমা নেই (ফোল্ডার, পরিবার)। <b>Binary tree:</b> প্রতি node-এ সর্বোচ্চ ২ child (left, right)। Binary tree-র বিশেষ রূপ:</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>Full/Strict</b> (প্রতি node-এ 0 বা 2 child)<div id="t1"></div></div><div style="flex:1;min-width:180px"><b>Perfect</b> (সব internal node-এ 2 child, সব leaf একই level)<div id="t2"></div></div><div style="flex:1;min-width:180px"><b>Complete/Almost complete</b> (শেষ level বাদে পূর্ণ, শেষটি বাম থেকে)<div id="t3"></div></div><div style="flex:1;min-width:180px"><b>Skewed</b> (সবাই একদিকে, linked list-এর মতো, depth n−1)<div id="t4"></div></div></div>
+<div class="card"><b>Balanced:</b> যেকোনো node-এ বাম ও ডান subtree-র height-এর পার্থক্য ≤ 1। <b>Rooted binary tree:</b> একটি root আছে এবং প্রতি node-এ ≤ 2 child। <b>Labeled/Unlabeled:</b> node-এ নাম থাকলে labeled।</div>
+<div class="card"><b>সূত্র:</b> n node-এর tree-তে n−1 edge · Height h-এ সর্বোচ্চ node = 2<sup>h+1</sup>−1 · Level k-এ সর্বোচ্চ 2<sup>k</sup> node · N level-এ সর্বোচ্চ 2<sup>N</sup>−1 · degree-2 node n₂ হলে leaf N₀ = n₂+1 · n leaf-এর full binary tree-এ মোট 2n−1 node · n unlabeled node-এ binary tree = 2nCn/(n+1) (n=3 ⇒ 5; labeled ⇒ 5×3! = 30; n=4 ⇒ 14)।</div></section>
+
+<section class="slide"><h2>Binary Search Tree (BST)</h2>
+<p>BST হলো এমন binary tree যেখানে <b>প্রতি node-এর বাম subtree-র সব মান তার চেয়ে ছোট, আর ডান subtree-র সব মান বড়</b>। তাই খোঁজার সময় প্রতি ধাপে অর্ধেক বাদ পড়ে — গড়ে O(log n); tree একদিকে ঝুঁকে গেলে (skewed) O(n)।</p>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1;min-width:230px"><b>উদাহরণ ১:</b> 50,30,70,20,40,60,80<div id="b1"></div></div><div style="flex:1;min-width:230px"><b>উদাহরণ ২ (ক্রমানুসারে insert):</b> 50,70,60,20,90,10,40,100<div id="b2"></div></div></div>
+<div class="card"><b>Construct করার নিয়ম:</b> প্রথম মান root; এরপর প্রতিটি মান root থেকে তুলনা করে নামতে নামতে ফাঁকা জায়গায় বসাও। উদাহরণ ২-এর inorder: 10,20,40,50,60,70,90,100 (সবসময় sorted)।</div>
+<div class="card"><b>Search 40:</b> 50-এ ছোট ⇒ বামে; 30-এ বড় ⇒ ডানে; 40 পেলাম। <b>Insert 25:</b> 50→বামে, 30→বামে, 20-এ বড় ⇒ 20-এর ডান child।</div>
+<div class="card"><b>Delete-এর ৩ case:</b> (১) Leaf — সরাও। (২) এক child — সেই child দিয়ে প্রতিস্থাপন। (৩) দুই child — ডান subtree-র সবচেয়ে ছোট (inorder successor) দিয়ে প্রতিস্থাপন করে সেটি delete। উদাহরণ: 30 মুছলে 40 ওর জায়গায় বসে।</div></section>
+
+<section class="slide"><h2>BST ইন্টারেক্টিভ</h2>
+<div class="card"><b>কীভাবে চালাবে:</b> সংখ্যা লিখে Insert দাও — tree নিজে সাজাবে। Search চাপলে খোঁজার পথ হলুদ হবে। Delete-এ তিন case-ই চলে। Preorder/Inorder/Postorder/Level চাপলে node-গুলো ক্রমানুসারে হলুদ হবে এবং ক্রম নিচে লেখা হবে।</div>
+<input id="k" type="number" value="45" style="width:80px"><button onclick="ins()">Insert</button><button onclick="srch()">Search</button><button onclick="dl()">Delete</button><button onclick="trav('pre')">Preorder</button><button onclick="trav('in')">Inorder</button><button onclick="trav('post')">Postorder</button><button onclick="trav('lvl')">Level</button><br><button onclick="pre([50,30,70,20,40,60,80])">উদাহরণ ১</button><button onclick="pre([50,70,60,20,90,10,40,100])">উদাহরণ ২</button><button onclick="R=null;draw();$('#om').textContent=''">Reset</button>
+<svg id="sv" viewBox="0 0 600 300" width="100%"></svg><p id="om"></p></section>
+
+<section class="slide"><h2>Tree Traversal — প্রতিটি node ঠিক একবার ভিজিট</h2>
+<p>কোনো operation করতে আগে node-এ পৌঁছাতে হয়। ভিজিট করার ক্রম অনুযায়ী চারটি পদ্ধতি; প্রথম তিনটি <b>Depth First</b>, শেষটি <b>Breadth First</b> (queue ব্যবহার করে)।</p>
+<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center"><div id="tt" style="min-width:200px"></div><table style="flex:1"><tr><th>পদ্ধতি</th><th>ক্রম</th><th>ফল (বামের tree)</th></tr><tr><td>Preorder</td><td>Root → Left → Right</td><td>1,2,4,5,3,6</td></tr><tr><td>Inorder</td><td>Left → Root → Right</td><td>4,2,5,1,3,6</td></tr><tr><td>Postorder</td><td>Left → Right → Root</td><td>4,5,2,6,3,1</td></tr><tr><td>Level order</td><td>স্তর ধরে বাম→ডান</td><td>1,2,3,4,5,6</td></tr></table></div>
+<div class="card"><b>Level order:</b> root queue-তে রাখো → queue থেকে একটি node তুলে ভিজিট করো, তার child-দের queue-তে দাও → queue খালি না হওয়া পর্যন্ত।</div>
+<div class="card"><b>ব্যবহার:</b> BST-এর inorder = sorted output · Preorder থেকে expression-এর prefix, Postorder থেকে postfix · Postorder: tree মুছে ফেলতে · Level order: স্তরভিত্তিক কাজ · দুই traversal (inorder + preorder/postorder) থেকে tree পুনর্গঠন সম্ভব। <b>উদাহরণ:</b> Postorder = D B E C A, Inorder = D B A E C ⇒ root A (postorder-এর শেষ), বাম = {D,B}, ডান = {E,C} ⇒ Preorder = A B D E C।</div></section>
+
+<section class="slide"><h2>Expression Tree</h2>
+<p>Operator হলো internal node, operand হলো leaf। Tree-র <b>inorder</b> দিলে infix, <b>preorder</b> দিলে prefix, <b>postorder</b> দিলে postfix expression পাওয়া যায়।</p>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:2;min-width:260px"><b>(a+b)/(a*b−c)+d</b><div id="e1"></div></div><div style="flex:1;min-width:150px"><b>(5+3)*2</b><div id="e2"></div></div></div>
+<div class="card">Infix: (a+b)/(a*b−c)+d · Prefix: + / + a b − * a b c d · Postfix: a b + a b * c − / d +। (5+3)*2: আগে 5+3=8, তারপর 8×2 = <b>16</b>।</div></section>
+
+<section class="slide"><h2>Heap (Min Heap ও Max Heap)</h2>
+<p>Heap একটি <b>complete binary tree</b> (শেষ level বাদে পূর্ণ, শেষটি বাম থেকে ভরা) যা priority queue ও heap sort-এ ব্যবহৃত হয়। <b>Min heap:</b> প্রতি parent ≤ তার child, তাই root = সবচেয়ে ছোট। <b>Max heap:</b> প্রতি parent ≥ child, root = সবচেয়ে বড়।</p>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1;min-width:220px"><b>Min heap</b><div id="h1"></div></div><div style="flex:1;min-width:220px"><b>Max heap</b><div id="h2"></div></div></div>
+<div class="card"><b>Insert:</b> সবচেয়ে নিচের স্তরে বামদিকের ফাঁকা জায়গায় বসাও, তারপর parent-এর সাথে তুলনা করে উপরে ওঠাও (<b>heapify-up</b>) — O(log n)। <b>Remove min/max:</b> root সরাও, শেষ node root-এ আনো, নিচে নামাও (<b>heapify-down</b>) — O(log n)। <b>Peek:</b> root দেখা — O(1)।</div>
+<div class="card"><b>Heap sort:</b> (১) max heap বানাও (২) root (সবচেয়ে বড়) শেষের ঘরে সরাও ও heap ছোট করে heapify করো (৩) পুরো array sorted না হওয়া পর্যন্ত চালাও — O(n log n)। <b>Array সূত্র (0-index):</b> parent = ⌊(i−1)/2⌋, বাম child = 2i+1, ডান child = 2i+2।</div></section>
+
+<section class="slide"><h2>AVL, B-Tree ও অন্যান্য Tree</h2>
+<table><tr><th>Tree</th><th>বৈশিষ্ট্য</th><th>ব্যবহার</th></tr><tr><td>AVL</td><td>Self-balancing BST; BF = h(left)−h(right) ∈ {−1,0,+1}; সব operation O(log n)</td><td>দ্রুত search নিশ্চিত করা</td></tr><tr><td>Red-Black</td><td>Self-balancing BST, সবসময় O(log n)</td><td>Library map/set</td></tr><tr><td>B-Tree / B+ Tree</td><td>Multiway search tree, এক node-এ একাধিক child, balanced</td><td>Database/File system index</td></tr><tr><td>Trie</td><td>String-এর prefix ধরে গঠিত</td><td>Autocomplete, router</td></tr><tr><td>Syntax tree</td><td>Program-এর গঠন</td><td>Compiler</td></tr><tr><td>Huffman tree</td><td>Frequency অনুযায়ী code</td><td>Data compression</td></tr></table>
+<div class="card"><b>Complexity:</b> BST — balanced: O(log n), skewed (worst): O(n); search/insert/delete সবই O(h), h = height। AVL/Red-Black — সবসময় O(log n)। <a href="avl.html">AVL ইন্টারেক্টিভ →</a></div></section>
+
+<section class="slide"><h2>C code (PDF থেকে)</h2>
+<pre>void inorder(node *r){ if(r){ inorder(r->left); printf("%d ",r->data); inorder(r->right);} }
+void preorder(node *r){ if(r){ printf("%d ",r->data); preorder(r->left); preorder(r->right);} }
+void postorder(node *r){ if(r){ postorder(r->left); postorder(r->right); printf("%d ",r->data);} }
+
+struct node *search(struct node *n,int key){      // BST search
+  if(n==NULL||n->key==key) return n;
+  return key<n->key ? search(n->left,key) : search(n->right,key); }
+struct node *insert(struct node *n,int key){      // BST insert
+  if(n==NULL) return newNode(key);
+  if(key<n->key) n->left=insert(n->left,key); else n->right=insert(n->right,key);
+  return n; }
+int getLeafCount(Node *n){ if(!n) return 0; if(!n->left&&!n->right) return 1;
+  return getLeafCount(n->left)+getLeafCount(n->right); }
+int countnodes(struct node *r){ return r? 1+countnodes(r->left)+countnodes(r->right):0; }
+int maxDepth(struct node *n){ if(!n) return 0; int l=maxDepth(n->left),r=maxDepth(n->right); return (l>r?l:r)+1; }
+bool isBST(Node *n,int lo,int hi){ if(!n) return true; if(n->data&lt;lo||n->data>hi) return false;
+  return isBST(n->left,lo,n->data)&&isBST(n->right,n->data,hi); }
+int kthSmallest(Node *r,int *i,int k){ /* inorder-এ k-তম node */
+  if(!r) return INT_MAX; int L=kthSmallest(r->left,i,k); if(L!=INT_MAX) return L;
+  if(++*i==k) return r->data; return kthSmallest(r->right,i,k); }</pre>
+<div class="card">সব function-ই recursion ব্যবহার করে — base case: node NULL। Inorder traversal করলে BST-এর মান ascending ক্রমে আসে, তাই k-তম ছোট মান পেতে k-তম node-এ থামলেই হয়।</div></section>
+
+<section class="slide"><h2>সমাধানসহ অনুশীলন (DS-UNIT-45)</h2>
+<div class="card"><b>সমস্যা ১:</b> 50,15,62,5,20,58,91,3,8,37,60,24 insert করলে root-এর বাম ও ডান subtree-তে node কত? <br>বামে (&lt;50): 15,5,20,3,8,37,24 = <b>7</b>; ডানে (&gt;50): 62,58,91,60 = <b>4</b> ⇒ উত্তর (7, 4)।</div>
+<div class="card"><b>সমস্যা ২:</b> 4টি distinct key দিয়ে কতটি BST? Catalan C₄ = 8C4/5 = <b>14</b>।</div>
+<div class="card"><b>সমস্যা ৩:</b> 7,5,1,8,3,6,0,9,4,2 insert। Inorder = 0,1,2,…,9 (sorted)। Preorder = 7,5,1,0,3,2,4,6,8,9।</div>
+<div class="card"><b>সমস্যা ৪:</b> Preorder 30,20,10,15,25,23,39,35,42 (BST) ⇒ Postorder = 15,10,23,25,20,35,42,39,30। (30 root; বাম: 20 [10→ডানে 15, 25→বামে 23]; ডান: 39 [35, 42])।</div>
+<div class="card"><b>সমস্যা ৫:</b> Max heap-এ 1,7,2,6,3,5,8 পরপর insert ⇒ array 8,6,7,1,3,2,5 (root 8)।</div></section>
+
+<section class="slide"><h2>Scenario: Tree কোথায় কীভাবে?</h2>
+<table><tr><th>ঘটনা</th><th>কোন Tree ও কেন</th></tr><tr><td>File system</td><td>General tree — প্রতি folder-এ বহু child। DFS দিয়ে গভীরে খোঁজা, BFS দিয়ে স্তর ধরে খোঁজা</td></tr><tr><td>Family app</td><td>Root = দাদা-দাদি, leaf = সবচেয়ে ছোট প্রজন্ম; Level order-এ প্রজন্ম ধরে দেখানো</td></tr><tr><td>Website menu</td><td>N-ary tree: Electronics → Mobile → Android/iPhone; নতুন category = parent-এর নিচে নতুন child</td></tr><tr><td>Bank database</td><td>B/B+ Tree — balanced, disk access কম, search O(log n)</td></tr><tr><td>Medical AI</td><td>Decision tree — node = প্রশ্ন (জ্বর? কাশি?), branch = উত্তর, leaf = ফলাফল</td></tr><tr><td>(5+3)*2</td><td>Expression tree ⇒ 16</td></tr><tr><td>Nested comments</td><td>Tree — parent = মূল comment, child = reply</td></tr><tr><td>Router loop</td><td>Spanning tree — cycle মুছে loop আটকায়</td></tr><tr><td>বইয়ের ID</td><td>BST — left&lt;root&lt;right; গড় O(log n), unbalanced হলে O(n)</td></tr><tr><td>Browser HTML</td><td>DOM tree: html → body → h1</td></tr></table></section>
+<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section>
+<script src="bank.js"></script><script src="app.js"></script><script>
+quiz('tr','#qz');
+// ---- generic figure drawer: node=[label,...children], null = empty slot ----
+function lay(n,d,c){if(!n){c.i++;return null}if(n.length==1)return{l:n[0],x:c.i++,y:d,k:[]};const s=c.i,k=n.slice(1).map(x=>lay(x,d+1,c)).filter(Boolean);return{l:n[0],x:(s+c.i-1)/2,y:d,k}}
+function fig(sp,hl=[]){const c={i:0},r=lay(sp,0,c),all=[];(function f(n){all.push(n);n.k.forEach(f)})(r);const X=n=>26+n.x*46,Y=n=>22+n.y*48,W=52+(c.i-1)*46,Hh=44+Math.max(...all.map(n=>n.y))*48;
+return '<svg viewBox="0 0 '+W+' '+Hh+'" style="max-width:'+W*1.4+'px;width:100%">'+all.map(n=>n.k.map(k=>'<line x1="'+X(n)+'" y1="'+Y(n)+'" x2="'+X(k)+'" y2="'+Y(k)+'"/>').join('')).join('')+all.map(n=>'<g class="nd '+(hl.includes(n.l)?'on':'')+'"><circle cx="'+X(n)+'" cy="'+Y(n)+'" r="15"/><text x="'+X(n)+'" y="'+(Y(n)+5)+'">'+n.l+'</text></g>').join('')+'</svg>'}
+const F=(id,sp,hl)=>$('#'+id).innerHTML=fig(sp,hl);
+const P=['A',['B',['G'],['I',['J'],['K']],['H']],['C',['E',['D']],['F']]];
+F('f0a',['A',['B'],['C',['E'],['F']]],[]);$('#f0a').innerHTML=$('#f0a').innerHTML.replace('</svg>','<line x1="98" y1="70" x2="144" y2="70" style="stroke:#dc2626"/></svg>');F('f0b',['A',['B'],['C',['E'],['F']]]);
+const TM={Root:[['A'],'যে node থেকে tree শুরু। প্রতি tree-তে ঠিক একটি root; একাধিক root থাকতে পারে না। এখানে A।'],
+Edge:[[],'দুই node-কে যুক্তকারী রেখা। n node-এর tree-তে ঠিক n−1 edge — এখানে 11 node, 10 edge।'],
+Parent:[['A','B','I','C','E'],'যে node-এর এক বা একাধিক child আছে। A-র child B,C; B-র child G,I,H; I-র child J,K; C-র child E,F; E-র child D।'],
+Child:[['B','C','G','I','H','J','K','E','F','D'],'যে node অন্য node-এর নিচে যুক্ত। root ছাড়া সবাই কারো না কারো child। B,C হলো A-র child; J,K হলো I-র child; D হলো E-র child।'],
+Siblings:[['B','C','G','I','H','J','K','E','F'],'একই parent-এর child-রা siblings: (B,C), (G,I,H), (J,K), (E,F)।'],
+Degree:[['B'],'Node-এর degree = তার child সংখ্যা: A=2, B=3, C=2, D=0। Tree-র degree = সবচেয়ে বড় node degree = B-র 3।'],
+Internal:[['A','B','C','I','E'],'কমপক্ষে একটি child আছে এমন node (non-terminal)। এখানে A,B,C,I,E।'],
+Leaf:[['G','J','K','H','D','F'],'যার কোনো child নেই (external/terminal node)। এখানে G,J,K,H,D,F।'],
+Level:[['A'],'উপর থেকে নিচে ধাপ; root = level 0। Level 0: A · 1: B,C · 2: G,I,H,E,F · 3: J,K,D।'],
+Height:[['A'],'Node থেকে নিচের সবচেয়ে লম্বা পথের edge সংখ্যা। Leaf-এর height 0; B=2, A=3। Tree-র height = root-এর height = 3।'],
+Depth:[['J'],'Root থেকে ওই node পর্যন্ত edge সংখ্যা: A=0, B=1, C=1, J=3। Tree-র depth = সবচেয়ে গভীর leaf-এর depth = 3।'],
+Subtree:[['B','G','I','J','K','H'],'কোনো node ও তার সব descendant মিলে subtree। এখানে B-কে root ধরে হলুদ অংশ একটি subtree।'],
+Forest:[[],'আলাদা (disjoint) কয়েকটি tree-র সমষ্টি। Tree-র root সরালে তার child-দের subtree গুলো একটি forest হয়।']};
+$('#tb').innerHTML=Object.keys(TM).map(k=>'<button onclick="tm(\''+k+'\')">'+k+'</button>').join('');F('f1',P);
+function tm(k){F('f1',P,TM[k][0]);$('#tx').innerHTML='<b>'+k+':</b> '+TM[k][1]}
+F('t1',['A',['B',['D'],['E']],['C']]);F('t2',['A',['B',['D'],['E']],['C',['F'],['G']]]);F('t3',['A',['B',['D'],['E']],['C',['F'],null]]);F('t4',['A',null,['B',null,['C',null,['D']]]]);
+F('b1',['50',['30',['20'],['40']],['70',['60'],['80']]]);F('b2',['50',['20',['10'],['40']],['70',['60'],['90',null,['100']]]]);
+F('tt',['1',['2',['4'],['5']],['3',null,['6']]]);
+F('e1',['+',['/',['+',['a'],['b']],['−',['*',['a'],['b']],['c']]],['d']]);F('e2',['*',['+',['5'],['3']],['2']]);
+F('h1',['10',['15',['25'],['30']],['20',['35'],['40']]]);F('h2',['40',['30',['25'],['20']],['35',['15'],['10']]]);
+// ---- interactive BST ----
+let R=null;const mk=v=>({v,l:null,r:null});
+function put(v){if(!R){R=mk(v);return}let c=R;for(;;){if(v==c.v)return;const s=v<c.v?'l':'r';if(!c[s]){c[s]=mk(v);return}c=c[s]}}
+function ins(){put(+$('#k').value);draw();$('#om').textContent='Insert সম্পন্ন'}
+function pre(a){R=null;a.forEach(put);draw();$('#om').textContent='ক্রম: '+a.join(', ')}
+function rm(n,v){if(!n)return n;if(v<n.v)n.l=rm(n.l,v);else if(v>n.v)n.r=rm(n.r,v);else{if(!n.l)return n.r;if(!n.r)return n.l;let s=n.r;while(s.l)s=s.l;n.v=s.v;n.r=rm(n.r,s.v)}return n}
+function dl(){const v=+$('#k').value,a=nodes(R).find(n=>n.v==v);let t='পাওয়া যায়নি';if(a)t=!a.l&&!a.r?'Case 1: leaf সরানো হলো':(!a.l||!a.r)?'Case 2: এক child দিয়ে প্রতিস্থাপন':'Case 3: inorder successor দিয়ে প্রতিস্থাপন';R=rm(R,v);draw();$('#om').textContent=v+' delete — '+t}
+function ly(n,d,o){if(!n)return;ly(n.l,d+1,o);n.x=o.i++;n.y=d;ly(n.r,d+1,o)}
+function nodes(n,a=[]){if(n){nodes(n.l,a);a.push(n);nodes(n.r,a)}return a}
+function draw(on=[]){const o={i:0};ly(R,0,o);const a=nodes(R),X=n=>30+n.x*(540/Math.max(a.length,1)),Y=n=>30+n.y*55;
+$('#sv').innerHTML=a.map(n=>[n.l,n.r].map(c=>c?'<line x1="'+X(n)+'" y1="'+Y(n)+'" x2="'+X(c)+'" y2="'+Y(c)+'"/>':'').join('')).join('')+a.map(n=>'<g class="nd '+(on.includes(n)?'on':'')+'"><circle cx="'+X(n)+'" cy="'+Y(n)+'" r="16"/><text x="'+X(n)+'" y="'+(Y(n)+5)+'">'+n.v+'</text></g>').join('')}
+function order(t,n=R,a=[]){if(!n)return a;if(t=='pre')a.push(n);order(t,n.l,a);if(t=='in')a.push(n);order(t,n.r,a);if(t=='post')a.push(n);return a}
+function lvl(){const a=[],q=R?[R]:[];while(q.length){const n=q.shift();a.push(n);n.l&&q.push(n.l);n.r&&q.push(n.r)}return a}
+async function trav(t){const a=t=='lvl'?lvl():order(t);for(let i=1;i<=a.length;i++){draw(a.slice(0,i));$('#om').textContent=a.slice(0,i).map(n=>n.v).join(', ');await sleep(600)}}
+async function srch(){const v=+$('#k').value;let c=R,p=[];while(c){p.push(c);draw(p);$('#om').textContent=v+' ও '+c.v+' তুলনা: '+(v==c.v?'পাওয়া গেছে':v<c.v?'ছোট ⇒ বামে':'বড় ⇒ ডানে');await sleep(700);if(c.v==v)return;c=v<c.v?c.l:c.r}$('#om').textContent=v+' পাওয়া যায়নি'}
+pre([50,30,70,20,40,60,80]);
+</script></body></html>
