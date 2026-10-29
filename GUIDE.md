@@ -6,7 +6,7 @@ User (Bangla speaker, prepares for CS/IT exams such as Bangladesh Bank AD-ICT) w
 Source PDFs (Cloud IT Online Batch-13 notes): Searching_Sorting-Full, Searching-Sorting-Scenario, Senario-based-tree, tree, Tree-bangla, Tree-Summery, stack, time-complexity, DS-UNIT-45 (Trees & Hashing slides by BMSCE).
 
 ## 2. Status (as of this version)
-DONE (v5): complexity (operation counting, 3n+3, T1 vs T2, Big-O/Ω/Θ, loop lab), search-sort (linear, binary with generated comparison tables, C code, exercises 1 & 3, scenarios), sorts (bubble, selection, insertion, quick with PDF 13-element trace, merge, heap, animation lab, exercises 1–9 solved by program), stack (ops, C code, applications, infix→postfix & postfix evaluator, queue, P-Q-R-S-T puzzle, all PYQ+practice with explanations), linkedlist (+2D address calculator), graph (BFS/DFS, Dijkstra, Bellman-Ford, SPFA, Floyd-Warshall, Kruskal, Prim animations). Earlier: **tree.html fully rewritten (v4)** to cover tree.pdf, Tree-bangla, Tree-Summery, Senario-based-tree and DS-UNIT-45 tree part completely (PDF's own tree A–K, 12 interactive terms, all types with figures, BST 3 delete cases, traversals, expression tree, heap, C code, solved problems, 10 scenarios). Complexity, Linear/Binary search, Bubble/Selection/Insertion/Quick/Heap/Merge sort animations, Stack/Queue, Linked List, Tree terminology + BST + traversals + heap/delete notes + code, AVL (insert+delete+rotations), Hashing (chaining, linear, quadratic, double; search/delete), Graph (BFS/DFS + notes), How-to-read intro, Bangla explanation cards, **125 questions** (cx 11, ss 31, st 19, tr 30, hs 17, ll 7, gr 10), Model Test.
+DONE (v5): complexity (operation counting, 3n+3, T1 vs T2, Big-O/Ω/Θ, loop lab), search-sort (linear, binary with generated comparison tables, C code, exercises 1 & 3, scenarios), sorts (bubble, selection, insertion, quick with PDF 13-element trace, merge, heap, animation lab, exercises 1–9 solved by program), stack (ops, C code, **prefix/postfix/infix converters both ways + prefix evaluator + 10 solved conversions (v6)**, applications, infix→postfix & postfix evaluator, queue, P-Q-R-S-T puzzle, all PYQ+practice with explanations), linkedlist (+2D address calculator), graph (BFS/DFS, Dijkstra, Bellman-Ford, SPFA, Floyd-Warshall, Kruskal, Prim animations). Earlier: **tree.html fully rewritten (v4)** to cover tree.pdf, Tree-bangla, Tree-Summery, Senario-based-tree and DS-UNIT-45 tree part completely (PDF's own tree A–K, 12 interactive terms, all types with figures, BST 3 delete cases, traversals, expression tree, heap, C code, solved problems, 10 scenarios). Complexity, Linear/Binary search, Bubble/Selection/Insertion/Quick/Heap/Merge sort animations, Stack/Queue, Linked List, Tree terminology + BST + traversals + heap/delete notes + code, AVL (insert+delete+rotations), Hashing (chaining, linear, quadratic, double; search/delete), Graph (BFS/DFS + notes), How-to-read intro, Bangla explanation cards, **125 questions** (cx 11, ss 31, st 19, tr 30, hs 17, ll 7, gr 10), Model Test.
 NOT DONE / next tasks (pick up here):
 0. (Resolved in v5) User complained earlier pages dropped PDF details / explanations were disjointed. v4 rewrote tree.html; **v5 rewrote complexity, search-sort, sorts, stack, linkedlist, graph** from the PDFs (exercise page and quick-sort worked example were read from page images). Keep this standard for any new page: concept → Bangla explanation → figure/animation → generated worked example → code → exam notes, nothing omitted.
 1. (Still open) DS-UNIT-45 hashing slides had picture-only examples (linear/quadratic/double, comparison) — current tables were recomputed by hand (mod 7, keys 50,700,76,85,92,73,101); compare with the PDF images.
@@ -229,6 +229,17 @@ gr|n vertex-এর complete undirected graph-এ edge?|n(n−1)/2~n²~n−1~2n|0
 gr|BFS-এ node ধরে রাখতে কোন DS?|Stack~Queue~Tree~Array|1|
 gr|Adjacency matrix-এ V vertex-এর space?|O(V)~O(V²)~O(V log V)~O(E)|1|
 gr|Network-এর সব node সংযুক্ত রেখে সবচেয়ে কম খরচের tree?|Minimum spanning tree~DFS tree~Heap~BST|0|
+st|A+B*C এর prefix?|+A*BC~*+ABC~ABC*+~+*ABC|0|* আগে হয় ⇒ B*C, তারপর A+(B*C)।
+st|(A+B)*C এর postfix?|AB+C*~ABC*+~AB*C+~A+BC*|0|
+st|a+(b-c)*d এর prefix?|+a*-bcd~*+a-bcd~+a-b*cd~abc-d*+|0|
+st|A-B-C এর postfix?|AB-C-~ABC--~A-BC-~AB-C+|0|বাম-সংযুক্ত।
+st|A^B^C এর postfix (^ ডান-সংযুক্ত)?|ABC^^~AB^C^~^^ABC~A^BC^|0|A^(B^C)।
+st|(A+B)*(C-D) এর prefix?|*+AB-CD~+A*B-CD~AB+CD-*~*A+B-CD|0|
+st|A*(B+C)/D এর postfix?|ABC+*D/~AB*C+D/~ABCD+*/~A*BC+D/|0|
+st|Prefix expression-এর মান নির্ণয়ে কোন দিক থেকে পড়া হয়?|ডান থেকে বামে~বাম থেকে ডানে~মাঝ থেকে~যেকোনো|0|
+st|Prefix - * + 2 3 4 5 এর মান?|15~20~25~5|0|(2+3)*4−5।
+st|Postfix 2 3 1 * + 9 - এর মান?|-4~4~14~-14|0|2+3*1−9।
+st|Postfix/Prefix-এ বন্ধনী লাগে না কেন?|operator-এর অবস্থানই কাজের ক্রম ঠিক করে~কম্পিউটার বন্ধনী বোঝে না~precedence নেই~অপারেটর কম|0|
 gr|Network loop এড়াতে?|Spanning tree~Heap~Stack~Queue|0|`.split('\n').map(l=>{const p=l.split('|');return{s:p[0],q:p[1],o:p[2].split('~'),a:+p[3],e:p[4]||''}});
 function shuf(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function renderQ(list,el,id){el.innerHTML=list.map((q,i)=>`<div class="q card"><b>${i+1}. ${q.q}</b>${q.o.map((o,j)=>`<label><input type="radio" name="${id}${i}" data-i="${i}" data-j="${j}"> ${o}</label>`).join('')}<div id="${id}r${i}"></div></div>`).join('');
@@ -594,6 +605,18 @@ void push(int d){ if(!isfull()) stack[++top] = d; else printf("Stack is full"); 
 <p>Infix লিখো (যেমন a+(b-c)*d বা 4+3*(6*3-12)):</p><input id="inf" value="a+(b-c)*d" style="width:260px"><button onclick="cv()">Postfix বানাও</button><p id="po"></p><div id="pt"></div>
 <p>Postfix মান বের করো (স্পেস দিয়ে লেখো, যেমন 6 3 2 4 + - *):</p><input id="pf" value="6 3 2 4 + - *" style="width:260px"><button onclick="ev()">মান নির্ণয়</button><div id="et"></div></section>
 
+<section class="slide"><h2>Prefix ও রূপান্তর (ইন্টারেক্টিভ)</h2>
+<p><b>Prefix (Polish notation):</b> operator আগে, তারপর operand — যেমন +AB। Prefix ও postfix দুটিতেই বন্ধনী ও precedence-এর ঝামেলা থাকে না; operator-এর অবস্থানই কাজের ক্রম ঠিক করে দেয়।</p>
+<div class="card"><b>Infix → Prefix (stack দিয়ে):</b> (১) expression উল্টে দাও এবং ( ও ) পরস্পর বদলে নাও। (২) উল্টানো expression-কে postfix-এর মতোই stack দিয়ে রূপান্তর করো, তবে <b>সমান precedence-এ আগের operator pop করবে না</b> (শুধু ^ ছাড়া)। (৩) ফল আবার উল্টে দাও।</div>
+<div class="card"><b>Prefix মান নির্ণয়:</b> <b>ডান থেকে বামে</b> পড়ো। operand হলে push; operator হলে প্রথম pop = <i>বাম</i> operand, দ্বিতীয় pop = <i>ডান</i> operand; “বাম op ডান” ফল push। (Postfix-এ বাম থেকে ডানে পড়া হয় এবং প্রথম pop ডান operand।)</div>
+<div class="card"><b>Postfix/Prefix → Infix:</b> operand হলে push; operator হলে দুটি operand তুলে “( বাম op ডান )” বানিয়ে আবার push। তিন রূপের যেকোনোটি থেকে বাকি দুটি পাওয়া যায়।</div>
+<p>রূপ বেছে expression লিখে রূপান্তর করো (postfix/prefix হলে symbol-গুলো স্পেস দিয়ে লেখো):</p>
+<select id="ty"><option value="in">Infix</option><option value="post">Postfix</option><option value="pre">Prefix</option></select> <input id="cin" value="A+B*C-D/F" style="width:260px"><button onclick="cvt()">রূপান্তর</button><div id="cr"></div><div id="ct"></div>
+<p>Prefix মান নির্ণয় (যেমন - * + 2 3 4 5): <input id="pe" value="- * + 2 3 4 5" style="width:220px"><button onclick="evp()">মান নির্ণয়</button></p><div id="pet"></div></section>
+<section class="slide"><h2>অনুশীলন: Infix, Postfix, Prefix (সমাধানসহ)</h2>
+<p>নিচের টেবিল program দিয়ে বের করা। নিজে হাতে করে পরে মিলিয়ে নাও; ধাপ দেখতে উপরের converter-এ expression বসাও।</p><div id="xt"></div>
+<p><b>মান নির্ণয়ের অনুশীলন:</b></p><div id="xv"></div>
+<div class="card"><b>মনে রাখার কৌশল:</b> Postfix-এ operator আসে দুই operand-এর <i>পরে</i>, Prefix-এ <i>আগে</i>। A−B−C ⇒ postfix AB−C− , prefix −−ABC (বাম-সংযুক্ত operator-এ বামেরটি আগে হয়)। A^B^C ডান-সংযুক্ত ⇒ postfix ABC^^ , prefix ^A^BC।</div></section>
 <section class="slide"><h2>Queue — FIFO</h2>
 <p>Queue-তে নতুন element <b>পিছনে (rear)</b> ঢোকে (enqueue) এবং <b>সামনে (front)</b> থেকে বের হয় (dequeue) — টিকিট কাউন্টারের লাইনের মতো। First In First Out। Stack-এ একই প্রান্তে ঢোকা-বেরোনো, Queue-তে দুই প্রান্তে।</p>
 <div class="cells" id="qq" style="min-height:44px"></div><button onclick="enq()">Enqueue</button><button onclick="deq()">Dequeue</button>
@@ -629,8 +652,20 @@ const PY=[['১','a+(b−c)*d-এর postfix? [SBL-SO 2020]','abc−d*+','প্
 $('#py').innerHTML=tb(['নং','প্রশ্ন','উত্তর','ব্যাখ্যা'],PY);
 const PP=[['১','Stack-এ element ঢোকানো প্রক্রিয়ার নাম?','Push',''],['২','Stack-এর application কোনটি?','সবগুলো','function call, stock span, expression evaluation'],['৩','Linked list stack-এ নতুন node push করলে?','list-এর সামনে বসে','head-এ O(1)'],['৪','খালি stack থেকে remove করলে?','Underflow',''],['৫','Stack-এর entries “ordered” মানে?','ক্রমিক (sequential) entry','একটির পর একটি'],['৬','Stack থেকে সরানো হয় কোন ক্রমে?','Reverse (উল্টো)','LIFO'],['৭','কোনটি stack ব্যবহার করে?','সবগুলো','parentheses balancing, local variable tracking, compiler syntax analyzer'],['৮','Postfix 6 3 2 4 + − * এর মান?','<b>−18</b>','2 4 + = 6; 3 6 − = −3; 6 × (−3) = −18। (PDF-এ উত্তর d “15–100” — ভুল)'],['৯','4+3*(6*3−12) → postfix-এ stack-এ একসাথে সর্বোচ্চ symbol?','4','+ * ( * (উপরের converter-এ যাচাই করো)'],['১০','কোনটি stack-এর application?','সবগুলো','factorial, Tower of Hanoi, infix→postfix'],['১১','Stack-কে আরও কী বলে?','Last in first out',''],['১২','কোনটি linear DS?','Stack','Graph/Tree non-linear']];
 $('#pp').innerHTML=tb(['নং','প্রশ্ন','উত্তর','ব্যাখ্যা'],PP);
-</script></body></html>
+const OPR=/^[-+*\/^]$/,sp=s=>s.includes(' ')?s.trim().split(/\s+/):toks(s);
+function toPre(s){const T=toks(s).reverse().map(t=>t=='('?')':t==')'?'(':t),pr={'+':1,'-':1,'*':2,'/':2,'^':3},out=[],S=[],rows=[];for(const t of T){if(/[\dA-Za-z]/.test(t[0]))out.push(t);else if(t=='(')S.push(t);else if(t==')'){while(S.length&&S[S.length-1]!='(')out.push(S.pop());S.pop()}else{while(S.length&&S[S.length-1]!='('&&(pr[S[S.length-1]]>pr[t]||(pr[S[S.length-1]]==pr[t]&&t=='^')))out.push(S.pop());S.push(t)}rows.push([t,S.join(' '),out.join(' ')])}while(S.length)out.push(S.pop());rows.push(['(শেষ)','',out.join(' ')+' → উল্টালে '+[...out].reverse().join(' ')]);return{out:[...out].reverse().join(' '),rows}}
+function toInfix(s,ty){const S=[],rows=[],T=sp(s),seq=ty=='pre'?[...T].reverse():T;for(const t of seq){if(OPR.test(t)){let a,b;if(ty=='pre'){a=S.pop();b=S.pop()}else{b=S.pop();a=S.pop()}S.push('('+a+t+b+')')}else S.push(t);rows.push([t,S.join(' , ')])}return{out:S[0],rows}}
+function evPre(s){const S=[],rows=[];for(const t of [...sp(s)].reverse()){if(OPR.test(t)){const a=S.pop(),b=S.pop();S.push(t=='+'?a+b:t=='-'?a-b:t=='*'?a*b:t=='/'?a/b:Math.pow(a,b))}else S.push(+t);rows.push([t,S.join(', ')])}return rows}
 
+function cvt(){const s=$('#cin').value,ty=$('#ty').value;let inf,po,pr,rows,hd;
+if(ty=='in'){const a=toPost(s),b=toPre(s);inf=s;po=a.out;pr=b.out;$('#ct').innerHTML='<p><b>Infix → Postfix ধাপ:</b></p>'+tb(['Symbol','Stack','Output'],a.rows)+'<p><b>Infix → Prefix ধাপ (উল্টানো expression পড়া হচ্ছে):</b></p>'+tb(['Symbol','Stack','Output'],b.rows)}
+else{const a=toInfix(s,ty);inf=a.out;po=ty=='post'?sp(s).join(' '):toPost(inf).out;pr=ty=='pre'?sp(s).join(' '):toPre(inf).out;$('#ct').innerHTML='<p><b>'+(ty=='post'?'Postfix → Infix (বাম→ডান)':'Prefix → Infix (ডান→বাম)')+' ধাপ:</b></p>'+tb(['Symbol','Stack'],a.rows)}
+$('#cr').innerHTML='<div class="card">Infix: <b>'+inf+'</b><br>Postfix: <b>'+po+'</b><br>Prefix: <b>'+pr+'</b></div>'}
+function evp(){const r=evPre($('#pe').value);$('#pet').innerHTML=tb(['Symbol (ডান→বাম)','Stack'],r)+'<p>ফল = <b>'+r[r.length-1][1]+'</b></p>'}
+$('#xt').innerHTML=tb(['Infix','Postfix','Prefix'],['A+B*C','(A+B)*C','A+B*C-D/F','a+(b-c)*d','A*(B+C)/D','A^B^C','(A+B)*(C-D)','4+3*(6*3-12)','A-B-C','(A+B*C)/(D-E)'].map(e=>[e,toPost(e).out,toPre(e).out]));
+$('#xv').innerHTML=tb(['Expression','ধরন','মান'],[['5 3 2 * +','Postfix',evP('5 3 2 * +').pop()[1]],['6 3 2 4 + - *','Postfix',evP('6 3 2 4 + - *').pop()[1]],['2 3 1 * + 9 -','Postfix',evP('2 3 1 * + 9 -').pop()[1]],['- * + 2 3 4 5','Prefix',evPre('- * + 2 3 4 5').pop()[1]],['+ * 2 3 4','Prefix',evPre('+ * 2 3 4').pop()[1]],['/ + 8 4 * 2 3','Prefix',evPre('/ + 8 4 * 2 3').pop()[1]]]);
+cvt();evp();
+</script></body></html>
 ```
 
 ## linkedlist.html

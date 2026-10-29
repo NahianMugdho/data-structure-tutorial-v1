@@ -122,6 +122,17 @@ gr|n vertex-এর complete undirected graph-এ edge?|n(n−1)/2~n²~n−1~2n|0
 gr|BFS-এ node ধরে রাখতে কোন DS?|Stack~Queue~Tree~Array|1|
 gr|Adjacency matrix-এ V vertex-এর space?|O(V)~O(V²)~O(V log V)~O(E)|1|
 gr|Network-এর সব node সংযুক্ত রেখে সবচেয়ে কম খরচের tree?|Minimum spanning tree~DFS tree~Heap~BST|0|
+st|A+B*C এর prefix?|+A*BC~*+ABC~ABC*+~+*ABC|0|* আগে হয় ⇒ B*C, তারপর A+(B*C)।
+st|(A+B)*C এর postfix?|AB+C*~ABC*+~AB*C+~A+BC*|0|
+st|a+(b-c)*d এর prefix?|+a*-bcd~*+a-bcd~+a-b*cd~abc-d*+|0|
+st|A-B-C এর postfix?|AB-C-~ABC--~A-BC-~AB-C+|0|বাম-সংযুক্ত।
+st|A^B^C এর postfix (^ ডান-সংযুক্ত)?|ABC^^~AB^C^~^^ABC~A^BC^|0|A^(B^C)।
+st|(A+B)*(C-D) এর prefix?|*+AB-CD~+A*B-CD~AB+CD-*~*A+B-CD|0|
+st|A*(B+C)/D এর postfix?|ABC+*D/~AB*C+D/~ABCD+*/~A*BC+D/|0|
+st|Prefix expression-এর মান নির্ণয়ে কোন দিক থেকে পড়া হয়?|ডান থেকে বামে~বাম থেকে ডানে~মাঝ থেকে~যেকোনো|0|
+st|Prefix - * + 2 3 4 5 এর মান?|15~20~25~5|0|(2+3)*4−5।
+st|Postfix 2 3 1 * + 9 - এর মান?|-4~4~14~-14|0|2+3*1−9।
+st|Postfix/Prefix-এ বন্ধনী লাগে না কেন?|operator-এর অবস্থানই কাজের ক্রম ঠিক করে~কম্পিউটার বন্ধনী বোঝে না~precedence নেই~অপারেটর কম|0|
 gr|Network loop এড়াতে?|Spanning tree~Heap~Stack~Queue|0|`.split('\n').map(l=>{const p=l.split('|');return{s:p[0],q:p[1],o:p[2].split('~'),a:+p[3],e:p[4]||''}});
 function shuf(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function renderQ(list,el,id){el.innerHTML=list.map((q,i)=>`<div class="q card"><b>${i+1}. ${q.q}</b>${q.o.map((o,j)=>`<label><input type="radio" name="${id}${i}" data-i="${i}" data-j="${j}"> ${o}</label>`).join('')}<div id="${id}r${i}"></div></div>`).join('');
