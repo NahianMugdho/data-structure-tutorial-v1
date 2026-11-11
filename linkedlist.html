@@ -1,4 +1,31 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linked</title><link rel="stylesheet" href="style.css"></head><body>
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Linked</title><link rel="stylesheet" href="style.css">
+<style>
+.llx{color:inherit}
+.llx .llx-row{display:flex;align-items:center;gap:8px;margin:10px 0;flex-wrap:wrap}
+.llx .llx-pg{font-size:13px;opacity:.75;margin-left:auto}
+.llx input[type=range]{width:100%}
+.llx .llx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:12px}
+.llx .llx-cap{font-size:12px;opacity:.75;margin:0 0 4px}
+.llx .llx-cb{background:rgba(128,128,128,.12);border-radius:8px;padding:6px 0;overflow-x:auto;margin:0 0 10px}
+.llx .llx-cl{white-space:pre;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;padding:2px 8px;line-height:1.6}
+.llx .llx-cl.on{background:rgba(56,139,253,.22);font-weight:600}
+.llx .llx-cl.call{background:rgba(210,153,34,.28)}
+.llx .llx-tx{border:1px solid rgba(128,128,128,.4);border-radius:10px;padding:12px 14px;margin:0 0 10px}
+.llx .llx-tx p{margin:0}
+.llx .llx-tx p:last-child{font-size:14px;line-height:1.7}
+.llx .llx-out{background:rgba(128,128,128,.14);border-radius:8px;padding:8px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.6;min-height:70px;white-space:pre-wrap}
+.llx svg{display:block;max-width:100%;height:auto}
+.llx svg text{fill:currentColor;font-size:12px}
+.llx svg .th{font-size:14px;font-weight:600}
+.llx .llx-arr{stroke:currentColor;stroke-opacity:.6;stroke-width:1.5;fill:none}
+.llx .llx-teal{fill:rgba(29,158,117,.18);stroke:#1D9E75}
+.llx .llx-purple{fill:rgba(127,119,221,.2);stroke:#7F77DD}
+.llx .llx-amber{fill:rgba(239,159,39,.22);stroke:#EF9F27}
+.llx .llx-gray{fill:rgba(136,135,128,.18);stroke:#888780}
+.llx .llx-red{fill:rgba(226,75,74,.2);stroke:#E24B4A}
+@keyframes llxpop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:no-preference){.llx .pop{animation:llxpop .5s ease-out;transform-box:fill-box;transform-origin:center}}
+</style></head><body>
 <section class="slide"><h2>Linked List কী?</h2>
 <p>Array-তে element পাশাপাশি ঘরে থাকে; Linked list-এ প্রতিটি <b>node</b>-এ দুটি অংশ: <b>data</b> ও পরের node-এর ঠিকানা (<b>next pointer</b>)। শেষ node-এর next = NULL। শুরুর node-কে ধরে রাখে <b>head</b>। ফলে memory-তে ছড়ানো থাকলেও শিকলের মতো যুক্ত থাকে।</p>
 <div class="card"><b>ধরন:</b> Singly (শুধু next), Doubly (prev ও next — প্রতি node-এ ২টি pointer), Circular (শেষ node-এর next = প্রথম node)।</div>
@@ -12,6 +39,91 @@
 void insertHead(struct node **h,int v){ struct node *n=malloc(sizeof *n); n->data=v; n->next=*h; *h=n; }
 void deleteValue(struct node **h,int v){ while(*h &amp;&amp; (*h)->data!=v) h=&amp;(*h)->next;
    if(*h){ struct node *t=*h; *h=t->next; free(t);} }</pre></section>
+<section class="slide"><h2>C কোড অ্যানিমেশন: ধাপে ধাপে</h2>
+<div class="card"><b>কীভাবে দেখবে:</b> "পরে" চাপলে একটা করে লাইন চলবে, "অটো প্লে" দিলে নিজে নিজে চলবে, নিচের স্লাইডার টেনে যেকোনো ধাপে যাওয়া যায়। ডানে কোন লাইন চলছে, বামে মেমোরিতে node ও পয়েন্টারের অবস্থা, আর নিচে টার্মিনালের আউটপুট একসাথে বদলাবে।<br><b>রঙের মানে:</b> বেগুনি = head, সবুজ = list এর node, হলুদ = এইমাত্র malloc হওয়া node, ধূসর ড্যাশ = list থেকে বাদ পড়া node, লাল = free হয়ে যাওয়া node, কমলা তীর = h, t, n পয়েন্টার।</div>
+<div class="llx" id="llx">
+<div id="lla-viz"></div>
+<div class="llx-row">
+<button id="lla-prev" type="button">◀ আগে</button>
+<button id="lla-next" type="button">পরে ▶</button>
+<button id="lla-play" type="button">▶ অটো প্লে</button>
+<button id="lla-reset" type="button">↺ রিসেট</button>
+<span id="lla-pg" class="llx-pg"></span>
+</div>
+<input type="range" id="lla-sl" min="0" value="0" step="1" aria-label="ধাপ বাছাই">
+<div class="llx-grid">
+<div><p class="llx-cap">main()</p><div class="llx-cb" id="lla-cm"></div><div id="lla-cf"></div></div>
+<div>
+<div class="llx-tx"><p class="llx-cap">এই ধাপে কী হচ্ছে</p><p id="lla-tx"></p></div>
+<p class="llx-cap">টার্মিনাল আউটপুট</p><div class="llx-out" id="lla-out"></div>
+</div>
+</div>
+</div>
+<details style="margin-top:14px"><summary>পুরো C কোড দেখো</summary>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct node {
+    int data;
+    struct node *next;
+};
+
+void insertHead(struct node **h, int v) {
+    struct node *n = malloc(sizeof *n);
+    if (n == NULL) {
+        printf("Memory allocation failed!\n");
+        return;
+    }
+    n-&gt;data = v;
+    n-&gt;next = *h;
+    *h = n;
+    printf("%d inserted successfully!\n", v);
+}
+
+void deleteValue(struct node **h, int v) {
+    while (*h &amp;&amp; (*h)-&gt;data != v) {
+        h = &amp;(*h)-&gt;next;
+    }
+    if (*h) {
+        struct node *t = *h;
+        *h = t-&gt;next;
+        free(t);
+        printf("%d deleted successfully!\n", v);
+    } else {
+        printf("%d not found!\n", v);
+    }
+}
+
+void display(struct node *h) {
+    printf("Linked List: ");
+    while (h != NULL) {
+        printf("%d -&gt; ", h-&gt;data);
+        h = h-&gt;next;
+    }
+    printf("NULL\n");
+}
+
+void freeList(struct node **h) {
+    while (*h) {
+        struct node *t = *h;
+        *h = t-&gt;next;
+        free(t);
+    }
+}
+
+int main() {
+    struct node *head = NULL;
+    insertHead(&amp;head, 30);
+    insertHead(&amp;head, 20);
+    insertHead(&amp;head, 10);
+    display(head);
+    deleteValue(&amp;head, 20);
+    display(head);
+    insertHead(&amp;head, 5);
+    display(head);
+    freeList(&amp;head);
+    return 0;
+}</pre></details></section>
 <section class="slide"><h2>2D Array-র ঠিকানা (Row-major / Column-major)</h2>
 <p>Array memory-তে এক লাইনে থাকে। দুই-মাত্রার array R×C-কে সারি ধরে (row-major) বা কলাম ধরে (column-major) সাজানো যায়:</p>
 <div class="card">Row-major: ঠিকানা = Base + size × (i × C + j) · Column-major: ঠিকানা = Base + size × (j × R + i) (i, j = 0 থেকে শুরু)।</div>
@@ -24,4 +136,114 @@ function at(){const p=Math.max(1,Math.min(L.length+1,+$('#p').value));L.splice(p
 function del(){const i=L.indexOf(+$('#v').value);if(i<0)return d('মান নেই');L.splice(i,1);d('delete — '+(i+1)+'টি node ঘুরে পাওয়া গেছে')}
 function sr(){const i=L.indexOf(+$('#v').value);d(i<0?'পাওয়া যায়নি, '+L.length+'টি node ঘুরতে হলো':'পাওয়া গেছে, '+(i+1)+'টি node ঘুরে')}
 function ad(){const R=+$('#R').value,C=+$('#C').value,S=+$('#S').value,B=+$('#B').value,i=+$('#i').value,j=+$('#j').value;$('#am').innerHTML='Row-major: '+B+' + '+S+'×('+i+'×'+C+'+'+j+') = <b>'+(B+S*(i*C+j))+'</b><br>Column-major: '+B+' + '+S+'×('+j+'×'+R+'+'+i+') = <b>'+(B+S*(j*R+i))+'</b>'}
-d();ad();</script></body></html>
+d();ad();</script>
+<script>
+(function(){
+const SN={
+main:["struct node *head = NULL;","insertHead(&head, 30);","insertHead(&head, 20);","insertHead(&head, 10);","display(head);","deleteValue(&head, 20);","display(head);","insertHead(&head, 5);","display(head);","freeList(&head);","return 0;"],
+insertHead:["struct node *n = malloc(sizeof *n);","if (n == NULL) { ...; return; }","n->data = v;","n->next = *h;","*h = n;","printf(\"%d inserted...\", v);"],
+deleteValue:["while (*h && (*h)->data != v)","    h = &(*h)->next;","if (*h) {","    struct node *t = *h;","    *h = t->next;","    free(t);","    printf(\"%d deleted...\", v);"],
+display:["printf(\"Linked List: \");","while (h != NULL) {","    printf(\"%d -> \", h->data);","    h = h->next;","printf(\"NULL\\n\");"],
+freeList:["while (*h) {","    struct node *t = *h;","    *h = t->next;","    free(t);"]
+};
+const TT={insertHead:"insertHead(struct node **h, int v)",deleteValue:"deleteValue(struct node **h, int v)",display:"display(struct node *h)",freeList:"freeList(struct node **h)"};
+const A={30:"0x1A0",20:"0x2B0",10:"0x3C0",5:"0x4D0"};
+let S={nodes:[],fl:null,hAt:null,cur:null,t:null,det:null,out:[],part:null,pulse:null},ML=0;
+const steps=[];
+function P(fn,line,txt,mut){S.pulse=null;if(mut)mut(S);steps.push({fn:fn,line:line,ml:ML,txt:txt,s:JSON.parse(JSON.stringify(S))});}
+function ins(v,ml){ML=ml;const had=S.nodes.length,old=had?S.nodes[0].v:null;
+P('main',ml,'main() থেকে insertHead কল হলো। &head পাঠানো হয়েছে, তাই ফাংশনের h হলো head ভ্যারিয়েবলের ঠিকানা।');
+P('insertHead',0,'malloc দিয়ে heap এ নতুন node এর জায়গা নেওয়া হলো (ঠিকানা '+A[v]+')। ভেতরে এখনো কোনো মান নেই।',function(s){s.fl={v:null,a:A[v],d:0,n:0};s.hAt='head'});
+P('insertHead',1,'NULL চেক: n NULL নয়, মানে মেমোরি পাওয়া গেছে। তাই return না করে এগিয়ে যাই।');
+P('insertHead',2,'n->data = v: নতুন node এর data ঘরে '+v+' বসলো।',function(s){s.fl.v=v;s.fl.d=1});
+P('insertHead',3,had?'n->next = *h: *h মানে বর্তমান head, অর্থাৎ '+old+' এর node। নতুন node এর next সেটাকেই দেখাচ্ছে।':'n->next = *h: list খালি, তাই *h = NULL। নতুন node এর next = NULL।',function(s){s.fl.n=1});
+P('insertHead',4,'*h = n: head ভ্যারিয়েবল এখন নতুন node কে দেখায়। নতুন node list এর একদম সামনে ঢুকে গেল (O(1))।',function(s){s.nodes.unshift({v:v,a:A[v]});s.fl=null;s.pulse=A[v]});
+P('insertHead',5,v+' inserted successfully! প্রিন্ট হলো।',function(s){s.out.push(v+' inserted successfully!');s.hAt=null});}
+function dsp(ml){ML=ml;const vals=S.nodes.map(function(x){return x.v}),n=vals.length;
+P('main',ml,'display(head) কল হলো। head এর মান কপি হয়ে ফাংশনের h এ গেছে। এখানে শুধু পড়া হবে, list বদলাবে না।',function(s){s.det=null});
+P('display',0,'শুরুতে "Linked List: " প্রিন্ট। h এখন প্রথম node কে দেখাচ্ছে।',function(s){s.part='Linked List: ';s.cur=0});
+vals.forEach(function(v,i){
+P('display',1,'h != NULL? h এ '+v+' এর node আছে, শর্ত সত্য, লুপে ঢুকলাম।');
+P('display',2,v+' -> প্রিন্ট হলো (h->data পড়া হলো)।',function(s){s.part+=v+' -> '});
+P('display',3,'h = h->next: h পরের '+(i+1<n?'node':'ঘর (NULL)')+' এ সরে গেল।',function(s){s.cur=i+1<n?i+1:'null'});});
+P('display',1,'h এখন NULL, শর্ত মিথ্যা, লুপ শেষ।');
+P('display',4,'শেষে NULL প্রিন্ট করে লাইন সম্পূর্ণ।',function(s){s.out.push(s.part+'NULL');s.part=null;s.cur=null});}
+function buildDel(){ML=5;
+P('main',5,'deleteValue(&head, 20) কল হলো। আবারও &head, তাই h হলো head এর ঠিকানা (pointer to pointer)।');
+P('deleteValue',0,'while: *h মানে head, অর্থাৎ 10 এর node। 10 != 20 সত্য, তাই লুপ চলবে।',function(s){s.hAt='head'});
+P('deleteValue',1,'h = &(*h)->next: h এখন 10 এর next ঘরের ঠিকানা ধরছে। h নিজে node নয়, একটা "লিংক" কে ধরে।',function(s){s.hAt=0});
+P('deleteValue',0,'আবার চেক: *h এখন 20 এর node। 20 != 20 মিথ্যা, লুপ থামলো। h ঠিক সেই লিংকে আছে যেটা 20 কে দেখায়।');
+P('deleteValue',2,'if (*h): NULL নয়, মানে 20 খুঁজে পাওয়া গেছে।');
+P('deleteValue',3,'t = *h: 20 এর node এর ঠিকানা t এ সেভ। পরে free করতে লাগবে, তাই হারালে চলবে না।',function(s){s.t=1});
+P('deleteValue',4,'*h = t->next: 10 এর next এখন 30 কে দেখায়। 20 list থেকে বাদ, কিন্তু মেমোরিতে এখনো আছে।',function(s){s.det={v:20,a:A[20],at:1,freed:0};s.nodes.splice(1,1);s.t=null});
+P('deleteValue',5,'free(t): 20 এর node এর মেমোরি সিস্টেমকে ফেরত দেওয়া হলো।',function(s){s.det.freed=1});
+P('deleteValue',6,'20 deleted successfully! প্রিন্ট হলো।',function(s){s.out.push('20 deleted successfully!');s.hAt=null});}
+function buildFree(){ML=9;
+P('main',9,'freeList(&head): শেষে সব node মুছে মেমোরি লিক আটকানো হচ্ছে।',function(s){s.det=null});
+while(S.nodes.length){const v=S.nodes[0].v,a=S.nodes[0].a;
+P('freeList',0,'while (*h): *h এখন '+v+' এর node, NULL নয়, লুপ চলবে।',function(s){s.hAt='head'});
+P('freeList',1,'t = *h: '+v+' এর node এর ঠিকানা t তে রাখা হলো।',function(s){s.t=0});
+P('freeList',2,'*h = t->next: head আগে পরের node এ সরলো। আগে free করলে পরের node এর পথ হারিয়ে যেত।',function(s){s.nodes.shift();s.det={v:v,a:a,at:0,freed:0};s.t=null});
+P('freeList',3,'free(t): '+v+' এর node এর মেমোরি ছেড়ে দেওয়া হলো।',function(s){s.det.freed=1});}
+P('freeList',0,'*h এখন NULL, লুপ শেষ। সব node free হয়ে গেছে।',function(s){s.det=null;s.hAt=null});
+ML=10;P('main',10,'return 0: প্রোগ্রাম শেষ। head = NULL, কোনো মেমোরি লিক নেই।');}
+P('main',0,'struct node *head = NULL: head নামে একটা পয়েন্টার ভ্যারিয়েবল তৈরি হলো, যা এখনো কিছুই দেখায় না। অর্থাৎ list খালি।');
+ins(30,1);ins(20,2);ins(10,3);dsp(4);buildDel();dsp(6);ins(5,7);dsp(8);buildFree();
+
+let idx=0,timer=null;
+const q=function(id){return document.getElementById('lla-'+id)};
+const esc=function(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
+const R='#D85A30';
+function arr(x1,y1,x2,y2,c){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" class="llx-arr" marker-end="url(#llarrow)"'+(c?' style="stroke:'+c+';stroke-opacity:1"':'')+'/>';}
+function rc(x,y,w,h,cls,extra){return '<rect class="'+cls+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6" stroke-width="1"'+(extra||'')+'/>';}
+function tx(x,y,t,cls){return '<text'+(cls?' class="'+cls+'"':'')+' x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central">'+t+'</text>';}
+function mk(x,y,x2,y2,label,lx,ly){return arr(x,y,x2,y2,R)+'<text x="'+lx+'" y="'+ly+'" text-anchor="middle" style="fill:'+R+'">'+label+'</text>';}
+function draw(s){
+const n=s.nodes.length,X=function(i){return 120+i*130},Y=110;
+let o='<svg width="100%" viewBox="0 0 680 290" role="img" aria-label="লিংকড লিস্টের মেমোরি চিত্র"><defs><marker id="llarrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
+o+='<g>'+rc(20,Y,60,40,'llx-purple')+tx(50,Y+20,'head','th')+'</g>';
+o+=arr(80,Y+20,X(0)-2,Y+20);
+s.nodes.forEach(function(nd,i){const x=X(i);
+o+='<g'+(nd.a===s.pulse?' class="pop"':'')+'>'+rc(x,Y,100,40,'llx-teal')+tx(x+25,Y+20,nd.v,'th')+tx(x+75,Y+20,'next')+'<line x1="'+(x+50)+'" y1="'+Y+'" x2="'+(x+50)+'" y2="'+(Y+40)+'" stroke="#1D9E75" stroke-width="1"/></g>';
+o+=tx(x+50,Y+58,nd.a);
+o+=arr(x+88,Y+20,X(i+1)-2,Y+20);});
+o+='<g>'+rc(X(n),Y+5,56,30,'llx-gray',' stroke-dasharray="3 3"')+tx(X(n)+28,Y+20,'NULL')+'</g>';
+if(s.fl){const f=s.fl,x=X(0);
+o+='<g class="pop">'+rc(x,30,100,40,'llx-amber')+tx(x+25,50,f.d?f.v:'?','th')+tx(x+75,50,f.n?'next':'?')+'<line x1="'+(x+50)+'" y1="30" x2="'+(x+50)+'" y2="70" stroke="#EF9F27" stroke-width="1"/></g>';
+o+=tx(x+50,20,'heap '+f.a);
+o+=mk(x-36,50,x-2,50,'n',x-50,54);
+if(f.n){o+=n?arr(x+75,72,x+55,108):arr(x+75,72,x+28,113);}}
+if(s.hAt==='head')o+=mk(50,192,50,154,'h = &amp;head',50,208);
+else if(typeof s.hAt==='number')o+=mk(X(s.hAt)+78,192,X(s.hAt)+78,154,'h = &amp;next',X(s.hAt)+78,208);
+if(s.cur!==null){const cx=s.cur==='null'?X(n)+28:X(s.cur)+50;o+=mk(cx,78,cx,(s.cur==='null'?113:108),'h',cx,70);}
+if(s.t!==null){const tx0=X(s.t)+50;o+=mk(tx0,194,tx0,156,'t',tx0,210);}
+if(s.det){const d=s.det,x=X(d.at);
+o+='<g>'+rc(x,228,100,40,d.freed?'llx-red':'llx-gray',' stroke-dasharray="4 3"')+tx(x+50,248,d.v,'th')+'</g>';
+o+='<text x="'+(x-8)+'" y="252" text-anchor="end" style="fill:'+R+'">t</text>';
+o+=tx(x+50,284,d.freed?'free() হয়েছে':'list থেকে বাদ');}
+return o+'</svg>';}
+function code(lines,hi,cls){return lines.map(function(l,i){return '<div class="llx-cl'+(i===hi?' '+cls:'')+'">'+esc(l)+'</div>'}).join('');}
+function render(){
+const st=steps[idx],s=st.s;
+q('viz').innerHTML=draw(s);
+q('cm').innerHTML=code(SN.main,st.ml,st.fn==='main'?'on':'call');
+q('cf').innerHTML=st.fn==='main'?'':'<p class="llx-cap">'+esc(TT[st.fn])+'</p><div class="llx-cb">'+code(SN[st.fn],st.line,'on')+'</div>';
+q('tx').textContent=st.txt;
+q('out').textContent=s.out.concat(s.part!==null?[s.part+'_']:[]).join('\n')||'(এখনো কিছু প্রিন্ট হয়নি)';
+q('pg').textContent='ধাপ '+(idx+1)+' / '+steps.length;
+const sl=q('sl');sl.max=steps.length-1;sl.value=idx;}
+function stop(){if(timer){clearInterval(timer);timer=null;q('play').textContent='▶ অটো প্লে';}}
+function go(dd){stop();idx=Math.max(0,Math.min(steps.length-1,idx+dd));render();}
+function play(){if(timer){stop();return;}
+if(idx>=steps.length-1)idx=0;
+q('play').textContent='⏸ থামাও';
+render();
+timer=setInterval(function(){if(idx>=steps.length-1){stop();return;}idx++;render();},1900);}
+q('prev').addEventListener('click',function(){go(-1)});
+q('next').addEventListener('click',function(){go(1)});
+q('play').addEventListener('click',play);
+q('reset').addEventListener('click',function(){stop();idx=0;render()});
+q('sl').addEventListener('input',function(){stop();idx=+this.value;render()});
+render();
+})();
+</script></body></html>
