@@ -25,6 +25,7 @@
 .llx .llx-red{fill:rgba(226,75,74,.2);stroke:#E24B4A}
 @keyframes llxpop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 @media (prefers-reduced-motion:no-preference){.llx .pop{animation:llxpop .5s ease-out;transform-box:fill-box;transform-origin:center}}
+.llx button.llx-on{border-color:#378ADD;box-shadow:inset 0 0 0 1px #378ADD;font-weight:600}
 </style></head><body>
 <section class="slide"><h2>Linked List কী?</h2>
 <p>Array-তে element পাশাপাশি ঘরে থাকে; Linked list-এ প্রতিটি <b>node</b>-এ দুটি অংশ: <b>data</b> ও পরের node-এর ঠিকানা (<b>next pointer</b>)। শেষ node-এর next = NULL। শুরুর node-কে ধরে রাখে <b>head</b>। ফলে memory-তে ছড়ানো থাকলেও শিকলের মতো যুক্ত থাকে।</p>
@@ -124,10 +125,113 @@ int main() {
     freeList(&amp;head);
     return 0;
 }</pre></details></section>
+<section class="slide"><h2>Doubly ও Circular Linked List</h2>
+<div class="card"><b>কীভাবে দেখবে:</b> উপরের বোতাম দিয়ে Doubly বা Circular বাছো, তারপর "পরে" চাপো বা অটো প্লে দাও। কমলা মোটা তীর মানে ওই ধাপে সেই পয়েন্টারটা বদলাল। নীল তীর = next, বেগুনি তীর = prev, হলুদ node = এইমাত্র malloc হওয়া, ধূসর = list থেকে বাদ পড়া, লাল = free হয়ে যাওয়া।</div>
+<div class="llx" id="lld">
+<div class="llx-row">
+<button id="lld-md" type="button">Doubly linked list</button>
+<button id="lld-mc" type="button">Circular linked list</button>
+</div>
+<div id="lld-viz"></div>
+<div class="llx-row">
+<button id="lld-prev" type="button">◀ আগে</button>
+<button id="lld-next" type="button">পরে ▶</button>
+<button id="lld-play" type="button">▶ অটো প্লে</button>
+<button id="lld-reset" type="button">↺ রিসেট</button>
+<span id="lld-pg" class="llx-pg"></span>
+</div>
+<input type="range" id="lld-sl" min="0" value="0" step="1" aria-label="ধাপ বাছাই">
+<div class="llx-grid">
+<div><p class="llx-cap" id="lld-ct">কোড</p><div class="llx-cb" id="lld-cd"></div></div>
+<div>
+<div class="llx-tx"><p class="llx-cap">এই ধাপে কী হচ্ছে</p><p id="lld-tx"></p></div>
+<p class="llx-cap">আউটপুট</p><div class="llx-out" id="lld-out" style="min-height:40px"></div>
+</div>
+</div>
+</div>
+<p><b>Doubly linked list:</b> প্রতিটি node এ দুটো পয়েন্টার, <b>prev</b> (পেছনের node) আর <b>next</b> (সামনের node)। প্রথম node এর prev এবং শেষ node এর next = NULL। সুবিধা: পেছনে যাওয়া যায়, আর কোনো node এর পয়েন্টার জানা থাকলে delete O(1) (আগের node খুঁজতে হাঁটতে হয় না)। অসুবিধা: প্রতি node এ বাড়তি পয়েন্টারের মেমোরি, আর insert/delete এ দুই দিকের পয়েন্টার সামলাতে হয়।</p>
+<pre>struct dnode {
+    int data;
+    struct dnode *prev;
+    struct dnode *next;
+};
+
+// a এর ঠিক পরে নতুন node বসানো
+void insertAfter(struct dnode *a, int v) {
+    struct dnode *n = malloc(sizeof *n);
+    n-&gt;data = v;
+    n-&gt;next = a-&gt;next;                 // ১. নতুন node এর next
+    n-&gt;prev = a;                       // ২. নতুন node এর prev
+    if (a-&gt;next) a-&gt;next-&gt;prev = n;    // ৩. পরের node এর prev
+    a-&gt;next = n;                       // ৪. a এর next সবার শেষে
+}
+
+// p কে সরাসরি মোছা, আগের node খুঁজতে হাঁটতে হয় না
+void deleteNode(struct dnode **head, struct dnode *p) {
+    if (p-&gt;prev) p-&gt;prev-&gt;next = p-&gt;next;
+    else *head = p-&gt;next;              // p নিজেই head ছিল
+    if (p-&gt;next) p-&gt;next-&gt;prev = p-&gt;prev;
+    free(p);
+}
+
+// tail থেকে উল্টো দিকে প্রিন্ট
+void printBackward(struct dnode *tail) {
+    for (struct dnode *c = tail; c; c = c-&gt;prev)
+        printf("%d ", c-&gt;data);
+}</pre>
+<div class="card"><b>মনে রাখো:</b> insert এ আগে নতুন node এর দুই লিংক ঠিক করতে হয় (১, ২), তারপর পুরনো node গুলো বদলাতে হয় (৩, ৪)। <code>a-&gt;next = n</code> আগে করলে পরের node এর ঠিকানা হারিয়ে যায়।</div>
+<p><b>Circular linked list:</b> শেষ node এর next NULL না হয়ে আবার প্রথম node কে ধরে, ফলে শিকলটা বৃত্ত। এখানে head এর বদলে <b>tail</b> পয়েন্টার রাখা হয়, কারণ <code>tail-&gt;next</code> ই হলো head। তাতে শুরু ও শেষ দুই জায়গাতেই insert O(1)। ব্যবহার: round-robin scheduling, music playlist এর repeat mode।</p>
+<pre>struct cnode {
+    int data;
+    struct cnode *next;
+};
+
+// শেষে insert (tail পয়েন্টার বদলায়)
+void insertEnd(struct cnode **tail, int v) {
+    struct cnode *n = malloc(sizeof *n);
+    n-&gt;data = v;
+    if (*tail == NULL) {            // list খালি
+        n-&gt;next = n;                // নিজেই নিজেকে ধরে
+        *tail = n;
+    } else {
+        n-&gt;next = (*tail)-&gt;next;    // নতুন node এর next = head
+        (*tail)-&gt;next = n;          // পুরনো tail এর next = নতুন node
+        *tail = n;                  // tail সরলো
+    }
+}
+
+// do-while, কারণ NULL এ কখনো পৌঁছানো যায় না
+void display(struct cnode *tail) {
+    if (!tail) return;
+    struct cnode *c = tail-&gt;next;   // head থেকে শুরু
+    do {
+        printf("%d -&gt; ", c-&gt;data);
+        c = c-&gt;next;
+    } while (c != tail-&gt;next);      // আবার head এ ফিরলে থামো
+}</pre>
+<div class="card"><b>ফাঁদ:</b> সাধারণ list এর মতো <code>while (c != NULL)</code> দিলে লুপ কখনো থামবে না। তাই head এর সাথে তুলনা করে থামতে হয়।</div>
+<table><tr><th></th><th>Singly</th><th>Doubly</th><th>Circular (singly)</th></tr>
+<tr><td>প্রতি node এ পয়েন্টার</td><td>১টি</td><td>২টি</td><td>১টি</td></tr>
+<tr><td>পেছনে যাওয়া</td><td>যায় না</td><td>যায়</td><td>যায় না</td></tr>
+<tr><td>Head তে insert</td><td>O(1)</td><td>O(1)</td><td>O(1)</td></tr>
+<tr><td>Tail এ insert</td><td>O(n) (tail পয়েন্টার থাকলে O(1))</td><td>O(1) (tail পয়েন্টার থাকলে)</td><td>O(1) (tail পয়েন্টার থাকলে)</td></tr>
+<tr><td>পয়েন্টার জানা node মোছা</td><td>O(n) (আগের node খুঁজতে)</td><td>O(1)</td><td>O(n) (আগের node খুঁজতে)</td></tr>
+<tr><td>শেষ node এর next</td><td>NULL</td><td>NULL</td><td>head</td></tr></table></section>
 <section class="slide"><h2>2D Array-র ঠিকানা (Row-major / Column-major)</h2>
 <p>Array memory-তে এক লাইনে থাকে। দুই-মাত্রার array R×C-কে সারি ধরে (row-major) বা কলাম ধরে (column-major) সাজানো যায়:</p>
 <div class="card">Row-major: ঠিকানা = Base + size × (i × C + j) · Column-major: ঠিকানা = Base + size × (j × R + i) (i, j = 0 থেকে শুরু)।</div>
-<p>R <input id="R" type="number" value="20" style="width:60px"> C <input id="C" type="number" value="50" style="width:60px"> element size <input id="S" type="number" value="4" style="width:55px"> Base <input id="B" type="number" value="2000" style="width:75px"> i <input id="i" type="number" value="10" style="width:55px"> j <input id="j" type="number" value="10" style="width:55px"> <button onclick="ad()">হিসাব</button></p><p id="am"></p></section>
+<p>R <input id="R" type="number" value="20" style="width:60px"> C <input id="C" type="number" value="50" style="width:60px"> element size <input id="S" type="number" value="4" style="width:55px"> Base <input id="B" type="number" value="2000" style="width:75px"> i <input id="i" type="number" value="10" style="width:75px"> j <input id="j" type="number" value="10" style="width:75px"> <button onclick="ad()">হিসাব</button></p><p id="am"></p></section>
+<section class="slide"><h2>Array বনাম Linked list: ঠিকানা কীভাবে পাই?</h2>
+<p>উপরের 2D array স্লাইডের হিসাবটা linked list এর অংশ নয়, বরং linked list কেন আলাদা সেটা বোঝার তুলনা।</p>
+<div class="card"><b>Array:</b> সব element মেমোরিতে গায়ে গায়ে থাকে, তাই i-তম element এর ঠিকানা সূত্রে এক ধাপে বের হয়: <code>Base + size × i</code>। 2D তে row-major এ <code>Base + size × (i × C + j)</code>। উপরের উদাহরণে 4040 বা 2840 একটা হিসাবেই পাওয়া গেছে, কোনো লুপ লাগেনি। তাই access O(1)।</div>
+<div class="card"><b>Linked list:</b> প্রতিটি node <code>malloc</code> দিয়ে মেমোরির যেকোনো জায়গায় তৈরি হয় (যেমন 0x1A0, 0x2B0, 0x3C0), ব্যবধানের কোনো নিয়ম নেই। তাই সূত্র খাটে না। ঠিকানা কেবল আগের node এর <code>next</code> এর ভেতরে লেখা থাকে। i-তম node এ যেতে head থেকে i ধাপ হাঁটতে হয়, তাই access O(n)।</div>
+<table><tr><th></th><th>Array</th><th>Linked list</th></tr>
+<tr><td>মেমোরিতে অবস্থান</td><td>পরপর (contiguous)</td><td>ছড়ানো, পয়েন্টারে যুক্ত</td></tr>
+<tr><td>i-তম এর ঠিকানা</td><td>সূত্র দিয়ে এক ধাপে</td><td>পয়েন্টার ধরে i ধাপ হাঁটা</td></tr>
+<tr><td>মাঝখানে/শুরুতে insert</td><td>পরের সবাইকে সরাতে হয়, O(n)</td><td>কয়েকটা পয়েন্টার বদলালেই হয় (পজিশন জানা থাকলে O(1))</td></tr>
+<tr><td>বাড়তি মেমোরি</td><td>নেই</td><td>প্রতি node এ পয়েন্টার</td></tr>
+<tr><td>Cache আচরণ</td><td>ভালো (কাছাকাছি ডেটা)</td><td>তুলনামূলক খারাপ</td></tr></table>
+<div class="card"><b>পরীক্ষার পয়েন্ট:</b> "কোনটায় O(1) random access?" উত্তর array। "কোনটায় head এ insert O(1)?" উত্তর linked list। দুটোর কারণই এই মেমোরি বিন্যাসের পার্থক্য।</div></section>
 <section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section>
 <script src="bank.js"></script><script src="fig.js"></script><script src="app.js"></script><script>
 quiz('ll','#qz');let L=[3,7,9];
@@ -239,6 +343,150 @@ if(idx>=steps.length-1)idx=0;
 q('play').textContent='⏸ থামাও';
 render();
 timer=setInterval(function(){if(idx>=steps.length-1){stop();return;}idx++;render();},1900);}
+q('prev').addEventListener('click',function(){go(-1)});
+q('next').addEventListener('click',function(){go(1)});
+q('play').addEventListener('click',play);
+q('reset').addEventListener('click',function(){stop();idx=0;render()});
+q('sl').addEventListener('input',function(){stop();idx=+this.value;render()});
+render();
+})();
+</script>
+<script>
+(function(){
+const SN={
+d:{struct:["struct dnode {","    int data;","    struct dnode *prev;","    struct dnode *next;","};"],
+insertAfter:["struct dnode *n = malloc(sizeof *n);","n->data = v;","n->next = a->next;","n->prev = a;","if (a->next) a->next->prev = n;","a->next = n;"],
+deleteNode:["if (p->prev) p->prev->next = p->next;","else *head = p->next;","if (p->next) p->next->prev = p->prev;","free(p);"],
+printBackward:["for (struct dnode *c = tail; c; c = c->prev)","    printf(\"%d \", c->data);"]},
+c:{struct:["struct cnode {","    int data;","    struct cnode *next;","};"],
+insertEnd:["struct cnode *n = malloc(sizeof *n);","n->data = v;","if (*tail == NULL) {","    n->next = n;  *tail = n;","} else {","    n->next = (*tail)->next;","    (*tail)->next = n;","    *tail = n;","}"],
+display:["if (!tail) return;","struct cnode *c = tail->next;","do {","    printf(\"%d -> \", c->data);","    c = c->next;","} while (c != tail->next);"]}};
+const SIG={struct:"node এর গঠন",insertAfter:"insertAfter(struct dnode *a, int v)",deleteNode:"deleteNode(struct dnode **head, struct dnode *p)",printBackward:"printBackward(struct dnode *tail)",insertEnd:"insertEnd(struct cnode **tail, int v)",display:"display(struct cnode *tail)"};
+function builder(init){let S=init;const steps=[];
+function P(fn,line,txt,mut){S.hot=[];if(mut)mut(S);steps.push({fn:fn,line:line,txt:txt,s:JSON.parse(JSON.stringify(S))});}
+return {P:P,steps:steps};}
+function buildD(){
+const b=builder({order:['a','b','c'],nodes:{a:{v:10,n:'b',p:null},b:{v:20,n:'c',p:'a'},c:{v:30,n:null,p:'b'}},head:'a',tail:'c',cur:null,cl:'',hot:[],out:''});const P=b.P;
+P('struct',-1,'Doubly linked list: প্রতিটি node এ দুটো পয়েন্টার। next সামনের node কে, prev পেছনের node কে দেখায়। প্রথম node এর prev এবং শেষ node এর next হলো NULL। নীল তীর = next, বেগুনি তীর = prev। head শুরু ধরে, tail শেষ ধরে।');
+P('insertAfter',0,'insertAfter(a, 15): 10 এর ঠিক পরে 15 বসাবো। malloc দিয়ে নতুন node n তৈরি হলো (ওপরে হলুদ)। ভেতরের সব ঘর এখনো খালি।',function(s){s.nodes.x={v:null,raise:true};s.order.splice(1,0,'x')});
+P('insertAfter',1,'n->data = v: data ঘরে 15 বসলো।',function(s){s.nodes.x.v=15});
+P('insertAfter',2,'n->next = a->next: a এর পরে এখন 20 আছে। তাই নতুন node এর next 20 কে ধরলো। পুরনো list এর কোনো পয়েন্টার এখনো বদলায়নি, তাই list নিরাপদ।',function(s){s.nodes.x.n='b';s.hot=['x.n']});
+P('insertAfter',3,'n->prev = a: নতুন node এর prev 10 কে ধরলো। এখন n এর দুই দিকের লিংক ঠিক।',function(s){s.nodes.x.p='a';s.hot=['x.p']});
+P('insertAfter',4,'a->next->prev = n: a->next মানে এখনো 20 এর node। ওর prev আগে 10 কে দেখাত, এখন n কে দেখাবে। (a শেষ node হলে a->next NULL থাকত, তাই if চেক।)',function(s){s.nodes.b.p='x';s.hot=['b.p']});
+P('insertAfter',5,'a->next = n: সবশেষে 10 এর next ও n কে দেখালো। মোট চারটা পয়েন্টার বদলালো: n এর দুটো, 20 এর prev, 10 এর next। ক্রম উল্টালে 20 এর ঠিকানা হারিয়ে যেতে পারত। node টা এখন সারিতে নেমে এলো।',function(s){s.nodes.a.n='x';s.nodes.x.raise=false;s.hot=['a.n']});
+P('deleteNode',-1,'deleteNode(&head, p): 20 এর node মুছবো, p সেটাকে ধরে আছে। Singly list এ আগের node খুঁজতে পুরো list হাঁটতে হতো। এখানে p->prev দিয়েই সরাসরি আগের node পাই, তাই delete হয় O(1) এ।',function(s){s.cur='b';s.cl='p'});
+P('deleteNode',0,'p->prev->next = p->next: p->prev হলো 15 এর node। ওর next এখন 20 এর বদলে 30 কে দেখায়।',function(s){s.nodes.x.n='c';s.hot=['x.n']});
+P('deleteNode',2,'p->next->prev = p->prev: p->next হলো 30 এর node। ওর prev এখন 15 কে দেখায়। দুই দিক থেকেই 20 কে এড়িয়ে যাওয়া গেছে, তাই node টা list থেকে আলাদা (ধূসর, ওপরে)।',function(s){s.nodes.c.p='x';s.nodes.b.raise=true;s.nodes.b.stale=true;s.hot=['c.p']});
+P('deleteNode',3,'free(p): 20 এর মেমোরি ছেড়ে দেওয়া হলো। (head মুছতে হলে else লাইন *head সরায়, এখানে 20 head নয় তাই সেটা চলেনি।)',function(s){s.nodes.b.cls='freed';s.cur=null});
+P('printBackward',0,'পেছন থেকে হাঁটা: c = tail, মানে 30 এর node। Singly list এ এটা সম্ভব নয়, কারণ সেখানে prev পয়েন্টারই নেই।',function(s){s.order=['a','x','c'];delete s.nodes.b;s.cur='c';s.cl='c'});
+P('printBackward',1,'printf: 30 প্রিন্ট হলো।',function(s){s.out='30 '});
+P('printBackward',0,'c = c->prev: c পেছনে 15 এ সরলো।',function(s){s.cur='x'});
+P('printBackward',1,'15 প্রিন্ট হলো।',function(s){s.out='30 15 '});
+P('printBackward',0,'c = c->prev: c এখন 10 এ।',function(s){s.cur='a'});
+P('printBackward',1,'10 প্রিন্ট হলো।',function(s){s.out='30 15 10 '});
+P('printBackward',0,'c = c->prev: 10 এর prev NULL, তাই c = NULL, লুপ শেষ। আউটপুট উল্টো ক্রমে: 30 15 10।',function(s){s.cur=null});
+return b.steps;}
+function buildC(){
+const b=builder({order:[],nodes:{},tail:null,cur:null,cl:'',hot:[],out:''});const P=b.P;
+P('struct',-1,'Circular linked list: শেষ node এর next NULL নয়, বরং আবার প্রথম node কে ধরে। তাই শিকলটা একটা বৃত্ত। এখানে শুধু tail পয়েন্টার রাখা হয়েছে, কারণ head = tail->next, ফলে শেষে আর শুরুতে insert দুটোই O(1)। এখন list খালি, tail = NULL।');
+P('insertEnd',0,'insertEnd(&tail, 10): malloc দিয়ে নতুন node n তৈরি হলো (ওপরে হলুদ)।',function(s){s.nodes.a={v:null,raise:true};s.order=['a']});
+P('insertEnd',1,'n->data = v: data ঘরে 10 বসলো।',function(s){s.nodes.a.v=10});
+P('insertEnd',2,'if (*tail == NULL): tail NULL, মানে list খালি। তাই প্রথম if ব্লকে ঢুকবো।');
+P('insertEnd',3,'n->next = n: একটাই node, তাই সে নিজেকেই দেখায় (নিজের দিকে ঘুরে আসা তীর)। *tail = n: tail ও এই node। একটা node এর বৃত্ত তৈরি।',function(s){s.nodes.a.n='a';s.nodes.a.raise=false;s.tail='a';s.hot=['a.n']});
+P('insertEnd',0,'insertEnd(&tail, 20): আবার malloc।',function(s){s.nodes.b={v:null,raise:true};s.order=['a','b']});
+P('insertEnd',1,'n->data = 20।',function(s){s.nodes.b.v=20});
+P('insertEnd',4,'এবার *tail NULL নয়, তাই else ব্লক চলবে।');
+P('insertEnd',5,'n->next = (*tail)->next: tail->next মানে head (10)। নতুন node এর next তাই 10 কেই ধরলো, বৃত্ত বন্ধ থাকার ব্যবস্থা আগে হয়ে গেল।',function(s){s.nodes.b.n='a';s.hot=['b.n']});
+P('insertEnd',6,'(*tail)->next = n: পুরনো tail (10) এর next এখন নতুন node কে দেখায়। node টা সারিতে নামলো।',function(s){s.nodes.a.n='b';s.nodes.b.raise=false;s.hot=['a.n']});
+P('insertEnd',7,'*tail = n: tail এখন নতুন node (20)। head কিন্তু আগের জায়গাতেই, কারণ head = tail->next।',function(s){s.tail='b'});
+P('insertEnd',1,'insertEnd(&tail, 30): malloc করে data = 30 বসলো (দুটো লাইন একসাথে দেখানো হলো)।',function(s){s.nodes.c={v:30,raise:true};s.order=['a','b','c']});
+P('insertEnd',5,'n->next = (*tail)->next: tail (20) এর next হলো 10। নতুন node এর next তাই 10 কে ধরলো।',function(s){s.nodes.c.n='a';s.hot=['c.n']});
+P('insertEnd',6,'(*tail)->next = n: 20 এর next এখন 30 কে দেখায়।',function(s){s.nodes.b.n='c';s.nodes.c.raise=false;s.hot=['b.n']});
+P('insertEnd',7,'*tail = n: tail এখন 30। তিনটা node এর বৃত্ত সম্পূর্ণ: 10, 20, 30, আবার 10।',function(s){s.tail='c'});
+P('display',0,'display(tail): প্রথমে চেক, list খালি হলে কিছু করার নেই। এখানে খালি নয়।');
+P('display',1,'c = tail->next: tail এর next হলো head, তাই c এখন 10 এ।',function(s){s.cur='a';s.cl='c'});
+P('display',3,'printf: 10 -> প্রিন্ট হলো।',function(s){s.out='10 -> '});
+P('display',4,'c = c->next: c সরলো 20 এ।',function(s){s.cur='b'});
+P('display',5,'while (c != tail->next): c = 20, head = 10, সমান নয়, তাই লুপ চলবে।');
+P('display',3,'20 -> প্রিন্ট হলো।',function(s){s.out='10 -> 20 -> '});
+P('display',4,'c = c->next: c সরলো 30 এ।',function(s){s.cur='c'});
+P('display',5,'while (c != tail->next): c = 30, head = 10, সমান নয়, লুপ চলবে।');
+P('display',3,'30 -> প্রিন্ট হলো।',function(s){s.out='10 -> 20 -> 30 -> '});
+P('display',4,'c = c->next: 30 এর next হলো 10, তাই c ঘুরে আবার head এ ফিরে এলো। এটাই বৃত্তের বৈশিষ্ট্য।',function(s){s.cur='a';s.hot=['c.n']});
+P('display',5,'while (c != tail->next): c = 10 = head, সমান, তাই লুপ শেষ। NULL এর জন্য অপেক্ষা করলে লুপ কখনো থামত না, এই কারণেই এখানে do-while এবং head এর সাথে তুলনা।',function(s){s.cur=null;s.out='10 -> 20 -> 30 -> (আবার 10 এ ফিরেছি)'});
+return b.steps;}
+const STEPS={d:buildD(),c:buildC()};
+let mode='d',idx=0,timer=null;
+const q=function(id){return document.getElementById('lld-'+id)};
+const esc=function(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
+const BL='#378ADD',PU='#7F77DD',HOT='#D85A30',GR='#888780';
+function arrow(x1,y1,x2,y2,c,hot,stale){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" class="llx-arr" marker-end="url(#llcarrow)" style="stroke:'+(hot?HOT:c)+';stroke-opacity:'+(stale?'.45':'1')+';stroke-width:'+(hot?2.5:1.5)+(stale?';stroke-dasharray:4 3':'')+'"/>';}
+function wrapP(x1,y1,x2,y2,hot){return '<path d="M'+x1+' '+y1+' V252 H'+x2+' V'+y2+'" fill="none" class="llx-arr" marker-end="url(#llcarrow)" style="stroke:'+(hot?HOT:BL)+';stroke-opacity:1;stroke-width:'+(hot?2.5:1.5)+'"/>';}
+function tx(x,y,t,cls,col){return '<text'+(cls?' class="'+cls+'"':'')+' x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central"'+(col?' style="fill:'+col+'"':'')+'>'+t+'</text>';}
+function mark(x,yTop,label,above,color){
+if(above)return '<line x1="'+x+'" y1="'+(yTop-34)+'" x2="'+x+'" y2="'+(yTop-3)+'" class="llx-arr" marker-end="url(#llcarrow)" style="stroke:'+color+';stroke-opacity:1"/>'+tx(x,yTop-42,label,'',color);
+return '<line x1="'+x+'" y1="'+(yTop+24)+'" x2="'+x+'" y2="'+(yTop+3)+'" class="llx-arr" marker-end="url(#llcarrow)" style="stroke:'+color+';stroke-opacity:1"/>'+tx(x,yTop+36,label,'',color);}
+function draw(m,s){
+const D=m==='d',W=D?100:90,PITCH=D?140:150,X0=70,H=52,YN=150,YR=40;
+const pos={};
+s.order.forEach(function(id,i){const nd=s.nodes[id];pos[id]={x:X0+i*PITCH,y:nd.raise?YR:YN,r:!!nd.raise,i:i};});
+let o='<svg width="100%" viewBox="0 0 680 300" role="img" aria-label="'+(D?'Doubly':'Circular')+' linked list চিত্র"><defs><marker id="llcarrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
+if(!s.order.length)o+='<rect class="llx-gray" x="250" y="130" width="180" height="40" rx="6" stroke-width="1" stroke-dasharray="3 3"/>'+tx(340,150,'tail = NULL','th');
+s.order.forEach(function(id){const nd=s.nodes[id],p=pos[id];
+const cls=nd.cls==='freed'?'llx-red':(nd.stale?'llx-gray':(nd.raise?'llx-amber':'llx-teal'));
+const v=nd.v===null?'?':nd.v,cy=p.y+H/2;
+o+='<g'+(nd.raise&&!nd.stale?' class="pop"':'')+'><rect class="'+cls+'" x="'+p.x+'" y="'+p.y+'" width="'+W+'" height="'+H+'" rx="6" stroke-width="1"'+(nd.stale?' stroke-dasharray="4 3"':'')+'/>';
+if(D){o+=tx(p.x+16,cy,nd.p===undefined?'?':'prev')+tx(p.x+50,cy,v,'th')+tx(p.x+84,cy,nd.n===undefined?'?':'next');}
+else{o+=tx(p.x+25,cy,v,'th')+tx(p.x+70,cy,nd.n===undefined?'?':'next');}
+const dv=D?[p.x+33,p.x+67]:[p.x+50];
+dv.forEach(function(x){o+='<line x1="'+x+'" y1="'+p.y+'" x2="'+x+'" y2="'+(p.y+H)+'" stroke="currentColor" stroke-opacity=".4" stroke-width="1"/>';});
+o+='</g>';});
+s.order.forEach(function(id){const nd=s.nodes[id],A=pos[id];
+const stale=!!nd.stale;
+if(nd.n!==undefined){
+if(nd.n===null){if(D&&!A.r){o+=arrow(A.x+W,A.y+13,A.x+W+30,A.y+13,BL,false,false)+tx(A.x+W+48,A.y+13,'NULL');}}
+else{const B=pos[nd.n],hot=s.hot.indexOf(id+'.n')>=0;
+if(B){
+if(A.r&&B.r){}
+else if(A.r){o+=arrow(A.x+(D?85:70),A.y+H,B.x+(D?25:45),B.y-2,BL,hot,stale);}
+else if(B.r){o+=arrow(A.x+W,A.y+(D?13:26),B.x+10,B.y+H+2,BL,hot,stale);}
+else if(B.i>A.i){o+=arrow(A.x+W,A.y+(D?13:26),B.x-2,B.y+(D?13:26),BL,hot,stale);}
+else{o+=wrapP(A.x+W-15,A.y+H,B.x+45,B.y+H+2,hot);}}}}
+if(D&&nd.p!==undefined){
+if(nd.p===null){if(!A.r){o+=arrow(A.x,A.y+39,A.x-30,A.y+39,PU,false,false)+tx(A.x-48,A.y+39,'NULL');}}
+else{const B=pos[nd.p],hot=s.hot.indexOf(id+'.p')>=0;
+if(B){
+if(A.r&&B.r){}
+else if(A.r){o+=arrow(A.x+15,A.y+H,B.x+75,B.y-2,PU,hot,stale);}
+else if(B.r){o+=arrow(A.x,A.y+39,B.x+90,B.y+H+2,PU,hot,stale);}
+else{o+=arrow(A.x,A.y+39,B.x+W+2,B.y+39,PU,hot,stale);}}}}});
+if(D){if(s.head&&pos[s.head])o+=mark(pos[s.head].x+25,pos[s.head].y+H,'head',false,GR);
+if(s.tail&&pos[s.tail])o+=mark(pos[s.tail].x+75,pos[s.tail].y+H,'tail',false,GR);}
+else if(s.tail&&pos[s.tail])o+=mark(pos[s.tail].x+22,pos[s.tail].y+H,'tail',false,GR);
+if(s.cur&&pos[s.cur])o+=mark(pos[s.cur].x+(D?50:45),pos[s.cur].y,s.cl,true,HOT);
+return o+'</svg>';}
+function code(lines,hi){return lines.map(function(l,i){return '<div class="llx-cl'+(i===hi?' on':'')+'">'+esc(l)+'</div>'}).join('');}
+function render(){
+const steps=STEPS[mode],st=steps[idx],s=st.s;
+q('viz').innerHTML=draw(mode,s);
+q('ct').textContent=SIG[st.fn];
+q('cd').innerHTML=code(SN[mode][st.fn],st.line);
+q('tx').textContent=st.txt;
+q('out').textContent=s.out||'(এখনো কিছু প্রিন্ট হয়নি)';
+q('pg').textContent='ধাপ '+(idx+1)+' / '+steps.length;
+const sl=q('sl');sl.max=steps.length-1;sl.value=idx;
+q('md').classList.toggle('llx-on',mode==='d');
+q('mc').classList.toggle('llx-on',mode==='c');}
+function stop(){if(timer){clearInterval(timer);timer=null;q('play').textContent='▶ অটো প্লে';}}
+function setMode(m){stop();mode=m;idx=0;render();}
+function go(dd){stop();idx=Math.max(0,Math.min(STEPS[mode].length-1,idx+dd));render();}
+function play(){if(timer){stop();return;}
+if(idx>=STEPS[mode].length-1)idx=0;
+q('play').textContent='⏸ থামাও';
+render();
+timer=setInterval(function(){if(idx>=STEPS[mode].length-1){stop();return;}idx++;render();},2000);}
+q('md').addEventListener('click',function(){setMode('d')});
+q('mc').addEventListener('click',function(){setMode('c')});
 q('prev').addEventListener('click',function(){go(-1)});
 q('next').addEventListener('click',function(){go(1)});
 q('play').addEventListener('click',play);
