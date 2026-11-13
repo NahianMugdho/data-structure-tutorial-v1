@@ -1,4 +1,29 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tree</title><link rel="stylesheet" href="style.css"></head><body>
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tree</title><link rel="stylesheet" href="style.css"><style>
+.cwb{border:1px solid rgba(100,116,139,.4);border-radius:12px;padding:12px;margin:12px 0}
+.cwtool{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px;font-size:14px}
+.cwtool input,.cwtool select,.cwsp{padding:4px 6px;border:1px solid #94a3b8;border-radius:6px;font:inherit}
+.cwtree{width:230px;max-width:100%}.cwkey,.cwk{width:70px}
+.cwflag{color:#dc2626;font-weight:700;font-size:13px}
+.cwgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+@media(max-width:760px){.cwgrid{grid-template-columns:minmax(0,1fr)}}
+.cwhead{display:flex;justify-content:space-between;align-items:center;background:#1e293b;color:#94a3b8;padding:6px 10px;border-radius:8px 8px 0 0;font:700 12px ui-monospace,Menlo,Consolas,monospace}
+.cwpre{margin:0;background:#0f172a;color:#e2e8f0;padding:8px 0;border-radius:0 0 8px 8px;overflow:auto;max-height:520px;font:13px/1.6 ui-monospace,Menlo,Consolas,monospace}
+.cl{display:block;position:relative;padding:0 12px 0 40px;white-space:pre;border-left:3px solid transparent}
+.cl::before{content:attr(data-n);position:absolute;left:8px;color:#64748b}
+.cl.on{background:rgba(250,204,21,.25);border-left-color:#facc15}
+.cl i{font-style:normal}.cl .k{color:#7dd3fc}.cl .s{color:#86efac}.cl .c{color:#94a3b8}
+.cwbtn{padding:5px 11px;border:1px solid #94a3b8;border-radius:8px;background:#f8fafc;color:#0f172a;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;margin:2px}
+.cwbtn.pri{background:#2563eb;border-color:#2563eb;color:#fff}
+.cwsvgbox{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px;min-height:120px}
+.cwsvgbox svg{display:block;margin:0 auto;width:100%;height:auto}
+.cwleg{font-size:11px;color:#64748b;margin:4px 0}.cwleg span{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 3px 0 8px;vertical-align:middle;border:1px solid #64748b}
+.cwinfo{font-size:13px;margin-top:6px;display:grid;gap:4px}.cwo{font:700 14px ui-monospace,monospace;color:#16a34a}
+.chip{display:inline-block;padding:1px 7px;margin:1px;border-radius:999px;background:rgba(100,116,139,.18);font:12px ui-monospace,monospace}
+.chip.top{background:#facc15;color:#422006;font-weight:700}.cwar{opacity:.5;margin:0 1px}
+.cwctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}.cwr{flex:1;min-width:120px}.cwcnt{font-size:12px;opacity:.75}
+.cwnote{margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(250,204,21,.18);border-left:4px solid #facc15;font-size:14px;min-height:22px}
+</style>
+</head><body>
 <section class="slide"><h2>Tree কী?</h2>
 <p>Tree একটি <b>non-linear</b> data structure যেখানে data <b>hierarchical</b> (উপর-নিচ ধাপে) সাজানো থাকে। ফোল্ডারের ভেতরে ফোল্ডার, পরিবারের বংশতালিকা — সবই tree। এটি <b>recursive</b> সংজ্ঞা: প্রতিটি child নিজেই একটি ছোট tree (subtree)।</p>
 <div class="card"><b>Tree-র সংজ্ঞা (তিনভাবে):</b> (১) Node ও edge দিয়ে গঠিত hierarchical structure। (২) Cycle ছাড়া connected graph। (৩) যে graph-এ যেকোনো দুই vertex-এর মধ্যে <b>ঠিক একটি</b> পথ আছে।</div>
@@ -55,28 +80,61 @@
 <table><tr><th>Tree</th><th>বৈশিষ্ট্য</th><th>ব্যবহার</th></tr><tr><td>AVL</td><td>Self-balancing BST; BF = h(left)−h(right) ∈ {−1,0,+1}; সব operation O(log n)</td><td>দ্রুত search নিশ্চিত করা</td></tr><tr><td>Red-Black</td><td>Self-balancing BST, সবসময় O(log n)</td><td>Library map/set</td></tr><tr><td>B-Tree / B+ Tree</td><td>Multiway search tree, এক node-এ একাধিক child, balanced</td><td>Database/File system index</td></tr><tr><td>Trie</td><td>String-এর prefix ধরে গঠিত</td><td>Autocomplete, router</td></tr><tr><td>Syntax tree</td><td>Program-এর গঠন</td><td>Compiler</td></tr><tr><td>Huffman tree</td><td>Frequency অনুযায়ী code</td><td>Data compression</td></tr></table>
 <div class="card"><b>Complexity:</b> BST — balanced: O(log n), skewed (worst): O(n); search/insert/delete সবই O(h), h = height। AVL/Red-Black — সবসময় O(log n)। <a href="avl.html">AVL ইন্টারেক্টিভ →</a></div></section>
 
-<section class="slide"><h2>C code (PDF থেকে)</h2>
-<pre>void inorder(node *r){ if(r){ inorder(r->left); printf("%d ",r->data); inorder(r->right);} }
-void preorder(node *r){ if(r){ printf("%d ",r->data); preorder(r->left); preorder(r->right);} }
-void postorder(node *r){ if(r){ postorder(r->left); postorder(r->right); printf("%d ",r->data);} }
+<section class="slide"><h2>C code — সব একসাথে (কপি করার জন্য)</h2>
+<p>নিচে প্রতিটি function আলাদা সেকশনে ব্যাখ্যা ও অ্যানিমেশনসহ আছে। এখানে সবগুলো একসাথে — <b>“ফুল কোড কপি”</b> চাপলেই সব function ক্লিপবোর্ডে যাবে। কম্পাইল করে চালাতে চাইলে “header+struct সহ কপি” নাও।</p>
+<div data-cwfull="all"></div>
+<div class="card"><b>আগে জানা দরকার — node কেমন:</b> প্রতিটি node-এ একটি মান এবং বাম ও ডান child-এর দুটি pointer থাকে। PDF-এর কোডে কোথাও <code>r->data</code>, কোথাও <code>n->key</code> লেখা — দুটোই একই মান। child না থাকলে pointer <b>NULL</b>। নিচের struct + <code>newNode</code> সব function-এর ভিত্তি:</div>
+<div data-cwfull="pre"></div>
+<div class="card"><b>সব function-এর মিল:</b> প্রতিটিই <b>recursion</b> — আগে base case (node NULL), তারপর বাম ও ডান subtree-র জন্য নিজেকে call। প্রতিটি অ্যানিমেশনে বাম পাশে কোডের যে লাইন চলছে তা হলুদ হবে, আর ডান পাশে tree ও <b>call stack</b> দেখা যাবে।</div></section>
 
-struct node *search(struct node *n,int key){      // BST search
-  if(n==NULL||n->key==key) return n;
-  return key<n->key ? search(n->left,key) : search(n->right,key); }
-struct node *insert(struct node *n,int key){      // BST insert
-  if(n==NULL) return newNode(key);
-  if(key<n->key) n->left=insert(n->left,key); else n->right=insert(n->right,key);
-  return n; }
-int getLeafCount(Node *n){ if(!n) return 0; if(!n->left&&!n->right) return 1;
-  return getLeafCount(n->left)+getLeafCount(n->right); }
-int countnodes(struct node *r){ return r? 1+countnodes(r->left)+countnodes(r->right):0; }
-int maxDepth(struct node *n){ if(!n) return 0; int l=maxDepth(n->left),r=maxDepth(n->right); return (l>r?l:r)+1; }
-bool isBST(Node *n,int lo,int hi){ if(!n) return true; if(n->data&lt;lo||n->data>hi) return false;
-  return isBST(n->left,lo,n->data)&&isBST(n->right,n->data,hi); }
-int kthSmallest(Node *r,int *i,int k){ /* inorder-এ k-তম node */
-  if(!r) return INT_MAX; int L=kthSmallest(r->left,i,k); if(L!=INT_MAX) return L;
-  if(++*i==k) return r->data; return kthSmallest(r->right,i,k); }</pre>
-<div class="card">সব function-ই recursion ব্যবহার করে — base case: node NULL। Inorder traversal করলে BST-এর মান ascending ক্রমে আসে, তাই k-তম ছোট মান পেতে k-তম node-এ থামলেই হয়।</div></section>
+<section class="slide"><h2>১) Traversal — inorder, preorder, postorder</h2>
+<p>তিনটি function একই কাঠামোর; শুধু <code>printf</code> লাইনটি কোথায় বসেছে তা-ই পার্থক্য। “অংশ” মেনু থেকে পদ্ধতি বেছে ▶ চালাও। ধাপে ধাপে দেখতে <b>পরে ▶</b> চাপো বা স্লাইডার টানো; নিজের tree-র মান লিখে Build দাও।</p>
+<div data-cw="trav"></div>
+<div class="card"><b>ব্যাখ্যা:</b> <code>if(r)</code> মানে node NULL না হলে তবেই কাজ — NULL হলে কিছু না করে ফিরে যাওয়াই base case। <b>Inorder</b>: বাম → print → ডান। <b>Preorder</b>: print → বাম → ডান। <b>Postorder</b>: বাম → ডান → print। অর্থাৎ node কখন “ভিজিট” (print) হবে তা নির্ভর করে print লাইনের অবস্থানের ওপর।</div>
+<div class="card"><b>মনে রাখো:</b> BST-এ inorder সবসময় ছোট থেকে বড় (sorted)। Preorder-এর প্রথম মান root; postorder-এর শেষ মান root। সময় O(n); recursion stack লাগে O(h)।</div>
+</section>
+
+<section class="slide"><h2>২) BST Search</h2>
+<p>প্রতি ধাপে একটি node-এর সাথে তুলনা করে বাম বা ডানে যাই — বাকি অর্ধেক বাদ। key বদলে (যেমন 40, 65, 99) চালিয়ে দেখো: পাওয়া গেলে node সবুজ হয়, না পেলে লাল ডটেড NULL-এ গিয়ে থামে।</p>
+<div data-cw="search"></div>
+<div class="card"><b>ব্যাখ্যা:</b> (১) <code>n==NULL</code> হলে key নেই ⇒ NULL ফেরত; <code>n->key==key</code> হলে পেয়ে গেছি ⇒ সেই node-ই ফেরত। (২) নইলে <code>key &lt; n->key</code> হলে বামে, না হলে ডানে — <code>?:</code> (ternary) দিয়ে এক লাইনে। (৩) যা ফেরত আসে তা-ই সরাসরি উপরে পাঠানো হয়, তাই উত্তর stack বেয়ে উঠে আসে।</div>
+<div class="card"><b>জটিলতা:</b> O(h)। balanced হলে h ≈ log n; skewed হলে h = n ⇒ O(n)। <b>পরীক্ষা:</b> “কতবার তুলনা লাগবে” প্রশ্নে root থেকে ওই node পর্যন্ত পথের node সংখ্যাই উত্তর।</div>
+</section>
+
+<section class="slide"><h2>৩) BST Insert</h2>
+<p>নতুন key সবসময় একটি <b>leaf</b> হিসেবে বসে। নামতে নামতে NULL ফাঁকা জায়গা পাওয়া পর্যন্ত যাই, তারপর <code>newNode</code> বানিয়ে উপরে ফেরত পাঠাই। শেষে নতুন node হলুদ হয়ে tree-তে যুক্ত হবে।</p>
+<div data-cw="ins"></div>
+<div class="card"><b>ব্যাখ্যা:</b> <code>n->left = insert(n->left,key)</code> — কৌশলটি হলো: recursive call যে pointer ফেরত দেয় সেটিই বাম child হিসেবে বসে। বেশিরভাগ সময় ফেরত আসা pointer আগেরটাই থাকে; শুধু NULL-এর জায়গায় call পৌঁছালে নতুন node আসে ও parent-এর সাথে জুড়ে যায়। শেষের <code>return n</code> মানে প্রতিটি node নিজের pointer ঠিকমতো ফেরত দেয়।</div>
+<div class="card"><b>লক্ষ্য করো:</b> এই কোডে সমান key (duplicate) <code>else</code>-তে পড়ে বলে ডানে যায়। insert-এর ক্রম বদলালে tree-র আকার বদলায় (10,20,30,40 ক্রমানুসারে দিলে skewed)। জটিলতা O(h)।</div>
+</section>
+
+<section class="slide"><h2>৪) Leaf গোনা ও Node গোনা</h2>
+<p>দুটোই “বাম subtree-র উত্তর + ডান subtree-র উত্তর” ধরনের। মেনু থেকে <b>getLeafCount</b> বা <b>countnodes</b> বেছে চালাও — প্রতিটি node-এর পাশে নীল রঙে তার subtree-র ফল ফুটে উঠবে।</p>
+<div data-cw="cnt"></div>
+<div class="card"><b>getLeafCount:</b> NULL ⇒ 0; বাম ও ডান দুটোই NULL হলে সেটি leaf ⇒ 1; নইলে বাম ও ডানের leaf সংখ্যা যোগ। <b>countnodes:</b> NULL ⇒ 0; নইলে <b>1 (নিজে) + বাম + ডান</b>। <code>r ? A : B</code> মানে r NULL না হলে A, নইলে B।</div>
+<div class="card"><b>যাচাই:</b> binary tree-তে leaf = (degree-2 node সংখ্যা) + 1। দুটোই O(n) — উত্তর নিচ থেকে উপরে ফেরে, তাই এগুলো postorder-এর ধরন।</div>
+</section>
+
+<section class="slide"><h2>৫) Tree-র সর্বোচ্চ গভীরতা (maxDepth)</h2>
+<p>প্রতিটি node জানতে চায় তার বাম ও ডান subtree কতটা গভীর, তারপর বড়টির সাথে নিজেকে যোগ (+1)। নীল সংখ্যা = ওই node-কে root ধরলে subtree-র গভীরতা।</p>
+<div data-cw="depth"></div>
+<div class="card"><b>ব্যাখ্যা:</b> NULL-এর গভীরতা 0। <code>l</code> ও <code>r</code> হলো দুই subtree-র গভীরতা; <code>(l&gt;r ? l : r) + 1</code> মানে বড়টি নিয়ে নিজের জন্য ১ যোগ। root-এর মানই পুরো tree-র maxDepth।</div>
+<div class="card"><b>সতর্কতা:</b> এই function <b>node গোনে</b> (শুধু root হলে ফল 1)। আগের পাতার “height” edge গোনে (শুধু root হলে 0)। তাই height = maxDepth − 1।</div>
+</section>
+
+<section class="slide"><h2>৬) isBST — tree কি আদৌ BST?</h2>
+<p>শুধু “বাম child ছোট, ডান child বড়” দেখলেই হয় না — পুরো subtree-র সব মান একটি <b>সীমার</b> ভেতরে থাকতে হয়। প্রতি node-এর পাশে তার সীমা [lo, hi] দেখা যাবে। “ভুল tree বানাও” চাপলে একটি মান এমনভাবে বদলানো হবে যাতে শুধু parent-এর সাথে মিললেও আসলে BST ভাঙে।</p>
+<div data-cw="bst"></div>
+<div class="card"><b>ব্যাখ্যা:</b> শুরুতে সীমা (−∞, +∞)। বামে নামলে <b>উপরের সীমা</b> (hi) হয় parent-এর মান; ডানে নামলে <b>নিচের সীমা</b> (lo) হয় parent-এর মান। মান সীমার বাইরে গেলেই false। দুই subtree-ই true হলে তবেই true (&amp;&amp; বলে বাম false হলে ডানে আর যায় না)।</div>
+<div class="card"><b>সীমা কেন দরকার:</b> শুধু child-parent তুলনা করলে এমন tree ধরা পড়ে না যেখানে বাম subtree-র গভীরে root-এর চেয়ে বড় মান লুকিয়ে আছে। বিকল্প: inorder চালিয়ে দেখা মান বাড়ছে কিনা। জটিলতা O(n)।</div>
+</section>
+
+<section class="slide"><h2>৭) kthSmallest — k-তম ছোট মান</h2>
+<p>BST-এর inorder ছোট থেকে বড় ক্রমে চলে, তাই inorder-এ k-তম node-ই k-তম ছোট মান। কাউন্টার <code>i</code> বাড়াতে বাড়াতে <code>i == k</code> হলে থামি। নিচে i ও k দেখা যাবে; node-এর পাশের #১, #২… হলো ভিজিটের ক্রম।</p>
+<div data-cw="kth"></div>
+<div class="card"><b>ব্যাখ্যা:</b> বাম subtree আগে খুঁজি। সেখানে উত্তর মিললে (<code>L != INT_MAX</code>) সরাসরি ফেরত। না মিললে বর্তমান node গুনি: <code>++*i</code>। i == k হলে এই node-এর মানই উত্তর; নইলে ডানে যাই। <code>INT_MAX</code> মানে “এখনও পাইনি”।</div>
+<div class="card"><b>খেয়াল রাখো:</b> <code>i</code> একটি pointer (<code>int *i</code>), তাই সব recursive call একই কাউন্টার ভাগ করে — শুরুতে <code>int i = 0;</code> দিয়ে <code>&amp;i</code> পাঠাতে হয়। k, node সংখ্যার চেয়ে বড় হলে INT_MAX ফেরে। জটিলতা O(h + k)।</div>
+</section>
 
 <section class="slide"><h2>সমাধানসহ অনুশীলন (DS-UNIT-45)</h2>
 <div class="card"><b>সমস্যা ১:</b> 50,15,62,5,20,58,91,3,8,37,60,24 insert করলে root-এর বাম ও ডান subtree-তে node কত? <br>বামে (&lt;50): 15,5,20,3,8,37,24 = <b>7</b>; ডানে (&gt;50): 62,58,91,60 = <b>4</b> ⇒ উত্তর (7, 4)।</div>
@@ -96,7 +154,7 @@ function fig(sp,hl=[]){const c={i:0},r=lay(sp,0,c),all=[];(function f(n){all.pus
 return '<svg viewBox="0 0 '+W+' '+Hh+'" style="max-width:'+W*1.4+'px;width:100%">'+all.map(n=>n.k.map(k=>'<line x1="'+X(n)+'" y1="'+Y(n)+'" x2="'+X(k)+'" y2="'+Y(k)+'"/>').join('')).join('')+all.map(n=>'<g class="nd '+(hl.includes(n.l)?'on':'')+'"><circle cx="'+X(n)+'" cy="'+Y(n)+'" r="15"/><text x="'+X(n)+'" y="'+(Y(n)+5)+'">'+n.l+'</text></g>').join('')+'</svg>'}
 const F=(id,sp,hl)=>$('#'+id).innerHTML=fig(sp,hl);
 const P=['A',['B',['G'],['I',['J'],['K']],['H']],['C',['E',['D']],['F']]];
-F('f0a',['A',['B'],['C',['E'],['F']]],[]);$('#f0a').innerHTML=$('#f0a').innerHTML.replace('</svg>','<line x1="98" y1="70" x2="144" y2="70" style="stroke:#dc2626"/></svg>');F('f0b',['A',['B'],['C',['E'],['F']]]);
+F('f0a',['A',['B'],['C',['E'],['F']]],[]);$('#f0a').innerHTML=$('#f0a').innerHTML.replace('</svg>','<line x1="72" y1="118" x2="118" y2="118" style="stroke:#dc2626;stroke-width:3.5"/></svg>');F('f0b',['A',['B'],['C',['E'],['F']]]);
 const TM={Root:[['A'],'যে node থেকে tree শুরু। প্রতি tree-তে ঠিক একটি root; একাধিক root থাকতে পারে না। এখানে A।'],
 Edge:[[],'দুই node-কে যুক্তকারী রেখা। n node-এর tree-তে ঠিক n−1 edge — এখানে 11 node, 10 edge।'],
 Parent:[['A','B','I','C','E'],'যে node-এর এক বা একাধিক child আছে। A-র child B,C; B-র child G,I,H; I-র child J,K; C-র child E,F; E-র child D।'],
@@ -133,4 +191,276 @@ function lvl(){const a=[],q=R?[R]:[];while(q.length){const n=q.shift();a.push(n)
 async function trav(t){const a=t=='lvl'?lvl():order(t);for(let i=1;i<=a.length;i++){draw(a.slice(0,i));$('#om').textContent=a.slice(0,i).map(n=>n.v).join(', ');await sleep(600)}}
 async function srch(){const v=+$('#k').value;let c=R,p=[];while(c){p.push(c);draw(p);$('#om').textContent=v+' ও '+c.v+' তুলনা: '+(v==c.v?'পাওয়া গেছে':v<c.v?'ছোট ⇒ বামে':'বড় ⇒ ডানে');await sleep(700);if(c.v==v)return;c=v<c.v?c.l:c.r}$('#om').textContent=v+' পাওয়া যায়নি'}
 pre([50,30,70,20,40,60,80]);
+</script>
+<script>
+(function(){
+'use strict';
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function hl(s){let cm='';const ci=s.search(/\/\/|\/\*/);if(ci>=0){cm=s.slice(ci);s=s.slice(0,ci)}
+ const o=esc(s).replace(/"[^"]*"/g,m=>'<i class="s">'+m+'</i>').replace(/\b(struct|union|typedef|int|void|bool|return|if|else|true|false|NULL|INT_MAX|include)\b/g,'<i class="k">$1</i>');
+ return o+(cm?'<i class="c">'+esc(cm)+'</i>':'')}
+function copy(t,b){
+ const done=()=>{const o=b.dataset.o||b.textContent;b.dataset.o=o;b.textContent='✓ কপি হয়েছে';setTimeout(()=>{b.textContent=o},1600)};
+ function fb(){const x=document.createElement('textarea');x.value=t;x.style.position='fixed';x.style.opacity='0';document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(e){}x.remove();done()}
+ if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(done,fb)}else fb()}
+function mkBlock(el,lines,btns){
+ el.innerHTML='<div class="cwhead"><span>C</span><span class="cwbtns">'+btns.map((b,i)=>'<button class="cwbtn" data-k="'+i+'">'+b[0]+'</button>').join('')+'</span></div><pre class="cwpre">'+lines.map((s,i)=>'<span class="cl" data-n="'+(i+1)+'">'+(hl(s)||' ')+'</span>').join('')+'</pre>';
+ el.querySelectorAll('button').forEach(b=>{b.onclick=()=>copy(btns[+b.dataset.k][1],b)})}
+
+/* ---------- কোড ---------- */
+const CODES={
+trav:[
+'void inorder(node *r){','  if(r){','    inorder(r->left);','    printf("%d ",r->data);','    inorder(r->right);','  }','}','',
+'void preorder(node *r){','  if(r){','    printf("%d ",r->data);','    preorder(r->left);','    preorder(r->right);','  }','}','',
+'void postorder(node *r){','  if(r){','    postorder(r->left);','    postorder(r->right);','    printf("%d ",r->data);','  }','}'],
+search:[
+'struct node *search(struct node *n,int key){      // BST search','  if(n==NULL||n->key==key) return n;','  return key < n->key','       ? search(n->left,key)','       : search(n->right,key);','}'],
+ins:[
+'struct node *insert(struct node *n,int key){      // BST insert','  if(n==NULL) return newNode(key);','  if(key < n->key)','    n->left = insert(n->left,key);','  else','    n->right = insert(n->right,key);','  return n;','}'],
+cnt:[
+'int getLeafCount(Node *n){','  if(!n) return 0;','  if(!n->left && !n->right) return 1;','  return getLeafCount(n->left)','       + getLeafCount(n->right);','}','',
+'int countnodes(struct node *r){','  return r ? 1 + countnodes(r->left)','             + countnodes(r->right)','           : 0;','}'],
+depth:[
+'int maxDepth(struct node *n){','  if(!n) return 0;','  int l = maxDepth(n->left),','      r = maxDepth(n->right);','  return (l>r ? l : r) + 1;','}'],
+bst:[
+'bool isBST(Node *n,int lo,int hi){','  if(!n) return true;','  if(n->data < lo || n->data > hi)','    return false;','  return isBST(n->left, lo, n->data)','      && isBST(n->right, n->data, hi);','}'],
+kth:[
+'int kthSmallest(Node *r,int *i,int k){ /* inorder-এ k-তম node */','  if(!r) return INT_MAX;','  int L = kthSmallest(r->left,i,k);','  if(L != INT_MAX) return L;','  if(++*i == k) return r->data;','  return kthSmallest(r->right,i,k);','}']
+};
+const PRE=['#include <stdio.h>','#include <stdlib.h>','#include <limits.h>','#include <stdbool.h>','',
+'struct node {','  union { int data; int key; };   // PDF-তে data ও key দুই নামই আছে — এখানে একই ঘর (C11)','  struct node *left, *right;','};','typedef struct node node;','typedef struct node Node;','',
+'struct node *newNode(int key){','  struct node *t = malloc(sizeof(struct node));','  t->key = key; t->left = t->right = NULL;','  return t;','}'].join('\n');
+const ALLL=['trav','search','ins','cnt','depth','bst','kth'].map(k=>CODES[k].join('\n')).join('\n\n');
+
+/* ---------- tree সাহায্যকারী ---------- */
+const NA=n=>n?n.v:'NULL';
+const mk=v=>({v,l:null,r:null});
+function put(R,v){const n=mk(v);if(!R)return n;let c=R;for(;;){const s=v<c.v?'l':'r';if(!c[s]){c[s]=n;return R}c=c[s]}}
+function build(t){const a=t.split(/[\s,]+/).filter(Boolean).map(Number).filter(Number.isFinite).slice(0,15);let R=null;a.forEach(v=>{R=put(R,v)});return R}
+function cl(n){if(!n)return null;const c={v:n.v,l:null,r:null};n.c=c;c.l=cl(n.l);c.r=cl(n.r);return c}
+function breakTree(R){if(R&&R.r&&R.r.l){R.r.l.v=R.v-5;return true}if(R&&R.l&&R.l.r){R.l.r.v=R.v+5;return true}return false}
+function lay(R){const a=[];let i=0,md=0;(function f(n,d,p){if(!n)return;f(n.l,d+1,n);n.x=i++;n.y=d;n.p=p;if(d>md)md=d;a.push(n);f(n.r,d+1,n)})(R,0,null);return{a,md,w:i}}
+
+function svgOf(R,s){
+ if(!R)return '<svg viewBox="0 0 220 60"><text x="110" y="34" text-anchor="middle" font-size="13" fill="#64748b">খালি tree</text></svg>';
+ const L=lay(R),a=L.a,U=Math.max(40,Math.min(58,600/Math.max(L.w,1)));
+ const W=Math.max(220,70+(L.w-1)*U),H=30+L.md*54+46;
+ const X=n=>W/2-(L.w-1)*U/2+n.x*U,Y=n=>28+n.y*54;
+ const path=s.path||[],vis=s.vis||[],bad=s.bad||[],lab=s.lab;
+ let o='<svg viewBox="0 0 '+W+' '+H+'" style="max-width:'+Math.round(W*1.5)+'px">';
+ a.forEach(n=>{[n.l,n.r].forEach(c=>{if(c){const hot=path.includes(n)&&path.includes(c);
+  o+='<line x1="'+X(n)+'" y1="'+Y(n)+'" x2="'+X(c)+'" y2="'+Y(c)+'" stroke="'+(hot?'#ca8a04':'#94a3b8')+'" stroke-width="'+(hot?3:1.6)+'"/>'}})});
+ if(s.nul){const p=s.nul[0],sd=s.nul[1],nx=X(p)+(sd=='l'?-1:1)*U*0.42,ny=Y(p)+42;
+  o+='<line x1="'+X(p)+'" y1="'+Y(p)+'" x2="'+nx+'" y2="'+(ny-9)+'" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="4 3"/>'
+   +'<rect x="'+(nx-18)+'" y="'+(ny-9)+'" width="36" height="18" rx="4" fill="#fff" stroke="#dc2626" stroke-dasharray="3 2"/>'
+   +'<text x="'+nx+'" y="'+(ny+4)+'" text-anchor="middle" font-size="10" font-weight="700" fill="#dc2626">NULL</text>'}
+ a.forEach(n=>{let f='#f1f5f9',st='#64748b',sw=1.8;
+  if(vis.includes(n)){f='#bbf7d0';st='#16a34a'}else if(path.includes(n)){f='#fef9c3';st='#ca8a04'}
+  if(bad.includes(n)){f='#fecaca';st='#dc2626';sw=3}
+  if(s.found===n){f='#4ade80';st='#15803d';sw=3.5}
+  else if(s.cur===n&&!bad.includes(n)){f='#facc15';st='#a16207';sw=3.5}
+  o+='<circle cx="'+X(n)+'" cy="'+Y(n)+'" r="16" fill="'+f+'" stroke="'+st+'" stroke-width="'+sw+'"/>'
+   +'<text x="'+X(n)+'" y="'+(Y(n)+4.5)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">'+n.v+'</text>';
+  const t=lab&&lab.get(n);
+  if(t){const left=n.p&&n.p.l===n;o+='<text x="'+(X(n)+(left?-20:20))+'" y="'+(Y(n)-12)+'" text-anchor="'+(left?'end':'start')+'" font-size="11" font-weight="700" fill="#1d4ed8">'+esc(String(t))+'</text>'}});
+ o+='</svg>';
+ return o.replace(/<(line|circle|rect|text)\b([^>]*?)(\/?)>/g,function(m,t,at,sl){let st='';
+  at=at.replace(/\s(fill|stroke-width|stroke-dasharray|stroke|font-size|font-weight|text-anchor)="([^"]*)"/g,function(x,k,v){st+=k+':'+v+';';return ''});
+  return '<'+t+at+' style="'+st+'"'+sl+'>'})}
+
+/* ---------- tracer: প্রতিটি function-এর ধাপ তৈরি ---------- */
+function trTrav(R,p){
+ const m=p.mode,nm={in:'inorder',pre:'preorder',post:'postorder'}[m],B={in:0,pre:8,post:16}[m],H=[B,B+1];
+ const LN=m=='in'?{L:B+2,P:B+3,R:B+4}:m=='pre'?{P:B+2,L:B+3,R:B+4}:{L:B+2,R:B+3,P:B+4};
+ const S=[],out=[],vis=[];
+ const push=(o,st)=>S.push(Object.assign({st:st.slice(),out:out.join(' '),vis:vis.slice()},o));
+ push({l:[],t:nm+'(root) call দিয়ে শুরু। এখনও কোনো node print হয়নি।'},[]);
+ function rec(n,st,par,side){
+  const s2=st.concat(nm+'('+NA(n)+')');
+  if(!n){push({l:H,nul:par&&[par,side],t:'r == NULL — base case। কিছু না করে আগের call-এ ফিরে যাও।'},s2);return}
+  push({l:H,cur:n,t:nm+'('+n.v+') শুরু। r NULL নয়, তাই if-এর ভেতরে ঢুকলাম।'},s2);
+  const ops={
+   L:()=>{push({l:[LN.L],cur:n,t:n.v+'-এর বাম child ('+NA(n.l)+') দিয়ে '+nm+' call।'},s2);rec(n.l,s2,n,'l')},
+   R:()=>{push({l:[LN.R],cur:n,t:n.v+'-এর ডান child ('+NA(n.r)+') দিয়ে '+nm+' call।'},s2);rec(n.r,s2,n,'r')},
+   P:()=>{out.push(n.v);vis.push(n);push({l:[LN.P],cur:n,t:n.v+' print হলো ⇒ এখন output: '+out.join(' ')},s2)}};
+  (m=='in'?['L','P','R']:m=='pre'?['P','L','R']:['L','R','P']).forEach(k=>ops[k]())}
+ rec(R,[],null,null);
+ push({l:[],t:'সম্পূর্ণ! '+nm+' ক্রম: '+out.join(', ')},[]);
+ return S}
+
+function trSearch(R,p){
+ const key=p.key,S=[],path=[];let res=null;
+ const push=(o,st)=>S.push(Object.assign({st:st.slice(),path:path.slice()},o));
+ push({l:[],t:'search(root, '+key+') দিয়ে শুরু।'},[]);
+ (function rec(n,st,par,side){
+  const s2=st.concat('search('+NA(n)+', '+key+')');
+  if(!n){push({l:[1],nul:par&&[par,side],t:'n == NULL ⇒ '+key+' tree-তে নেই। NULL return।'},s2);res=null;return}
+  path.push(n);
+  if(n.v==key){push({l:[1],cur:n,found:n,t:'n->key == '+key+' ⇒ পেয়ে গেছি! এই node-এর pointer return।'},s2);res=n;return}
+  if(key<n.v){push({l:[1,2,3],cur:n,t:key+' < '+n.v+' ⇒ বাম subtree-তে search (ডানের অর্ধেক বাদ)।'},s2);rec(n.l,s2,n,'l')}
+  else{push({l:[1,2,4],cur:n,t:key+' > '+n.v+' ⇒ ডান subtree-তে search (বামের অর্ধেক বাদ)।'},s2);rec(n.r,s2,n,'r')}
+ })(R,[],null,null);
+ push(res?{l:[],found:res,t:'ফল: '+key+' পাওয়া গেছে — '+path.length+'টি node তুলনা করতে হয়েছে।'}:{l:[],t:'ফল: NULL — '+key+' নেই ('+path.length+'টি node তুলনা)।'},[]);
+ return S}
+
+function trIns(R,p){
+ const key=p.key,S=[],post=cl(R),path=[];let proot=post,nn=null;
+ const push=(o,st,tr)=>S.push(Object.assign({st:st.slice(),tree:tr||R,path:tr?path.map(x=>x.c):path.slice()},o));
+ push({l:[],t:'insert(root, '+key+') দিয়ে শুরু।'},[]);
+ function rec(n,st,par,side){
+  const s2=st.concat('insert('+NA(n)+', '+key+')');
+  if(!n){
+   push({l:[1],nul:par&&[par,side],t:'n == NULL ⇒ ফাঁকা জায়গা পেলাম, এখানেই নতুন node বসবে।'},s2);
+   nn=mk(key);if(par)par.c[side]=nn;else proot=nn;
+   push({l:[1],cur:nn,t:'newNode('+key+') তৈরি হয়ে এই pointer return করল।'},s2,proot);return}
+  path.push(n);
+  const goL=key<n.v;
+  push({l:goL?[2,3]:[2,4,5],cur:n,t:goL?key+' < '+n.v+' ⇒ n->left = insert(n->left, key) — বামে নামো।':(key==n.v?key+' == '+n.v+', তাই key < n->key মিথ্যা (সমান মান এই কোডে ডানে যায) ⇒ ':key+' > '+n.v+' ⇒ ')+'n->right = insert(n->right, key) — ডানে নামো।'},s2);
+  rec(goL?n.l:n.r,s2,n,goL?'l':'r');
+  push({l:goL?[3,6]:[5,6],cur:n.c,t:'ফেরত আসা pointer '+n.v+'-এর '+(goL?'left':'right')+'-এ বসল; তারপর return n (এই node-এর নিজের pointer ঠিকই আছে)।'},s2,proot)}
+ rec(R,[],null,null);
+ push({l:[],cur:nn,t:'ফল: '+key+' নতুন leaf হিসেবে বসেছে। BST-এর শর্ত বজায় আছে, বাকি node নড়েনি।'},[],proot);
+ return S}
+
+function trCount(R,p){
+ const m=p.mode,S=[],lab=new Map(),nm=m=='leaf'?'getLeafCount':'countnodes';
+ const push=(o,st)=>S.push(Object.assign({st:st.slice(),lab:new Map(lab)},o));
+ push({l:[],t:nm+'(root) দিয়ে শুরু। নিচ থেকে ফিরে আসা মান node-এর পাশে নীল রঙে দেখা যাবে।'},[]);
+ function rec(n,st,par,side){
+  const s2=st.concat(nm+'('+NA(n)+')');
+  if(!n){push({l:m=='leaf'?[1]:[7,10],nul:par&&[par,side],t:m=='leaf'?'!n ⇒ NULL-এ কোনো leaf নেই ⇒ 0 return।':'r NULL ⇒ ": 0" শাখা ⇒ 0 return।'},s2);return 0}
+  if(m=='leaf'&&!n.l&&!n.r){lab.set(n,'= 1');push({l:[2],cur:n,t:n.v+'-এর বাম ও ডান দুটোই NULL ⇒ এটি leaf ⇒ 1 return।'},s2);return 1}
+  push({l:m=='leaf'?[3,4]:[7,8,9],cur:n,t:m=='leaf'?n.v+' leaf নয় ⇒ বাম ও ডান subtree-র leaf সংখ্যা যোগ করব।':n.v+' আছে ⇒ 1 (নিজে) + বাম subtree-র node + ডান subtree-র node।'},s2);
+  const a=rec(n.l,s2,n,'l'),b=rec(n.r,s2,n,'r'),v=m=='leaf'?a+b:1+a+b;
+  lab.set(n,'= '+v);
+  push({l:m=='leaf'?[3,4]:[8,9],cur:n,t:(m=='leaf'?a+' + '+b:'1 + '+a+' + '+b)+' = '+v+' return।'},s2);return v}
+ const t=rec(R,[],null,null);
+ push({l:[],t:'ফল: '+(m=='leaf'?'মোট leaf = ':'মোট node = ')+t},[]);
+ return S}
+
+function trDepth(R){
+ const S=[],lab=new Map();
+ const push=(o,st)=>S.push(Object.assign({st:st.slice(),lab:new Map(lab)},o));
+ push({l:[],t:'maxDepth(root) দিয়ে শুরু। প্রতিটি node নিজের নিচের দুই subtree-র গভীরতা জেনে ফিরবে।'},[]);
+ function rec(n,st,par,side){
+  const s2=st.concat('maxDepth('+NA(n)+')');
+  if(!n){push({l:[1],nul:par&&[par,side],t:'!n ⇒ NULL-এর গভীরতা 0 return।'},s2);return 0}
+  push({l:[2,3],cur:n,t:n.v+': বাম ও ডান subtree-র maxDepth জানতে নিজেকে দুইবার call।'},s2);
+  const l=rec(n.l,s2,n,'l'),r=rec(n.r,s2,n,'r'),m=(l>r?l:r)+1;
+  lab.set(n,'= '+m);
+  push({l:[4],cur:n,t:'l = '+l+', r = '+r+' ⇒ (l>r ? l : r) + 1 = '+m+' return।'},s2);return m}
+ const d=rec(R,[],null,null);
+ push({l:[],t:'ফল: maxDepth = '+d+' (node গোনায়)। edge গোনায় tree-র height = '+(d-1)+'।'},[]);
+ return S}
+
+function trBST(R){
+ const S=[],lab=new Map(),bad=[];
+ const fm=x=>x===-Infinity?'−∞':x===Infinity?'+∞':x;
+ const push=(o,st)=>S.push(Object.assign({st:st.slice(),lab:new Map(lab),bad:bad.slice()},o));
+ push({l:[],t:'isBST(root, INT_MIN, INT_MAX) দিয়ে শুরু — root-এর ওপর কোনো সীমা নেই।'},[]);
+ function rec(n,lo,hi,st,par,side){
+  const s2=st.concat('isBST('+NA(n)+', '+fm(lo)+', '+fm(hi)+')');
+  if(!n){push({l:[1],nul:par&&[par,side],t:'n NULL ⇒ খালি subtree সবসময় ঠিক ⇒ true return।'},s2);return true}
+  lab.set(n,'['+fm(lo)+', '+fm(hi)+']');
+  if(n.v<lo||n.v>hi){bad.push(n);push({l:[2,3],cur:n,t:n.v+' সীমা ['+fm(lo)+', '+fm(hi)+']-এর বাইরে ⇒ BST-এর শর্ত ভাঙা ⇒ false return।'},s2);return false}
+  push({l:[2],cur:n,t:n.v+' সীমা ['+fm(lo)+', '+fm(hi)+']-এর ভেতরে ✔'},s2);
+  push({l:[4],cur:n,t:'বাম child-এর জন্য সীমা হবে ['+fm(lo)+', '+n.v+'] (hi = n->data)।'},s2);
+  if(!rec(n.l,lo,n.v,s2,n,'l')){push({l:[4],cur:n,t:'বাম subtree false ⇒ && short-circuit: ডানে না গিয়েই false return।'},s2);return false}
+  push({l:[5],cur:n,t:'বাম ঠিক ⇒ ডান child-এর জন্য সীমা হবে ['+n.v+', '+fm(hi)+'] (lo = n->data)।'},s2);
+  const r=rec(n.r,n.v,hi,s2,n,'r');
+  push({l:[4,5],cur:n,t:r?'বাম ও ডান দুটোই true ⇒ true return।':'ডান subtree false ⇒ false return।'},s2);return r}
+ const res=rec(R,-Infinity,Infinity,[],null,null);
+ push({l:[],t:'ফল: '+(res?'true — এটি বৈধ BST।':'false — এটি BST নয়।')},[]);
+ return S}
+
+function trKth(R,p){
+ const k=p.k,S=[],lab=new Map(),vis=[];let i=0;
+ const push=(o,st)=>S.push(Object.assign({st:st.slice(),lab:new Map(lab),vis:vis.slice(),ex:'i = '+i+' &nbsp; k = '+k},o));
+ push({l:[],t:'int i = 0; kthSmallest(root, &i, '+k+') — inorder-এ '+k+'-তম node খুঁজছি।'},[]);
+ function rec(n,st,par,side){
+  const s2=st.concat('kth('+NA(n)+')');
+  if(!n){push({l:[1],nul:par&&[par,side],t:'r NULL ⇒ INT_MAX return ("এখানে পাইনি")।'},s2);return Infinity}
+  push({l:[2],cur:n,t:n.v+': আগে বাম subtree ('+NA(n.l)+') খুঁজি।'},s2);
+  const L=rec(n.l,s2,n,'l');
+  if(L!==Infinity){push({l:[3],cur:n,t:'L = '+L+' ≠ INT_MAX ⇒ বামেই উত্তর মিলেছে, তাই '+L+' return (আর এগোই না)।'},s2);return L}
+  push({l:[3],cur:n,t:'L == INT_MAX ⇒ বামে এখনও পাইনি, এবার এই node-এর পালা।'},s2);
+  i++;vis.push(n);lab.set(n,'#'+i);
+  if(i==k){push({l:[4],cur:n,found:n,t:'++*i = '+i+' == k ⇒ '+n.v+' হলো '+k+'-তম ছোট মান। '+n.v+' return।'},s2);return n.v}
+  push({l:[4,5],cur:n,t:'++*i = '+i+' ≠ '+k+' ⇒ এখনও পৌঁছাইনি; ডান subtree ('+NA(n.r)+') দেখি।'},s2);
+  return rec(n.r,s2,n,'r')}
+ const res=rec(R,[],null,null);
+ push({l:[],t:res===Infinity?'ফল: INT_MAX — tree-তে '+k+'টির কম node আছে।':'ফল: '+k+'-তম ছোট মান = '+res},[]);
+ return S}
+
+/* ---------- widget ---------- */
+const T0='50, 30, 70, 20, 40, 60, 80';
+const CFG={
+ trav:{code:'trav',tree:T0,modes:[['in','Inorder'],['pre','Preorder'],['post','Postorder']],trace:trTrav},
+ search:{code:'search',tree:T0,key:40,trace:trSearch},
+ ins:{code:'ins',tree:T0,key:45,trace:trIns},
+ cnt:{code:'cnt',tree:'50, 30, 70, 20, 40, 60, 80, 65',modes:[['leaf','getLeafCount'],['count','countnodes']],trace:trCount},
+ depth:{code:'depth',tree:'50, 30, 70, 20, 40, 60, 80, 45',trace:trDepth},
+ bst:{code:'bst',tree:T0,brk:true,trace:trBST},
+ kth:{code:'kth',tree:T0,k:3,trace:trKth}};
+
+function Widget(el,name){
+ const C=CFG[name],code=CODES[C.code];
+ el.className+=' cwb';
+ let h='<div class="cwtool"><label>Tree-র মান (কমা দিয়ে): <input class="cwtree" value="'+C.tree+'"></label>';
+ if(C.modes)h+='<label>অংশ: <select class="cwmode">'+C.modes.map(m=>'<option value="'+m[0]+'">'+m[1]+'</option>').join('')+'</select></label>';
+ if(C.key!=null)h+='<label>key: <input class="cwkey" type="number" value="'+C.key+'"></label>';
+ if(C.k!=null)h+='<label>k: <input class="cwk" type="number" min="1" value="'+C.k+'"></label>';
+ if(C.brk)h+='<button class="cwbtn cwbrk">⚠ ভুল tree বানাও</button>';
+ h+='<button class="cwbtn pri cwbuild">🔄 Build</button><span class="cwflag"></span></div>'
+  +'<div class="cwgrid"><div class="cwcodebox"></div><div><div class="cwsvgbox"></div>'
+  +'<div class="cwleg"><span style="background:#facc15"></span>বর্তমান node <span style="background:#bbf7d0"></span>শেষ/ভিজিট <span style="background:#fef9c3"></span>পথ <span style="background:#fecaca"></span>ভুল <span style="background:#4ade80"></span>পাওয়া গেছে</div>'
+  +'<div class="cwinfo"></div></div></div>'
+  +'<div class="cwctl"><button class="cwbtn cwfirst">⏮ শুরু</button><button class="cwbtn cwprev">◀ আগে</button><button class="cwbtn pri cwplay">▶ চালাও</button><button class="cwbtn cwnext">পরে ▶</button>'
+  +'<input type="range" class="cwr" min="0" max="0" value="0"><span class="cwcnt"></span>'
+  +'<select class="cwsp"><option value="1600">ধীর</option><option value="900" selected>মাঝারি</option><option value="400">দ্রুত</option></select></div><div class="cwnote"></div>';
+ el.innerHTML=h;
+ const q=s=>el.querySelector(s);
+ mkBlock(q('.cwcodebox'),code,[['📋 কোড কপি',code.join('\n')]]);
+ const cls=[].slice.call(el.querySelectorAll('.cl'));
+ const W={steps:[],i:0,root:null,t:null,broken:false};
+ function stop(){if(W.t){clearTimeout(W.t);W.t=null}q('.cwplay').textContent='▶ চালাও'}
+ function go(i){
+  i=Math.max(0,Math.min(W.steps.length-1,i));W.i=i;const s=W.steps[i];
+  cls.forEach((e,j)=>e.classList.toggle('on',!!(s.l&&s.l.indexOf(j)>=0)));
+  q('.cwsvgbox').innerHTML=svgOf(s.tree||W.root,s);
+  let x='';
+  if(s.out!==undefined)x+='<div>Output: <span class="cwo">'+esc(s.out||'—')+'</span></div>';
+  if(s.ex)x+='<div>'+s.ex+'</div>';
+  if(s.st)x+='<div>Call stack: '+(s.st.length?s.st.map((c,j)=>'<span class="chip'+(j==s.st.length-1?' top':'')+'">'+esc(c)+'</span>').join('<span class="cwar">→</span>'):'<i>খালি</i>')+'</div>';
+  q('.cwinfo').innerHTML=x;q('.cwnote').textContent=s.t||'';
+  q('.cwr').value=i;q('.cwcnt').textContent='ধাপ '+(i+1)+'/'+W.steps.length}
+ function params(){
+  const p={mode:C.modes?q('.cwmode').value:null};
+  if(C.key!=null){p.key=parseInt(q('.cwkey').value,10);if(isNaN(p.key))p.key=C.key}
+  if(C.k!=null)p.k=Math.max(1,parseInt(q('.cwk').value,10)||C.k);
+  return p}
+ function rebuild(){
+  stop();const p=params();let R=build(q('.cwtree').value);if(!R)R=build(C.tree);
+  let msg='';if(C.brk&&W.broken)msg=breakTree(R)?'⚠ একটি মান ইচ্ছে করে ভুল করা হয়েছে (tree-তে দেখো)':'ভুল করার মতো যথেষ্ট বড় tree নয় — আরও মান দাও';
+  q('.cwflag').textContent=msg;
+  W.root=R;W.steps=C.trace(R,p);q('.cwr').max=W.steps.length-1;go(0)}
+ function tick(){go(W.i+1);if(W.i>=W.steps.length-1){stop();return}W.t=setTimeout(tick,+q('.cwsp').value)}
+ q('.cwplay').onclick=()=>{if(W.t){stop();return}if(W.i>=W.steps.length-1)go(0);q('.cwplay').textContent='⏸ থামাও';W.t=setTimeout(tick,300)};
+ q('.cwfirst').onclick=()=>{stop();go(0)};
+ q('.cwprev').onclick=()=>{stop();go(W.i-1)};
+ q('.cwnext').onclick=()=>{stop();go(W.i+1)};
+ q('.cwr').oninput=e=>{stop();go(+e.target.value)};
+ q('.cwbuild').onclick=rebuild;
+ [].forEach.call(el.querySelectorAll('input:not(.cwr),select.cwmode'),x=>x.addEventListener('change',rebuild));
+ if(C.brk)q('.cwbrk').onclick=()=>{W.broken=!W.broken;q('.cwbrk').textContent=W.broken?'✅ ঠিক tree-তে ফিরে যাও':'⚠ ভুল tree বানাও';rebuild()};
+ rebuild()}
+
+if(typeof document!=='undefined'){
+ [].forEach.call(document.querySelectorAll('[data-cw]'),el=>Widget(el,el.dataset.cw));
+ [].forEach.call(document.querySelectorAll('[data-cwfull]'),el=>{
+  if(el.dataset.cwfull=='pre')mkBlock(el,PRE.split('\n'),[['📋 কপি',PRE]]);
+  else mkBlock(el,ALLL.split('\n'),[['📋 ফুল কোড কপি',ALLL],['📋 header+struct সহ কপি',PRE+'\n\n'+ALLL]])})}
+if(typeof module!=='undefined')module.exports={build,trTrav,trSearch,trIns,trCount,trDepth,trBST,trKth,breakTree,svgOf,CODES};
+})();
+
 </script></body></html>
