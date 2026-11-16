@@ -1,14 +1,131 @@
 <!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DS</title><link rel="stylesheet" href="style.css"></head><body>
-<section class="slide"><h2>AVL Tree — বাংলায় ধারণা</h2><p>সাধারণ BST-তে sorted data দিলে tree একদিকে ঝুঁকে linked list হয়ে যায় (search O(n))। <b>AVL tree</b> প্রতিটি node-এর <b>Balance Factor (BF) = height(বাম) − height(ডান)</b> সবসময় −1, 0 বা +1 রাখে; এর বাইরে গেলেই <b>rotation</b> করে ঠিক করে। ফলে সব operation O(log n)।</p>
-<table><tr><th>অবস্থা</th><th>সমাধান</th></tr><tr><td>BF=+2, বাম child-এর BF ≥ 0 (LL)</td><td>Right rotate</td></tr><tr><td>BF=−2, ডান child-এর BF ≤ 0 (RR)</td><td>Left rotate</td></tr><tr><td>BF=+2, বাম child-এর BF &lt; 0 (LR)</td><td>আগে বামে left rotate, তারপর right rotate</td></tr><tr><td>BF=−2, ডান child-এর BF &gt; 0 (RL)</td><td>আগে ডানে right rotate, তারপর left rotate</td></tr></table>
-<div class="card"><b>Delete:</b> BST-এর মতোই মোছো (leaf / এক child / দুই child হলে inorder successor); তারপর উপরের দিকে প্রতিটি node-এ BF দেখে প্রয়োজনে rotation। Insert-এ সর্বোচ্চ ১টি rotation (বা double) লাগে, delete-এ একাধিক লাগতে পারে।</div></section>
-<section class="slide"><h2>AVL (ইন্টারেক্টিভ)</h2><div class="card"><b>কীভাবে চালাবে:</b> 10, 20, 30 insert করলে RR rotation দেখবে। তারপর কিছু মান delete করে দেখো tree আবার balance হয় কি না। নিচের বার্তায় কোন rotation হলো লেখা থাকবে।</div><input id="k" type="number" value="10" style="width:80px"><button onclick="go2()">Insert</button><button onclick="dl()">Delete</button><button onclick="R=null;dr();$('#m').textContent=''">Reset</button><svg id="sv" viewBox="0 0 600 300" width="100%"></svg><p id="m"></p></section>
-<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section><script src="bank.js"></script><script src="app.js"></script><script>quiz('tr','#qz');let R=null,log='';const H=n=>n?n.h:0,U=n=>n.h=1+Math.max(H(n.l),H(n.r)),BF=n=>H(n.l)-H(n.r);
-const rr=y=>{const x=y.l;y.l=x.r;x.r=y;U(y);U(x);return x},rl=x=>{const y=x.r;x.r=y.l;y.l=x;U(x);U(y);return y};
-function bal(n){U(n);const b=BF(n);if(b>1){if(BF(n.l)<0){n.l=rl(n.l);log+='LR '}else log+='LL ';return rr(n)}if(b<-1){if(BF(n.r)>0){n.r=rr(n.r);log+='RL '}else log+='RR ';return rl(n)}return n}
-function ins(n,v){if(!n)return{v,h:1,l:null,r:null};if(v<n.v)n.l=ins(n.l,v);else if(v>n.v)n.r=ins(n.r,v);else return n;return bal(n)}
-function del(n,v){if(!n)return n;if(v<n.v)n.l=del(n.l,v);else if(v>n.v)n.r=del(n.r,v);else{if(!n.l||!n.r)return n.l||n.r;let s=n.r;while(s.l)s=s.l;n.v=s.v;n.r=del(n.r,s.v)}return bal(n)}
-function lay(n,d,o){if(!n)return;lay(n.l,d+1,o);n.x=o.i++;n.y=d;lay(n.r,d+1,o)}function nd(n,a=[]){if(n){nd(n.l,a);a.push(n);nd(n.r,a)}return a}
-function dr(){lay(R,0,{i:0});const a=nd(R),X=n=>30+n.x*(540/Math.max(a.length,1)),Y=n=>30+n.y*55;$('#sv').innerHTML=a.map(n=>[n.l,n.r].map(c=>c?'<line x1="'+X(n)+'" y1="'+Y(n)+'" x2="'+X(c)+'" y2="'+Y(c)+'"/>':'').join('')).join('')+a.map(n=>'<g class="nd"><circle cx="'+X(n)+'" cy="'+Y(n)+'" r="18"/><text x="'+X(n)+'" y="'+(Y(n)+4)+'">'+n.v+'</text><text x="'+(X(n)+22)+'" y="'+(Y(n)-14)+'" style="font-size:10px">BF '+BF(n)+'</text></g>').join('')}
-function go2(){log='';R=ins(R,+$('#k').value);$('#k').value=+$('#k').value+10;$('#m').textContent=log?'Rotation: '+log:'rotation লাগেনি';dr()}
-function dl(){log='';R=del(R,+$('#k').value);$('#m').textContent=log?'Delete-এর পর rotation: '+log:'rotation লাগেনি';dr()}dr()</script></body></html>
+<section class="slide"><h2>AVL Tree — ধারণা ও Balance Factor</h2>
+<p>AVL tree হলো self-balancing binary search tree, যেখানে প্রতিটি node-এর <b>Balance Factor (BF)</b> সবসময় −১, ০ বা +১ থাকে। নাম এসেছে Georgy Adelson-Velsky ও Landis-এর নামে।</p>
+<div class="card"><b>কেন লাগে? (দাঁড়িপাল্লার গল্প):</b> সাধারণ BST-তে 10, 20, 30, 40 — sorted ডাটা দিলে tree একদিকে ঝুঁকে linked list হয়ে যায়, search হয় O(n)। AVL tree দাঁড়িপাল্লার মতো: কোনো node-এর এক পাশ অন্য পাশের চেয়ে ২ ধাপ ভারী হলেই সে ঘুরে (rotation) ভারসাম্য ফিরিয়ে আনে। তাই সব operation O(log n)।</div>
+<div class="card"><b>BF = বাম subtree-র height − ডান subtree-র height</b><br>Leaf-এর height = ১, না থাকা node-এর height = ০। বৈধ মান শুধু −১, ০, +১।</div>
+<h3>উদাহরণ: tree 33(9(8, 21(11)), 53(61))</h3>
+<svg viewBox="0 0 700 320" width="100%" style="max-width:700px;display:block;margin:auto" font-family="inherit">
+<g stroke="currentColor" stroke-opacity=".45" stroke-width="2"><line x1="350" y1="40" x2="200" y2="115"/><line x1="350" y1="40" x2="500" y2="115"/><line x1="200" y1="115" x2="110" y2="190"/><line x1="200" y1="115" x2="290" y2="190"/><line x1="500" y1="115" x2="560" y2="190"/><line x1="290" y1="190" x2="220" y2="265"/></g>
+<g stroke="#d97706" stroke-width="5" stroke-linecap="round" stroke-opacity=".9"><line x1="350" y1="40" x2="200" y2="115"/><line x1="200" y1="115" x2="290" y2="190"/><line x1="290" y1="190" x2="220" y2="265"/></g>
+<g stroke="#9333ea" stroke-width="5" stroke-linecap="round" stroke-opacity=".9"><line x1="350" y1="40" x2="500" y2="115"/><line x1="500" y1="115" x2="560" y2="190"/></g>
+<g fill="#2563eb"><circle cx="350" cy="40" r="20"/><circle cx="200" cy="115" r="20"/><circle cx="500" cy="115" r="20"/><circle cx="110" cy="190" r="20"/><circle cx="290" cy="190" r="20"/><circle cx="560" cy="190" r="20"/><circle cx="220" cy="265" r="20"/></g>
+<g fill="#fff" font-size="16" font-weight="700" text-anchor="middle"><text x="350" y="46">33</text><text x="200" y="121">9</text><text x="500" y="121">53</text><text x="110" y="196">8</text><text x="290" y="196">21</text><text x="560" y="196">61</text><text x="220" y="271">11</text></g>
+<g fill="currentColor" font-size="13"><g text-anchor="start"><text x="378" y="38">h=4</text><text x="378" y="54" fill="#16a34a" font-weight="700">BF=+1</text><text x="528" y="113">h=2</text><text x="528" y="129" fill="#16a34a" font-weight="700">BF=−1</text><text x="318" y="188">h=2</text><text x="318" y="204" fill="#16a34a" font-weight="700">BF=+1</text><text x="588" y="188">h=1</text><text x="588" y="204" fill="#16a34a" font-weight="700">BF=0</text></g>
+<g text-anchor="end"><text x="172" y="113">h=3</text><text x="172" y="129" fill="#16a34a" font-weight="700">BF=−1</text><text x="82" y="188">h=1</text><text x="82" y="204" fill="#16a34a" font-weight="700">BF=0</text><text x="192" y="263">h=1</text><text x="192" y="279" fill="#16a34a" font-weight="700">BF=0</text></g>
+<text x="250" y="68" text-anchor="end" fill="#d97706" font-weight="700">বামে ৩ ধাপ</text><text x="460" y="68" fill="#9333ea" font-weight="700">ডানে ২ ধাপ</text></g></svg>
+<div class="card"><b>figure পড়ার নিয়ম:</b> h = ওই node থেকে নিচের দিকে সবচেয়ে লম্বা পথে মোট node সংখ্যা (leaf-এর h = 1)। 🟠 কমলা পথ = root 33-এর বাম দিকের সবচেয়ে লম্বা পথ (9 → 21 → 11, মোট ৩)। 🟣 বেগুনি পথ = ডান দিকের সবচেয়ে লম্বা পথ (53 → 61, মোট ২)।</div>
+<h3>নিচ থেকে উপরে ধাপে ধাপে হিসাব</h3>
+<ol><li><b>Leaf (8, 11, 61):</b> নিচে কোনো child নেই, বাম ০ − ডান ০ = <b>BF 0</b>।</li>
+<li><b>21:</b> বামে 11 আছে (height ১), ডানে কিছু নেই (০) → ১ − ০ = <b>+1</b>। 21-এর নিজের h = ২।</li>
+<li><b>53:</b> বামে কিছু নেই (০), ডানে 61 (১) → ০ − ১ = <b>−1</b>। h = ২।</li>
+<li><b>9:</b> বামে 8 (h ১), ডানে 21 (h ২) → ১ − ২ = <b>−1</b>। h = ৩।</li>
+<li><b>33 (root):</b> বামে 9 (h ৩), ডানে 53 (h ২) → ৩ − ২ = <b>+1</b>।</li></ol>
+<p>নিচের table-এ একই হিসাব সংক্ষেপে:</p>
+<table><tr><th>Node</th><th>বাম height</th><th>ডান height</th><th>BF</th></tr>
+<tr><td>8, 11, 61 (leaf)</td><td>০</td><td>০</td><td>০</td></tr>
+<tr><td>21 (বামে 11)</td><td>১</td><td>০</td><td>+১</td></tr>
+<tr><td>9 (বামে 8, ডানে 21→11)</td><td>১</td><td>২</td><td>−১</td></tr>
+<tr><td>53 (ডানে 61)</td><td>০</td><td>১</td><td>−১</td></tr>
+<tr><td>33 (বাম ৩, ডান ২)</td><td>৩</td><td>২</td><td>+১</td></tr></table>
+<p>সব BF −১..+১-এর মধ্যে, তাই এই tree balanced।</p></section>
+
+<section class="slide"><h2>Rotation — AVL-এর আসল কৌশল</h2>
+<p>Rotation-এ কয়েকটা node-এর জায়গা বদলে tree-র আকার ঠিক করা হয়, কিন্তু BST-এর নিয়ম (বাম &lt; root &lt; ডান) ভাঙে না।</p>
+<h3>Left Rotate (ডান দিক ভারী হলে)</h3>
+<pre>    x                y
+   / \              / \
+  α   y     →      x   γ
+     / \          / \
+    β   γ        α   β</pre>
+<ol><li>y = x-এর ডান child। y-এর বাম subtree (β) কে x-এর ডান child বানাও।</li><li>x-এর parent p থাকলে p-এর যে পাশে x ছিল সেখানে y বসাও। p না থাকলে y-ই নতুন root।</li><li>x কে y-এর বাম child বানাও।</li></ol>
+<h3>Right Rotate (বাম দিক ভারী হলে)</h3>
+<pre>      y            x
+     / \          / \
+    x   γ   →   α   y
+   / \              / \
+  α   β            β   γ</pre>
+<ol><li>x = y-এর বাম child। x-এর ডান subtree (β) কে y-এর বাম child বানাও।</li><li>y-এর parent-এর জায়গায় x বসাও (parent না থাকলে x নতুন root)।</li><li>y কে x-এর ডান child বানাও।</li></ol>
+<div class="card"><b>মনে রাখার কৌশল:</b> যে পাশ ভারী, তার উল্টো দিকে ঘোরাও। ডান ভারী → Left rotate, বাম ভারী → Right rotate।</div></section>
+
+<section class="slide"><h2>চারটি Case — কোনটায় কী করব</h2>
+<p>যে node-এর BF ±২ হয়েছে তাকে z বলি। z-এর ভারী পাশের child-এর BF দেখলেই case বোঝা যায়।</p>
+<table><tr><th>Case</th><th>চেনার উপায়</th><th>সমাধান</th></tr>
+<tr><td><b>LL</b></td><td>z-এর BF = +২, বাম child-এর BF ≥ ০</td><td>z-এ <b>Right rotate</b></td></tr>
+<tr><td><b>RR</b></td><td>z-এর BF = −২, ডান child-এর BF ≤ ০</td><td>z-এ <b>Left rotate</b></td></tr>
+<tr><td><b>LR</b></td><td>z-এর BF = +২, বাম child-এর BF &lt; ০ (ভিতরের বাঁক)</td><td>আগে বাম child-এ Left rotate, তারপর z-এ Right rotate</td></tr>
+<tr><td><b>RL</b></td><td>z-এর BF = −২, ডান child-এর BF &gt; ০</td><td>আগে ডান child-এ Right rotate, তারপর z-এ Left rotate</td></tr></table>
+<div class="card">Insert-এ নতুন node-এর পথ দেখেও case বোঝা যায় (বামে-বামে = LL, বামে-ডানে = LR…)। Delete-এ child-এর BF দেখেই ঠিক করতে হয়; child-এর BF = ০ হলে single rotation (LL বা RR)।</div>
+<div class="card"><b>পরীক্ষার ৫ ধাপ:</b> ১) BST-এর মতো insert/delete ২) নিচ থেকে উপরে BF হিসাব ৩) সবচেয়ে নিচের ±২ node z খোঁজো ৪) z-এর ভারী child-এর BF দেখে case ঠিক করো ৫) rotation করে আবার BF যাচাই।</div></section>
+
+<section class="slide"><h2>Insert — ধাপে ধাপে</h2>
+<ol><li>BST-এর নিয়মে নামো: newKey &lt; current হলে বামে, বড় হলে ডানে, খালি জায়গা না পাওয়া পর্যন্ত।</li><li>সেখানে নতুন node বসাও (leaf, BF = ০)।</li><li>নিচ থেকে root পর্যন্ত সব node-এর height ও BF নতুন করে হিসাব করো।</li><li>প্রথম যে node-এর BF ±২ হয় সেটাই z; case অনুযায়ী rotation করো।</li><li>Insert-এ একটা rotation (বা double rotation) করলেই পুরো tree ঠিক হয়।</li></ol>
+<div class="card"><b>উদাহরণ:</b> tree = 33(13(11(8), 21), 53(61)), insert করব <b>9</b>।<br>9 &lt; 33 → বামে; 9 &lt; 13 → বামে; 9 &lt; 11 → বামে; 9 &gt; 8 → 8-এর ডানে বসে। এখন 11-এর BF = +২, বাম child 8-এর BF = −১ (&lt; ০) → <b>LR case</b>। 8-এ Left rotate (9 উপরে আসে), তারপর 11-এ Right rotate। ফলে 9 হয় subtree-র root, বামে 8, ডানে 11।<br>👉 পরের স্লাইডে ▶ বাটনে অ্যানিমেশন দেখো।</div></section>
+
+<section class="slide"><h2>Delete — ধাপে ধাপে</h2>
+<ol><li>BST-এর মতো যে node মুছবে তাকে খুঁজে বের করো।</li><li>(ক) leaf হলে সরাসরি মোছো। (খ) এক child থাকলে child-কে তার জায়গায় বসাও। (গ) দুই child থাকলে ডান subtree-র সবচেয়ে ছোট মান (inorder successor) এখানে কপি করে successor node মুছো।</li><li>নিচ থেকে root পর্যন্ত BF নতুন করে হিসাব করো।</li><li>যেখানে BF ±২, সেখানে case অনুযায়ী rotation করো। Delete-এ একাধিক node-এ rotation লাগতে পারে।</li></ol>
+<div class="card"><b>উদাহরণ:</b> tree = 33(13(9(8,11), 21), 53(61)), delete করব <b>13</b> (দুই child)।<br>Successor = ডান subtree-র সবচেয়ে ছোট = 21। 13-এর জায়গায় 21 বসে, পুরোনো 21 মুছে যায়। এখন নতুন 21-এর বাম height ২, ডান ০ → BF = +২; বাম child 9-এর BF = ০ (≥ ০) → <b>LL case</b> → Right rotate। শেষে 9 root, বামে 8, ডানে 21 (তার বামে 11)।</div></section>
+
+<section class="slide"><h2>AVL (ইন্টারেক্টিভ অ্যানিমেশন)</h2>
+<div class="card"><b>রঙ:</b> 🟠 খোঁজার পথ, 🟢 নতুন বা successor node, 🔴 unbalanced node (z)। প্রতিটি node-এর উপরে BF লেখা। নিচের লেখায় কী হচ্ছে বলা থাকবে।</div>
+<p><button onclick="AV.run(AV.pIns)">▶ Insert উদাহরণ (9)</button><button onclick="AV.run(AV.pDel)">▶ Delete উদাহরণ (13)</button><button onclick="AV.run(()=>AV.seq([10,20,30]))">RR</button><button onclick="AV.run(()=>AV.seq([30,20,10]))">LL</button><button onclick="AV.run(()=>AV.seq([30,10,20]))">LR</button><button onclick="AV.run(()=>AV.seq([10,30,20]))">RL</button><button onclick="AV.run(()=>AV.seq([50,30,70,20,40,60,80,10,5,3]))">বড় demo</button></p>
+<input id="k" type="number" value="10" style="width:80px"><button onclick="AV.run(()=>AV.insert(+document.getElementById('k').value))">Insert</button><button onclick="AV.run(()=>AV.del(+document.getElementById('k').value))">Delete</button><button onclick="AV.stop()">⏸ Stop</button><button onclick="AV.play()">▶ Play</button><button onclick="AV.reset()">🔄 Reset</button>
+<svg id="sv" viewBox="0 0 700 360" width="100%"></svg><p id="m"></p></section>
+
+<section class="slide"><h2>Complexity ও ব্যবহার</h2>
+<table><tr><th>Insertion</th><th>Deletion</th><th>Search</th></tr><tr><td>O(log n)</td><td>O(log n)</td><td>O(log n)</td></tr></table>
+<div class="card"><b>ব্যবহার:</b> ডাটাবেসে বড় record-এর indexing এবং বড় ডাটাবেসে দ্রুত searching।</div></section>
+
+<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section><script src="bank.js"></script><script src="app.js"></script><script>quiz('tr','#qz');
+window.AV=(()=>{const g=id=>document.getElementById(id),STOP={};
+let tok=0,pending=null,paused=false,waiters=[];
+const gate=()=>paused?new Promise((res,rej)=>waiters.push({res,rej})):Promise.resolve();
+async function sleep(ms){const t=tok;for(let l=ms;l>0;l-=40){await gate();await new Promise(r=>setTimeout(r,40));if(t!==tok)throw STOP}}
+let R=null,ID=0,busy=false,hl={},pos={};
+const mk=v=>({v,h:1,l:null,r:null,id:++ID}),N=(v,l,r)=>{const n=mk(v);n.l=l||null;n.r=r||null;return n};
+const H=n=>n?n.h:0,BF=n=>H(n.l)-H(n.r),upd=n=>{n.h=1+Math.max(H(n.l),H(n.r))};
+function rec(n){if(n){rec(n.l);rec(n.r);upd(n)}}
+function rotR(y){const x=y.l;y.l=x.r;x.r=y;upd(y);upd(x);return x}
+function rotL(x){const y=x.r;x.r=y.l;y.l=x;upd(x);upd(y);return y}
+function fix(n,t,f){if(n===t)return f(n);if(t.v<n.v)n.l=fix(n.l,t,f);else n.r=fix(n.r,t,f);return n}
+function un(n){if(!n)return null;const c=un(n.l)||un(n.r);return c||(Math.abs(BF(n))>1?n:null)}
+function all(n,a=[]){if(n){all(n.l,a);a.push(n);all(n.r,a)}return a}
+const msg=t=>{g('m').innerHTML=t},COL={path:'#d97706',new:'#16a34a',bad:'#dc2626','':'#2563eb'};
+function paint(a,c){let s='';a.forEach(n=>[n.l,n.r].forEach(ch=>{if(ch)s+='<line x1="'+c[n.id].x+'" y1="'+c[n.id].y+'" x2="'+c[ch.id].x+'" y2="'+c[ch.id].y+'" stroke="currentColor" stroke-opacity=".5" stroke-width="2"/>'}));
+a.forEach(n=>{const p=c[n.id];s+='<g><circle cx="'+p.x+'" cy="'+p.y+'" r="20" fill="'+COL[hl[n.id]||'']+'"/><text x="'+p.x+'" y="'+(p.y+6)+'" fill="#fff" font-size="16" font-weight="700" text-anchor="middle">'+n.v+'</text><text x="'+(p.x+4)+'" y="'+(p.y-26)+'" fill="currentColor" font-size="12" text-anchor="middle">BF '+BF(n)+'</text></g>'});g('sv').innerHTML=s}
+async function draw(an=true){let i=0;const a=all(R);(function f(n,d){if(!n)return;f(n.l,d+1);n.X=i++;n.Y=d;f(n.r,d+1)})(R,0);
+const c=a.length,st=Math.min(72,620/Math.max(c-1,1)),o=(700-st*(c-1))/2,tg={},f0={};
+a.forEach(n=>{tg[n.id]={x:o+n.X*st,y:50+n.Y*62}});a.forEach(n=>{f0[n.id]=pos[n.id]||{x:tg[n.id].x,y:5}});
+const T=an?600:0;let el=0,last=performance.now();
+const tk=tok;await new Promise((res,rej)=>{(function fr(t){if(tk!==tok){rej(STOP);return}if(paused&&T){gate().then(()=>{last=performance.now();requestAnimationFrame(fr)},()=>rej(STOP));return}el+=t-last;last=t;const k=T?Math.min(1,el/T):1,e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,cur={};
+a.forEach(n=>{const f=f0[n.id],q=tg[n.id];cur[n.id]={x:f.x+(q.x-f.x)*e,y:f.y+(q.y-f.y)*e}});paint(a,cur);
+if(k<1)requestAnimationFrame(fr);else{pos=cur;res()}})(performance.now())})}
+async function rebalance(){let t;while((t=un(R))){hl={};hl[t.id]='bad';const b=BF(t),cs=b>1?(BF(t.l)<0?'LR':'LL'):(BF(t.r)>0?'RL':'RR');
+msg('⚠ <b>'+t.v+'</b>-এর BF = '+b+' (±১-এর বাইরে) → <b>'+cs+' case</b>');await draw(false);await sleep(1500);
+if(cs=='LR'){msg('LR: আগে '+t.l.v+'-এ Left rotate');R=fix(R,t.l,rotL);rec(R);await draw();await sleep(1000)}
+if(cs=='RL'){msg('RL: আগে '+t.r.v+'-এ Right rotate');R=fix(R,t.r,rotR);rec(R);await draw();await sleep(1000)}
+if(b>1){msg(t.v+'-এ Right rotate');R=fix(R,t,rotR)}else{msg(t.v+'-এ Left rotate');R=fix(R,t,rotL)}
+rec(R);await draw();await sleep(1000)}}
+async function insert(v){hl={};if(!R){R=mk(v);hl[R.id]='new';msg(v+' প্রথম node, তাই root');await draw();await sleep(600);hl={};await draw(false);return}
+let n=R,p;while(n){if(v===n.v){msg(v+' আগে থেকেই আছে');return}
+hl[n.id]='path';msg(v+(v<n.v?' &lt; ':' &gt; ')+n.v+' → '+(v<n.v?'বামে':'ডানে')+' যাও');await draw(false);await sleep(800);p=n;n=v<n.v?n.l:n.r}
+const nn=mk(v);if(v<p.v)p.l=nn;else p.r=nn;hl={};hl[nn.id]='new';rec(R);msg(v+' leaf হিসেবে বসল। এবার BF হিসাব');await draw();await sleep(1200);
+await rebalance();hl={};await draw(false);msg('✅ '+v+' insert শেষ, tree balanced')}
+async function del(v){hl={};let n=R;while(n&&n.v!==v){hl[n.id]='path';msg(v+(v<n.v?' &lt; ':' &gt; ')+n.v+' → '+(v<n.v?'বামে':'ডানে'));await draw(false);await sleep(800);n=v<n.v?n.l:n.r}
+if(!n){msg(v+' tree-তে নেই');return}
+hl={};hl[n.id]='bad';
+if(n.l&&n.r){let s=n.r;while(s.l)s=s.l;msg('দুই child আছে → inorder successor <b>'+s.v+'</b> (ডানের সবচেয়ে ছোট) দিয়ে বদলাব');hl[s.id]='new';await draw(false);await sleep(1600);R=fix(R,s,x=>x.r);n.v=s.v}
+else{msg(v+' মোছা হচ্ছে');await draw(false);await sleep(1000);R=fix(R,n,x=>x.l||x.r)}
+hl={};rec(R);await draw();await sleep(1000);await rebalance();hl={};await draw(false);msg('✅ delete শেষ, tree balanced')}
+function silent(){let t;while((t=un(R))){const b=BF(t);if(b>1){if(BF(t.l)<0)R=fix(R,t.l,rotL);R=fix(R,t,rotR)}else{if(BF(t.r)>0)R=fix(R,t.r,rotR);R=fix(R,t,rotL)}rec(R)}}
+function finish(){const p=pending;pending=null;hl={};if(p=='reset'){R=null;pos={};draw(false);msg('🔄 Reset হয়েছে, tree এখন খালি')}else if(p=='stop'){silent();draw(false);msg('⏹ থামানো হয়েছে (tree balanced অবস্থায় রাখা হয়েছে)')}}
+async function run(f){if(busy)return;busy=true;try{await f()}catch(e){if(e!==STOP)throw e;finish()}finally{busy=false;if(paused){paused=false;unmark()}}}
+function release(err){const w=waiters;waiters=[];w.forEach(x=>err?x.rej(STOP):x.res())}
+function unmark(){const z=g('pz');if(z)z.remove()}
+function stop(){if(busy&&!paused){paused=true;g('m').insertAdjacentHTML('beforeend','<span id="pz" style="color:#d97706"> ⏸ থামানো আছে, ▶ Play চাপলে এখান থেকে চলবে</span>')}}
+function play(){if(paused){paused=false;unmark();release(false)}}
+function reset(){pending='reset';tok++;paused=false;release(true);if(!busy)finish()}
+async function seq(a){R=null;pos={};for(const v of a){await insert(v);await sleep(600)}}
+async function pIns(){R=N(33,N(13,N(11,N(8)),N(21)),N(53,null,N(61)));pos={};hl={};rec(R);await draw(false);msg('শুরুর tree। এবার 9 insert করব');await sleep(1800);await insert(9)}
+async function pDel(){R=N(33,N(13,N(9,N(8),N(11)),N(21)),N(53,null,N(61)));pos={};hl={};rec(R);await draw(false);msg('শুরুর tree। এবার 13 delete করব');await sleep(1800);await del(13)}
+draw(false);return{run,insert,del,reset,stop,play,seq,pIns,pDel}})();
+</script></body></html>
