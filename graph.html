@@ -1,61 +1,266 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Graph</title><link rel="stylesheet" href="style.css"></head><body>
-<section class="slide"><h2>Graph — মৌলিক ধারণা</h2>
-<p>Graph = <b>vertex (node)</b>-এর সেট + তাদের যুক্তকারী <b>edge</b>-এর সেট। Tree-র বিপরীতে graph-এ cycle থাকতে পারে। Tree হলো এমন graph যা connected ও cycle-হীন (n vertex ⇒ n−1 edge)।</p>
-<table><tr><th>পরিভাষা</th><th>অর্থ</th></tr><tr><td>Directed / Undirected</td><td>edge-এ দিক আছে / নেই</td></tr><tr><td>Weighted</td><td>প্রতি edge-এ খরচ/দূরত্ব (weight)</td></tr><tr><td>Path / Cycle</td><td>vertex-এর ধারা / যে path শুরুর vertex-এই ফেরে</td></tr><tr><td>Connected</td><td>যেকোনো দুই vertex-এর মধ্যে path আছে</td></tr><tr><td>Degree</td><td>কোনো vertex-এ যুক্ত edge সংখ্যা</td></tr></table>
-<div class="card">n vertex-এর complete undirected graph-এ edge = n(n−1)/2। <b>ব্যবহার:</b> সড়ক/নেটওয়ার্ক, সামাজিক সংযোগ, গেমের মানচিত্র, রাউটিং।</div>
-<p>এই পেজের উদাহরণ graph (weighted, undirected):</p><div id="g0" style="max-width:460px"></div><div id="rep"></div>
-<div class="card"><b>Representation:</b> Adjacency matrix (V×V টেবিল; space O(V²); edge আছে কি না O(1)) · Adjacency list (প্রতি vertex-এর প্রতিবেশীর তালিকা; space O(V+E))।</div></section>
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Graph</title><link rel="stylesheet" href="style.css">
+<style>
+.chip{display:inline-block;padding:2px 9px;margin:2px;border-radius:14px;border:1px solid #888;font-size:13px}
+.chip.ok{background:var(--hl,#ffd54a);color:#000;border-color:var(--hl,#ffd54a)}
+.chip.no{background:#fca5a5;color:#000;text-decoration:line-through;border-color:#f87171}
+.chip.cur{outline:2px solid #f97316}
+.nd.on text.lb,.nd.cur text.lb{fill:currentColor}
+.nd.cur circle{stroke:#f97316;stroke-width:4}
+.pc{margin:8px 0}.pc button{margin:2px 4px 2px 0}
+.pm{min-height:3.2em;line-height:1.7}
+.ex{overflow-x:auto;margin:6px 0}
+.ct{font-size:13px;opacity:.7;margin:2px 0}
+.qb{margin:4px 0}
+ol.rules{padding-left:1.4em;line-height:1.8;margin:6px 0}
+.gm{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0}
+.mini{border:1px solid #8884;border-radius:10px;padding:10px}.mini b{display:block}
+.wn{border-left:4px solid #d98b18}
+.fm{padding:10px;border-radius:8px;border:1px dashed #8886;overflow-x:auto;font-family:ui-monospace,monospace;margin:8px 0}
+.lst li{margin:4px 0}.qq{border:1px solid #8884;border-radius:10px;padding:10px;margin:8px 0}
+</style></head><body>
 
-<section class="slide"><h2>BFS ও DFS</h2>
-<div class="card"><b>কীভাবে চালাবে:</b> বোতাম চাপলে A থেকে শুরু করে node-গুলো ক্রমানুসারে হলুদ হবে এবং ক্রম নিচে লেখা হবে। BFS কাছের প্রতিবেশীদের আগে (queue); DFS একটি পথে যতদূর যায়, শেষ হলে ফিরে অন্য পথে (stack/recursion)।</div>
-<div id="g1" style="max-width:460px"></div><button onclick="tr('bfs')">BFS (queue)</button><button onclick="tr('dfs')">DFS (stack)</button><p id="m1"></p>
-<table><tr><th></th><th>BFS</th><th>DFS</th></tr><tr><td>Data structure</td><td>Queue</td><td>Stack / recursion</td></tr><tr><td>Complexity</td><td>O(V+E)</td><td>O(V+E)</td></tr><tr><td>ব্যবহার</td><td>unweighted graph-এ এক vertex থেকে সব vertex-এর দূরত্ব/ছোট পথ; বন্ধু-সুপারিশ</td><td>maze/puzzle পথ, cycle খোঁজা, গভীর ফোল্ডার খোঁজা</td></tr></table></section>
+<section class="slide"><h2>Graph কী? কীভাবে কাজ করে?</h2>
+<p>Graph হলো <b>“জিনিস” আর “জিনিসদের মধ্যকার সম্পর্ক”</b>-এর ছবি। জিনিস = <b>vertex / node</b> (বিন্দু), সম্পর্ক = <b>edge</b> (রেখা)। Tree-র বিপরীতে graph-এ cycle (ঘুরে নিজের কাছে ফেরা পথ) থাকতে পারে। Tree হলো এমন graph যা connected ও cycle-হীন (n vertex ⇒ n−1 edge)।</p>
+<div class="card"><b>সহজ উপমা:</b> শহর = node, দুই শহরের রাস্তা = edge, রাস্তার দূরত্ব বা টোল = weight। ফেসবুকে প্রতিটি মানুষ = node, বন্ধুত্ব = edge।</div>
+<div class="gm"><div class="mini"><b>Vertex / Node</b>যে ব্যক্তি, জায়গা, কম্পিউটার বা বস্তুকে বোঝানো হচ্ছে। যেমন: শহর A, শহর B।</div><div class="mini"><b>Edge</b>দুটি node-এর মধ্যকার সংযোগ। যেমন: A থেকে B যাওয়ার রাস্তা।</div><div class="mini"><b>Weight</b>কোনো edge-এর খরচ, দূরত্ব, সময় বা অন্য মান। যেমন: রাস্তার দূরত্ব ৫ কিমি।</div><div class="mini"><b>Path</b>এক node থেকে অন্য node-এ যেতে ধারাবাহিকভাবে পার হওয়া edge-গুলোর পথ।</div></div>
+<h3>Graph-এর ধরন</h3>
+<table><tr><th>ধরন</th><th>সহজ ব্যাখ্যা</th><th>উদাহরণ</th></tr><tr><td>Undirected Graph</td><td>সংযোগের নির্দিষ্ট দিক নেই; A—B হলে দুই দিকেই যাওয়া যায়।</td><td>দুই শহরের দ্বিমুখী রাস্তা</td></tr><tr><td>Directed Graph</td><td>Edge-এর দিক নির্দিষ্ট; A → B মানে A থেকে B, কিন্তু B থেকে A নাও হতে পারে।</td><td>একদিকের রাস্তা, Instagram follow</td></tr><tr><td>Weighted Graph</td><td>প্রতিটি edge-এর সঙ্গে একটি weight থাকে।</td><td>দূরত্ব, ভাড়া বা সময়</td></tr><tr><td>Unweighted Graph</td><td>Edge-এর আলাদা weight নেই; প্রতিটি edge-কে সমান ধরা হয়।</td><td>বন্ধুত্বের নেটওয়ার্ক</td></tr><tr><td>Connected Graph</td><td>প্রতিটি node থেকে অন্য node-এ যাওয়ার অন্তত একটি পথ আছে।</td><td>সব শহর কোনো না কোনোভাবে যুক্ত</td></tr><tr><td>Cycle</td><td>কোনো node থেকে যাত্রা শুরু করে আবার সেই node-এ ফিরে আসা।</td><td>A → B → C → A</td></tr></table>
+<h3>কিছু গুরুত্বপূর্ণ শব্দ</h3>
+<ul class="lst"><li><b>Degree:</b> একটি node-এর সঙ্গে কয়টি edge যুক্ত। Directed graph-এ In-degree (যত edge ঢোকে) ও Out-degree (যত edge বের হয়) আলাদা করে দেখা হয়।</li><li><b>Adjacent node:</b> সরাসরি edge দিয়ে যুক্ত node-গুলো।</li><li><b>Subgraph:</b> মূল graph-এর কিছু node ও edge নিয়ে তৈরি ছোট graph।</li><li><b>Tree:</b> Connected এবং cycle-হীন graph। n টি node থাকলে tree-তে ঠিক n−1 টি edge থাকে।</li></ul>
+<div class="card"><b>Graph দিয়ে সমস্যা সমাধান — ৩ ধাপ:</b>
+<ol class="rules"><li>সমস্যাটাকে <b>node</b> (জিনিস) আর <b>edge</b> (সম্পর্ক) হিসেবে ভাবো।</li><li>কম্পিউটারে রাখো: <b>adjacency list</b> বা <b>adjacency matrix</b> (নিচে দেখো)।</li><li>প্রশ্ন অনুযায়ী <b>algorithm</b> চালাও — ঘুরে দেখা (BFS/DFS), ছোট পথ (Dijkstra…), কম খরচে জোড়া (MST)।</li></ol></div>
+<div class="card"><b>n vertex-এর complete undirected graph-এ edge = n(n−1)/2।</b> ব্যবহার: সড়ক/নেটওয়ার্ক, সামাজিক সংযোগ, গেমের মানচিত্র, রাউটিং।</div>
+<p>নিচের graph-এ A, B, C, D, E, F ছয়টি শহর কল্পনা করো। লাইনগুলো রাস্তা এবং লাইনের পাশের সংখ্যা রাস্তার দূরত্ব।</p>
+<div class="card"><b>নিজে করে দেখো:</b> নিচের যেকোনো node-এ ক্লিক করো — তার প্রতিবেশী ও degree দেখাবে।</div>
+<div class="pc">🔍 আকার: <button onclick="szG('g0',-60)">−</button><button onclick="szG('g0',60)">+</button></div><div id="g0" style="max-width:460px"></div><p id="ginfo">যেকোনো node-এ ক্লিক করো।</p><div id="rep"></div>
+<div class="card"><b>V এবং E কী?</b> V = মোট vertex/node সংখ্যা, E = মোট edge সংখ্যা। Graph algorithm-এর Time Complexity-তে এই দুটি প্রতীক বারবার আসবে। এই উদাহরণে V = 6, E = 9।</div>
+<div class="gm"><div class="mini"><b>Adjacency List</b>প্রতিটি node-এর পাশে তার প্রতিবেশী node-গুলোর তালিকা রাখা হয়। Sparse graph-এ (edge তুলনামূলক কম) memory সাশ্রয়ী। Space: O(V+E)।</div><div class="mini"><b>Adjacency Matrix</b>V × V টেবিল বানানো হয়। i ও j node-এর মধ্যে edge থাকলে ঘরে 1 বা weight, না থাকলে 0/∞ রাখা হয়। Edge আছে কি না দ্রুত দেখা যায়। Space: O(V²)।</div></div></section>
+
+<section class="slide"><h2>BFS — Breadth First Search</h2>
+<div class="card"><b>এক লাইনে:</b> শুরুর node থেকে আগে <b>কাছের</b> সবাইকে, তারপর তাদের কাছের সবাইকে — ঢেউয়ের মতো ছড়িয়ে ঘুরে দেখা। ব্যবহার হয় <b>Queue</b> (লাইনে যে আগে দাঁড়ায় সে আগে বের হয় — FIFO)।</div>
+<p>Traversal মানে graph-এর node-গুলোকে নিয়ম মেনে একে একে visit করা। একই node-এ বারবার চলে যাওয়ার ঝুঁকি থাকে, তাই কোন node আগে visit হয়েছে তা মনে রাখতে <b>visited</b> তালিকা/সেট রাখি।</p>
+<div class="card"><b>সহজ উদাহরণ:</b> তুমি A শহরে আছো। আগে A থেকে সরাসরি যেসব শহরে যাওয়া যায় সেগুলো দেখবে। তারপর ওই শহরগুলো থেকে এক রাস্তা দূরের শহরগুলো দেখবে। এভাবেই স্তর (level) ধরে এগোবে।</div>
+<div class="card"><b>Queue কী?</b> Queue হলো লাইনের মতো: যে আগে ঢোকে, সে আগে বের হয় (FIFO — First In, First Out)।</div>
+<div class="card"><b>নিয়ম:</b><ol class="rules"><li>শুরুর node-কে queue-তে রাখো এবং “দেখা হয়েছে” চিহ্ন দাও।</li><li>queue-র <b>সামনের</b> node-টা বের করো — এটাই এখন visit করা node।</li><li>তার সব প্রতিবেশীর মধ্যে যারা এখনো দেখা হয়নি, তাদের “দেখা হয়েছে” চিহ্ন দিয়ে queue-র <b>পেছনে</b> যোগ করো।</li><li>queue ফাঁকা না হওয়া পর্যন্ত ২ ও ৩ বারবার করো।</li></ol></div>
+<div class="card"><b>কীভাবে চালাবে:</b> “পরের ▶” চাপো। হলুদ node = দেখা হয়েছে, কমলা বর্ডার = এই ধাপের node, হলুদ edge = কোন node থেকে কে আবিষ্কৃত হলো। চাইলে “অটো” চাপো।</div>
+<div class="pc"><label>শুরু node: <select onchange="setTrav('b',this.value)"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></label></div><div id="pbfs"></div>
+<table><tr><th>Data structure</th><th>Complexity</th><th>ব্যবহার</th></tr><tr><td>Queue</td><td>O(V+E)</td><td>unweighted graph-এ এক vertex থেকে সব vertex-এর ছোট পথ (কম edge); বন্ধু-সুপারিশ; maze-এর সবচেয়ে ছোট পথ</td></tr></table></section>
+
+<section class="slide"><h2>DFS — Depth First Search</h2>
+<div class="card"><b>এক লাইনে:</b> একটা পথ ধরে <b>যতদূর যাওয়া যায়</b> যাও; আর যাওয়ার জায়গা না থাকলে পেছনে ফিরে (backtrack) অন্য পথ ধরো। ব্যবহার হয় <b>Stack</b> (সবার ওপরে যেটা রাখা হয় সেটাই আগে বের হয় — LIFO) বা recursion।</div>
+<div class="card"><b>Stack কী?</b> Stack হলো প্লেটের স্তূপের মতো: যে সবার শেষে ঢোকে, সে আগে বের হয় (LIFO — Last In, First Out)। DFS recursion দিয়েও লেখা যায়।</div>
+<div class="card"><b>নিয়ম:</b><ol class="rules"><li>শুরুর node-কে stack-এ রাখো।</li><li>stack-এর <b>মাথা</b> থেকে একটা node নাও। যদি আগেই দেখা হয়ে থাকে, বাদ দিয়ে পরেরটা নাও।</li><li>না দেখা থাকলে visit করো এবং তার না-দেখা প্রতিবেশীদের stack-এ রাখো।</li><li>stack ফাঁকা না হওয়া পর্যন্ত ২ ও ৩ বারবার করো। (stack-এ নিচে থাকা node-এ ফেরাটাই backtrack।)</li></ol></div>
+<div class="card"><b>BFS বনাম DFS:</b> BFS “চওড়া” হয়ে ছড়ায় (queue), DFS “গভীরে” যায় (stack)। দুটোরই complexity O(V+E)। ব্যবহার: maze/puzzle-এর পথ, cycle খোঁজা, connected অংশ গোনা, গভীর ফোল্ডার খোঁজা।</div>
+<div class="pc"><label>শুরু node: <select onchange="setTrav('d',this.value)"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></label></div><div id="pdfs"></div>
+<table><tr><th>বিষয়</th><th>BFS</th><th>DFS</th></tr><tr><td>Data structure</td><td>Queue</td><td>Stack / Recursion</td></tr><tr><td>চলার ধরন</td><td>Level by level</td><td>এক পথ ধরে গভীরে</td></tr><tr><td>Shortest path</td><td>Unweighted graph-এ shortest path বের করতে পারে</td><td>সাধারণভাবে shortest path নিশ্চিত করে না</td></tr><tr><td>Time Complexity</td><td>O(V+E)</td><td>O(V+E)</td></tr><tr><td>ব্যবহার</td><td>সামাজিক নেটওয়ার্কে কাছের সংযোগ, unweighted shortest path</td><td>Maze, cycle detection, connected component, backtracking</td></tr></table></section>
 
 <section class="slide"><h2>Shortest Path — Dijkstra</h2>
-<p><b>Single source</b> shortest path: এক উৎস (A) থেকে বাকি সব vertex-এ সবচেয়ে কম খরচের পথ। <b>নেগেটিভ weight চলবে না।</b> কৌশল (greedy): অনির্ধারিত vertex-দের মধ্যে যার দূরত্ব সবচেয়ে কম সেটিকে চূড়ান্ত করো, তার প্রতিবেশীদের দূরত্ব ছোট হলে আপডেট (relax) করো।</p>
-<div class="card"><b>কীভাবে চালাবে:</b> “পরের ধাপ” চাপো; হলুদ node = চূড়ান্ত হওয়া; নিচের টেবিলে প্রতিটি vertex-এর বর্তমান দূরত্ব; হলুদ edge = এখন পর্যন্ত পাওয়া shortest-path tree।</div>
-<div id="g2" style="max-width:460px"></div><button onclick="dj(0)">রিসেট</button><button onclick="dj(1)">পরের ধাপ</button><div id="d2"></div>
+<div class="card"><b>এক লাইনে:</b> <b>এক উৎস</b> (এখানে A) থেকে বাকি সব node-এ সবচেয়ে কম খরচের পথ। <b>নেগেটিভ weight চলবে না।</b> কৌশল greedy — এখনো চূড়ান্ত হয়নি এমন node-দের মধ্যে যার দূরত্ব সবচেয়ে ছোট, সেটাকেই চূড়ান্ত ধরো।</div>
+<div class="card wn"><b>খুব গুরুত্বপূর্ণ:</b> Dijkstra-তে negative weight থাকা যাবে না। কোনো edge-এর weight ঋণাত্মক হলে Bellman-Ford ব্যবহার করো।</div>
+<div class="card"><b>মূল ধারণা: Greedy।</b> প্রতিবার যেসব node-এর shortest distance এখনো চূড়ান্ত হয়নি, তাদের মধ্যে যার বর্তমান distance সবচেয়ে কম তাকে বেছে নিই, তারপর তার প্রতিবেশীদের distance আরও কমানো যায় কি না দেখি। এই আপডেটকে <b>Relaxation</b> বলে।
+<div class="fm">যদি dist[u] + weight(u, v) &lt; dist[v] হয়, তাহলে dist[v] = dist[u] + weight(u, v)</div></div>
+<div class="card"><b>নিয়ম:</b><ol class="rules"><li>উৎসের দূরত্ব 0, বাকি সবার দূরত্ব ∞ ধরো।</li><li>চূড়ান্ত হয়নি এমন node-দের মধ্যে <b>সবচেয়ে ছোট দূরত্বের</b> node u বাছো — u এখন চূড়ান্ত।</li><li>u-র প্রতিটি প্রতিবেশী v-এর জন্য দেখো: <b>d[u] + weight(u,v) &lt; d[v]</b> হলে d[v] কমিয়ে নতুন মান বসাও। একে বলে <b>relax</b>।</li><li>সব node চূড়ান্ত না হওয়া পর্যন্ত ২ ও ৩ চলতে থাকবে।</li></ol></div>
+<div class="card"><b>কেন নেগেটিভ weight-এ ভুল?</b> Dijkstra ধরে নেয় একবার চূড়ান্ত হলে আর কমবে না। নেগেটিভ edge পরে এসে সেটা কমিয়ে দিতে পারে।</div>
+<div class="card"><b>কীভাবে চালাবে:</b> “পরের ▶” চাপো। node-এর নিচের সংখ্যা = এখনকার দূরত্ব; হলুদ node = চূড়ান্ত; হলুদ edge = এ পর্যন্ত পাওয়া shortest-path tree।</div>
+<div class="pc"><label>Start node: <select onchange="setDj(this.value)"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></label></div><div id="pdj"></div>
 <div class="card"><b>Complexity:</b> array দিয়ে O(V²); min-heap দিয়ে O((V+E) log V)। BFS দিয়েও unweighted graph-এ shortest path হয়, কিন্তু weighted-এ Dijkstra লাগে।</div></section>
 
-<section class="slide"><h2>Bellman-Ford ও SPFA</h2>
-<p><b>Bellman-Ford</b> single-source shortest path, যেখানে <b>edge-এর weight নেগেটিভ</b> হতে পারে। পদ্ধতি: (V−1) বার সব edge relax করো। নেগেটিভ cycle থাকলে shortest path অর্থহীন (V-তম বারেও কমলে নেগেটিভ cycle ধরা পড়ে)। Complexity O(V·E)।</p>
-<p>উদাহরণ (directed): A→B = 4, A→C = 5, B→C = −3, C→D = 2; উৎস A:</p><div id="bf"></div>
-<div class="card"><b>SPFA (Shortest Path Faster Algorithm):</b> Bellman-Ford-এরই queue-ভিত্তিক দ্রুত রূপ — শুধু যে vertex-এর দূরত্ব বদলেছে তাদের queue-তে রেখে relax করে। single-source; গড়ে খুব দ্রুত, তাত্ত্বিক worst case O(V·E)।</div></section>
+<section class="slide"><h2>Bellman-Ford</h2>
+<div class="card"><b>এক লাইনে:</b> Dijkstra-র মতোই এক উৎস থেকে shortest path, কিন্তু <b>edge-এর weight নেগেটিভ</b> হলেও কাজ করে। কৌশল: সব edge বারবার relax করো।</div>
+<div class="card"><b>Negative weight কেন হয়?</b> ধরো কোনো graph-এ পথের খরচ কমাতে ছাড়/ক্রেডিট দেওয়া হচ্ছে। কোনো edge-এ −3 মানে ওই edge পার হলে মোট খরচ ৩ কমে যায়। Dijkstra এখানে ভুল করতে পারে, তাই Bellman-Ford লাগে।
+<div class="fm">dist[v] = min(dist[v], dist[u] + weight(u, v))</div></div>
+<div class="card wn"><b>Negative Cycle:</b> কোনো cycle-এর edge weight-গুলোর যোগফল ঋণাত্মক হলে ওই cycle বারবার ঘুরে distance আরও কমানো সম্ভব। তাই নির্দিষ্ট shortest distance পাওয়া যায় না।</div>
+<div class="card"><b>নিয়ম:</b><ol class="rules"><li>উৎসের দূরত্ব 0, বাকি সব ∞।</li><li><b>(V−1) বার</b> এই কাজ করো: প্রতিটি edge (u→v, w)-এর জন্য দেখো d[u]+w &lt; d[v] কি না; হলে d[v] আপডেট করো।</li><li>আরও <b>একবার (V-তম)</b> সব edge দেখো। এবারও কিছু কমলে <b>negative cycle</b> আছে — তখন shortest path অর্থহীন।</li></ol>
+<b>কেন (V−1) বার?</b> সবচেয়ে ছোট পথে সর্বোচ্চ V−1টা edge থাকে। প্রতি pass-এ অন্তত আরও এক edge দূরের সঠিক মান পাওয়া যায়। Complexity O(V·E)।</div>
+<div class="card"><b>কীভাবে চালাবে:</b> graph directed। উদাহরণ ১-এর edge: A→B = 4, A→C = 5, B→C = −3, C→D = 2; শুরু = A। একটি উদাহরণ বেছে “পরের ▶” চাপো — হলুদ edge = এখন যে edge দেখছি। (edge-এর ক্রম ইচ্ছাকৃতভাবে উল্টো রাখা, যাতে একাধিক pass কেন লাগে বোঝা যায়।)</div>
+<div class="pc"><button onclick="setBF(1)">উদাহরণ ১: নেগেটিভ edge (cycle নেই)</button><button onclick="setBF(2)">উদাহরণ ২: negative cycle আছে</button></div>
+<div id="pbf"></div>
+<div class="card"><b>Complexity:</b> Time O(V × E), Space O(V)। Negative edge থাকলে ব্যবহারযোগ্য।</div></section>
+
+<section class="slide"><h2>SPFA — Bellman-Ford-এর দ্রুত রূপ</h2>
+<div class="card"><b>এক লাইনে:</b> Bellman-Ford সব edge বারবার দেখে — অনেক বাড়তি কাজ। SPFA (Shortest Path Faster Algorithm) শুধু <b>যে node-এর দূরত্ব সদ্য বদলেছে</b>, তার edge-গুলো দেখে। এজন্য queue লাগে।</div>
+<div class="card"><b>নিয়ম:</b><ol class="rules"><li>উৎসের দূরত্ব 0, বাকি ∞; উৎসকে queue-তে রাখো।</li><li>queue-র সামনে থেকে u বের করো।</li><li>u-র প্রতিটি edge (u→v, w) relax করো: d[u]+w &lt; d[v] হলে d[v] কমাও, এবং v যদি queue-তে না থাকে তবে পেছনে যোগ করো।</li><li>queue ফাঁকা হলে শেষ। (Negative cycle ধরতে প্রতিটি node কতবার enqueue/relax হলো তার count রাখতে হয়।)</li></ol>
+</div>
+<div class="card wn"><b>সতর্কতা:</b> SPFA সব ক্ষেত্রে Bellman-Ford-এর চেয়ে দ্রুত নয়। Average-এ অনেক সময় ভালো কাজ করলেও worst-case Time Complexity O(VE)। Negative edge থাকলে ব্যবহার করা যায়, কিন্তু negative cycle থাকলে finite shortest path নেই।</div>
+<div id="pspfa"></div></section>
 
 <section class="slide"><h2>Floyd-Warshall — সব জোড়ার shortest path</h2>
-<p><b>All-pairs</b> shortest path, Dynamic Programming দিয়ে। প্রতিটি vertex k-কে “মাঝের স্টেশন” ধরে পরীক্ষা: <code>d[i][j] = min(d[i][j], d[i][k] + d[k][j])</code>। Complexity O(V³)।</p>
-<div class="card"><b>কীভাবে চালাবে:</b> “পরের k” চাপলে একটি করে vertex মাঝের স্টেশন হিসেবে যুক্ত হবে এবং কমে যাওয়া দূরত্ব হলুদ হবে। (উপরের graph, undirected)</div>
-<button onclick="fw(0)">রিসেট</button><button onclick="fw(1)">পরের k</button><div id="fw"></div></section>
+<div class="card"><b>এক লাইনে:</b> Dijkstra ও Bellman-Ford একটি start node থেকে অন্য node-গুলোর shortest path বের করে। কিন্তু graph-এর <b>প্রতিটি node থেকে প্রতিটি node</b>-এ shortest distance জানতে চাইলে Floyd-Warshall — একে All-Pairs Shortest Path বলে। এটি Dynamic Programming ব্যবহার করে: প্রতিবার একটি node-কে মাঝের স্টেশন (intermediate vertex) ধরে দেখি, ওই node হয়ে গেলে কোনো দুই node-এর পথ ছোট হয় কি না।
+<div class="fm">dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])</div>অর্থাৎ i থেকে j-তে সরাসরি যাওয়ার বর্তমান distance আর i → k → j হয়ে যাওয়ার distance তুলনা করো; যেটি ছোট সেটি রাখো।</div>
+<div class="card"><b>নিয়ম:</b><ol class="rules"><li>একটা V×V টেবিল d বানাও: সরাসরি edge থাকলে তার weight, নিজের থেকে নিজে 0, না থাকলে ∞।</li><li>প্রতিটি node k-কে একে একে <b>“মাঝের স্টেশন”</b> ধরো।</li><li>প্রতিটি জোড়া (i, j)-এর জন্য দেখো: <code>d[i][j] = min(d[i][j], d[i][k] + d[k][j])</code> — i থেকে j-তে সরাসরি না গিয়ে k হয়ে গেলে কি কম হয়?</li><li>সব k শেষ হলে টেবিলে সব জোড়ার উত্তর। Complexity O(V³)।</li></ol></div>
+<div class="card"><b>কীভাবে চালাবে:</b> “পরের k ▶” চাপলে একটি করে node মাঝের স্টেশন হবে; কমে যাওয়া ঘর হলুদ। (উপরের graph, undirected)</div>
+<div id="pfw"></div>
+<div class="card">Floyd-Warshall negative edge সামলাতে পারে, তবে negative cycle থাকলে shortest path নির্দিষ্ট হয় না। শেষে কোনো node-এর নিজের কাছে distance negative হলে (dist[i][i] &lt; 0) negative cycle আছে।</div>
+<div class="card"><b>Complexity:</b> Time O(V³), Space O(V²)। ছোট/মাঝারি graph-এ সব জোড়ার shortest distance বের করতে সুবিধাজনক।</div></section>
 
-<section class="slide"><h2>Minimum Spanning Tree (MST)</h2>
-<p><b>Spanning tree:</b> সব vertex যুক্ত অথচ cycle-হীন subgraph (V−1 edge)। <b>MST:</b> weighted graph-এ মোট weight সবচেয়ে কম spanning tree। নেটওয়ার্কে loop আটকাতে (spanning tree protocol) ও কম খরচে তার/পাইপ টানতে ব্যবহৃত।</p>
-<div class="card"><b>Kruskal (greedy):</b> সব edge weight অনুযায়ী ছোট→বড় সাজাও; একে একে নাও, তবে cycle তৈরি হলে বাদ দাও। V−1 edge হলে শেষ। Complexity O(E log E)।</div>
-<div class="card"><b>Prim (greedy):</b> একটি vertex থেকে শুরু; প্রতিবার ইতোমধ্যে নেওয়া অংশ থেকে বেরোনো সবচেয়ে সস্তা edge নাও। Complexity O(V²) বা heap-এ O(E log V)।</div>
-<div class="card"><b>কীভাবে চালাবে:</b> Kruskal/Prim বোতাম চাপলে একটি করে edge বিবেচনা হয় — সবুজাভ হলুদ = নেওয়া হলো, নিচের লেখায় কেন নেওয়া/বাদ দেওয়া হলো তা থাকবে।</div>
-<div id="g3" style="max-width:460px"></div><button onclick="mst('k',0)">Kruskal রিসেট</button><button onclick="mst('k',1)">Kruskal পরের</button><button onclick="mst('p',0)">Prim রিসেট</button><button onclick="mst('p',1)">Prim পরের</button><p id="m3"></p></section>
+<section class="slide"><h2>Minimum Spanning Tree (MST) ও Kruskal</h2>
+<div class="card"><b>সমস্যাটা কী?</b> কয়েকটি শহরের মধ্যে এমনভাবে বিদ্যুৎ/ইন্টারনেটের তার বসাতে হবে যেন সব শহর সংযুক্ত থাকে, কিন্তু মোট তারের দৈর্ঘ্য বা খরচ যত কম সম্ভব হয়। এই সমস্যার সমাধানে MST ব্যবহার হয়।</div>
+<div class="card"><b>Spanning tree:</b> সব vertex যুক্ত অথচ cycle-হীন subgraph (V−1 edge)। <b>MST:</b> weighted graph-এ মোট weight সবচেয়ে কম spanning tree।<br><b>সহজ ভাষায়:</b> কয়েকটা গ্রাম সবচেয়ে কম খরচে তার/পাইপ দিয়ে জুড়তে হবে, কিন্তু অকারণে ঘুরপথ (cycle) চাই না। নেটওয়ার্কে loop আটকাতে (spanning tree protocol)-ও লাগে।</div>
+<div class="card wn">MST আর Shortest Path এক জিনিস নয়। Shortest path-এ নির্দিষ্ট দুই node-এর মধ্যে পথের খরচ কমানো হয়; MST-তে <b>সব node-কে যুক্ত করার মোট edge weight</b> কমানো হয়।</div>
+<div class="card"><b>Kruskal (greedy) — edge ধরে ধরে:</b><ol class="rules"><li>সব edge weight অনুযায়ী <b>ছোট → বড়</b> সাজাও।</li><li>একটা একটা করে edge নাও।</li><li>edge-এর দুই প্রান্ত যদি <b>আলাদা গ্রুপে</b> থাকে (জুড়লে cycle হবে না) ⇒ <b>নাও</b>, গ্রুপ দুটো এক করো।</li><li>দুই প্রান্ত যদি <b>একই গ্রুপে</b> থাকে (জুড়লে cycle হবে) ⇒ <b>বাদ দাও</b>।</li><li>V−1টা edge নেওয়া হলে থামো। Complexity O(E log E)।</li></ol>
+<b>Cycle পরীক্ষা:</b> সাধারণত Disjoint Set Union (DSU / Union-Find) দিয়ে দ্রুত বোঝা হয় দুই node আগে থেকেই একই component-এ আছে কি না — ডেমোর “গ্রুপ” ঠিক এটাই।</div>
+<div class="card"><b>কীভাবে চালাবে:</b> “পরের ▶” চাপো — সবুজ/হলুদ chip = নেওয়া হয়েছে, লাল কাটা chip = বাদ। নিচে প্রতি ধাপের গ্রুপও দেখা যাবে।</div>
+<div id="pk"></div></section>
+
+<section class="slide"><h2>Prim — MST-এর অন্য পথ</h2>
+<div class="card"><b>এক লাইনে:</b> Kruskal edge ধরে এগোয়; Prim <b>একটা গাছ বড় করে</b> — একটা node থেকে শুরু করে প্রতিবার গাছ থেকে বেরোনো সবচেয়ে সস্তা edge নেয়।</div>
+<div class="card"><b>নিয়ম (Prim, greedy):</b><ol class="rules"><li>যেকোনো একটি node (এখানে A) দিয়ে গাছ শুরু করো।</li><li>গাছের ভেতরের node ও বাইরের node-কে জোড়া দেয় — এমন সব edge দেখো।</li><li>তাদের মধ্যে <b>সবচেয়ে কম weight-এর</b> edge নাও; বাইরের node-টা গাছে ঢোকে।</li><li>সব node গাছে ঢুকলে শেষ। Complexity O(V²) বা heap-এ O(E log V)।</li></ol></div>
+<div class="card"><b>Complexity:</b> Kruskal: O(E log E) (edge sort-এর জন্য)। Prim: binary heap ও adjacency list-এ O(E log V); সাধারণ matrix/array পদ্ধতিতে O(V²)। সাধারণত connected, undirected, weighted graph-এ MST ব্যবহৃত হয়।</div>
+<div class="card"><b>Kruskal বনাম Prim:</b> দুটোরই MST-এর মোট weight একই হয়। Kruskal সাধারণত কম edge-এর (sparse) graph-এ সুবিধাজনক; Prim বেশি edge-এর (dense) graph-এ।</div>
+<div class="card"><b>কীভাবে চালাবে:</b> “পরের ▶” চাপলে নিচে বেরোনো সব edge-এর তালিকা আসবে; সবচেয়ে ছোটটি হলুদ chip।</div>
+<div id="pp"></div></section>
 
 <section class="slide"><h2>Algorithm সারসংক্ষেপ</h2>
-<table><tr><th>Algorithm</th><th>উদ্দেশ্য</th><th>নেগেটিভ edge?</th><th>Complexity</th></tr><tr><td>BFS / DFS</td><td>traversal; unweighted shortest path (BFS)</td><td>–</td><td>O(V+E)</td></tr><tr><td>Dijkstra</td><td>single-source shortest path</td><td>না</td><td>O(V²) / O((V+E)log V)</td></tr><tr><td>Bellman-Ford</td><td>single-source shortest path</td><td>হ্যাঁ</td><td>O(VE)</td></tr><tr><td>SPFA</td><td>Bellman-Ford-এর queue রূপ</td><td>হ্যাঁ</td><td>গড়ে দ্রুত, worst O(VE)</td></tr><tr><td>Floyd-Warshall</td><td>all-pairs shortest path (DP)</td><td>হ্যাঁ (নেগেটিভ cycle ছাড়া)</td><td>O(V³)</td></tr><tr><td>Kruskal</td><td>MST (edge বাছাই)</td><td>–</td><td>O(E log E)</td></tr><tr><td>Prim</td><td>MST (vertex বাড়ানো)</td><td>–</td><td>O(V²) / O(E log V)</td></tr><tr><td>A*</td><td>গেম/রোবটে heuristic-সহ shortest path</td><td>–</td><td>heuristic-নির্ভর</td></tr></table>
+<table><tr><th>Algorithm</th><th>উদ্দেশ্য</th><th>নেগেটিভ edge?</th><th>Complexity</th></tr><tr><td>BFS</td><td>Traversal; unweighted shortest path</td><td>প্রযোজ্য নয়</td><td>O(V+E)</td></tr><tr><td>DFS</td><td>Traversal, cycle/component অনুসন্ধান</td><td>প্রযোজ্য নয়</td><td>O(V+E)</td></tr><tr><td>Dijkstra</td><td>single-source shortest path</td><td>না</td><td>O(V²) / O((V+E)log V)</td></tr><tr><td>Bellman-Ford</td><td>single-source shortest path</td><td>হ্যাঁ</td><td>O(VE)</td></tr><tr><td>SPFA</td><td>Bellman-Ford-এর queue রূপ</td><td>হ্যাঁ</td><td>গড়ে দ্রুত, worst O(VE)</td></tr><tr><td>Floyd-Warshall</td><td>all-pairs shortest path (DP)</td><td>হ্যাঁ (নেগেটিভ cycle ছাড়া)</td><td>O(V³)</td></tr><tr><td>Kruskal</td><td>MST (edge বাছাই)</td><td>Weight negative হলেও চলে</td><td>O(E log E)</td></tr><tr><td>Prim</td><td>MST (vertex বাড়ানো)</td><td>Weight negative হলেও চলে</td><td>O(V²) / O(E log V)</td></tr><tr><td>A*</td><td>গেম/রোবটে heuristic-সহ shortest path</td><td>–</td><td>heuristic-নির্ভর</td></tr></table>
+<div class="gm"><div class="mini"><b>Unweighted shortest path?</b>BFS ব্যবহার করো।</div><div class="mini"><b>Weighted, সব weight non-negative?</b>Dijkstra ব্যবহার করো।</div><div class="mini"><b>Negative edge আছে?</b>Bellman-Ford; উপযুক্ত ক্ষেত্রে SPFA-ও ব্যবহার করা যায়।</div><div class="mini"><b>সব জোড়ার shortest path?</b>Floyd-Warshall একটি সহজ পছন্দ।</div><div class="mini"><b>সব node-কে কম মোট খরচে যুক্ত করতে হবে?</b>Kruskal বা Prim — MST।</div><div class="mini"><b>শুধু graph ঘুরে দেখতে হবে?</b>BFS বা DFS।</div></div>
+<div class="card"><b>কোনটা কখন?</b> তোমার সমস্যা বেছে নাও:
+<select onchange="adv(this.value)"><option value="">— বাছো —</option><option value="1">weight নেই, কম edge-এ এক node থেকে আরেকটায় যেতে চাই</option><option value="2">maze/সব পথ ঘুরে দেখতে বা cycle খুঁজতে চাই</option><option value="3">weight আছে (সব ≥ 0), এক উৎস থেকে সবার ছোট পথ</option><option value="4">নেগেটিভ weight আছে, এক উৎস থেকে ছোট পথ</option><option value="5">সব জোড়া node-এর ছোট দূরত্ব দরকার</option><option value="6">সব node কম খরচে জুড়তে চাই</option></select>
+<p id="adv"></p></div>
 <div class="card">পরীক্ষার ফাঁদ: weighted graph-এ সবচেয়ে কার্যকর shortest path = Dijkstra (DFS বা BFS নয়); নেগেটিভ weight থাকলে Bellman-Ford; সব জোড়া হলে Floyd-Warshall।</div></section>
-<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div></section>
+<section class="slide"><h2>অনুশীলন প্রশ্ন</h2><div id="qz"></div><h3>নিজে যাচাই করো</h3><div id="qz2"></div></section>
+
 <script src="bank.js"></script><script src="fig.js"></script><script src="app.js"></script><script>
+if(typeof $==='undefined')window.$=function(s){return document.querySelector(s)};
+if(typeof tb==='undefined')window.tb=function(h,r){return '<table><tr>'+h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr>'+r.map(function(x){return '<tr>'+x.map(function(c){return '<td>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</table>'};
+if(typeof quiz==='undefined')window.quiz=function(){};
 quiz('gr','#qz');
+(function(){
 const V=['A','B','C','D','E','F'],PS={A:[50,130],B:[150,45],C:[150,215],D:[290,45],E:[290,215],F:[385,130]},EG=[['A','B',4],['A','C',2],['B','C',1],['B','D',5],['C','D',8],['C','E',10],['D','E',2],['D','F',6],['E','F',3]],INF=1e9;
 const key=(a,b)=>[a,b].sort().join(''),adj=n=>EG.filter(e=>e[0]==n||e[1]==n).map(e=>[e[0]==n?e[1]:e[0],e[2]]).sort();
-function dg(id,hn=[],he=[],lab={}){$('#'+id).innerHTML='<svg viewBox="0 0 440 260" width="100%">'+EG.map(e=>{const p=PS[e[0]],q=PS[e[1]],on=he.includes(key(e[0],e[1]));return '<line x1="'+p[0]+'" y1="'+p[1]+'" x2="'+q[0]+'" y2="'+q[1]+'" style="'+(on?'stroke:var(--hl);stroke-width:5':'')+'"/><text x="'+(p[0]+q[0])/2+'" y="'+((p[1]+q[1])/2-5)+'" style="font-size:12px">'+e[2]+'</text>'}).join('')+V.map(v=>'<g class="nd '+(hn.includes(v)?'on':'')+'"><circle cx="'+PS[v][0]+'" cy="'+PS[v][1]+'" r="17"/><text x="'+PS[v][0]+'" y="'+(PS[v][1]+5)+'">'+v+'</text>'+(lab[v]!==undefined?'<text x="'+PS[v][0]+'" y="'+(PS[v][1]+34)+'" style="font-size:12px">'+lab[v]+'</text>':'')+'</g>').join('')+'</svg>'}
-dg('g0');dg('g1');dg('g3');
+const ef=x=>x>=INF?'∞':x;
+const chip=(t,c)=>'<span class="chip '+(c||'')+'">'+t+'</span>';
+const box=(l,a)=>'<div class="qb"><b>'+l+':</b> '+(a.length?a.map(x=>chip(x)).join(''):'(ফাঁকা)')+'</div>';
+
+/* undirected graph drawing */
+function dgx(el,o){o=o||{};const hn=o.n||[],he=o.e||[],rej=o.r||[],lab=o.lab||{},cur=o.cur;
+el.innerHTML='<svg viewBox="0 0 440 260" width="100%">'+EG.map(e=>{const p=PS[e[0]],q=PS[e[1]],k=key(e[0],e[1]);const st=he.includes(k)?'stroke:var(--hl,#ffd54a);stroke-width:5':rej.includes(k)?'stroke:#ef4444;stroke-dasharray:5 4;stroke-width:3':'';return '<line x1="'+p[0]+'" y1="'+p[1]+'" x2="'+q[0]+'" y2="'+q[1]+'" style="'+st+'"/><text x="'+(p[0]+q[0])/2+'" y="'+((p[1]+q[1])/2-5)+'" style="font-size:12px">'+e[2]+'</text>'}).join('')+V.map(v=>'<g class="nd '+(hn.includes(v)?'on ':'')+(v==cur?'cur':'')+'"'+(o.click?' onclick="'+o.click+'(\''+v+'\')" style="cursor:pointer"':'')+'><circle cx="'+PS[v][0]+'" cy="'+PS[v][1]+'" r="17"/><text x="'+PS[v][0]+'" y="'+(PS[v][1]+5)+'">'+v+'</text>'+(lab[v]!==undefined?'<text class="lb" x="'+PS[v][0]+'" y="'+(PS[v][1]+34)+'" style="font-size:12px">'+lab[v]+'</text>':'')+'</g>').join('')+'</svg>'}
+
+/* directed graph drawing */
+const PD={A:[50,130],B:[170,45],C:[170,215],D:[340,130]};
+function dgd(el,o){const E=o.E,hi=o.hi,lab=o.lab||{},hn=o.n||[],cur=o.cur;let s='<svg viewBox="0 0 400 260" width="100%">';
+E.forEach((e,i)=>{const p=PD[e[0]],q=PD[e[1]];let dx=q[0]-p[0],dy=q[1]-p[1];const L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,px=-uy,py=ux;const rev=E.some(f=>f[0]==e[1]&&f[1]==e[0]);const off=rev?9:0;
+const x1=p[0]+ux*19+px*off,y1=p[1]+uy*19+py*off,x2=q[0]-ux*19+px*off,y2=q[1]-uy*19+py*off;const on=i===hi;
+const bx=x2-ux*11,by=y2-uy*11;
+s+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" style="'+(on?'stroke:var(--hl,#ffd54a);stroke-width:5':'')+'"/><polygon points="'+x2+','+y2+' '+(bx+px*5)+','+(by+py*5)+' '+(bx-px*5)+','+(by-py*5)+'" style="fill:'+(on?'var(--hl,#ffd54a)':'#888')+'"/><text x="'+((x1+x2)/2+px*(rev?16:14))+'" y="'+((y1+y2)/2+py*(rev?16:14)+4)+'" style="font-size:12px">'+e[2]+'</text>'});
+Object.keys(PD).forEach(v=>{s+='<g class="nd '+(hn.includes(v)?'on ':'')+(v==cur?'cur':'')+'"><circle cx="'+PD[v][0]+'" cy="'+PD[v][1]+'" r="17"/><text x="'+PD[v][0]+'" y="'+(PD[v][1]+5)+'">'+v+'</text>'+(lab[v]!==undefined?'<text class="lb" x="'+PD[v][0]+'" y="'+(PD[v][1]+34)+'" style="font-size:12px">'+lab[v]+'</text>':'')+'</g>'});
+el.innerHTML=s+'</svg>'}
+
+/* generic step player */
+function player(id,frames,draw){const el=$('#'+id);if(el._stop)el._stop();let i=0,t=null;
+const W0=el._w||560;
+el.innerHTML='<div class="pc">🔍 আকার: <button data-a="s-">−</button><input type="range" min="220" max="900" step="20" value="'+W0+'" data-a="rg" style="vertical-align:middle"><button data-a="s+">+</button></div><div class="gv" style="max-width:'+W0+'px"></div><p class="pm"></p><div class="ex"></div><div class="pc"><button data-a="r">রিসেট</button><button data-a="p">◀ আগের</button><button data-a="n">পরের ▶</button><button data-a="a">▶ অটো</button></div><p class="ct"></p>';
+const q=s=>el.querySelector(s);const rg=q('[data-a=rg]');
+const setW=w=>{w=Math.max(220,Math.min(900,w));el._w=w;rg.value=w;q('.gv').style.maxWidth=w+'px'};rg.oninput=()=>setW(+rg.value);
+function show(){const f=frames[i];draw(q('.gv'),f);q('.pm').innerHTML=f.msg;q('.ex').innerHTML=f.ex||'';q('.ct').textContent='ধাপ '+i+' / '+(frames.length-1)}
+function stop(){if(t){clearInterval(t);t=null;q('[data-a=a]').textContent='▶ অটো'}}
+el._stop=stop;
+el.querySelectorAll('button').forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a=='s-'||a=='s+'){setW((el._w||W0)+(a=='s+'?60:-60));return}
+if(a=='a'){if(t){stop();return}q('[data-a=a]').textContent='⏸ থামাও';t=setInterval(()=>{if(i>=frames.length-1){stop();return}i++;show()},1400);return}
+stop();if(a=='r')i=0;if(a=='p')i=Math.max(0,i-1);if(a=='n')i=Math.min(frames.length-1,i+1);show()});
+show()}
+const gU=(c,f)=>dgx(c,f.g||{});
+
+/* ---- Graph basics: click a node ---- */
+dgx($('#g0'),{click:'CLK'});
+window.szG=function(id,d){const e=$('#'+id);e.style.maxWidth=Math.max(220,Math.min(900,(parseInt(e.style.maxWidth)||460)+d))+'px'};
+window.CLK=function(v){const nb=adj(v);dgx($('#g0'),{n:[v],e:nb.map(a=>key(v,a[0])),cur:v,click:'CLK'});
+$('#ginfo').innerHTML='<b>'+v+'</b>-এর degree = '+nb.length+'। প্রতিবেশী: '+nb.map(a=>a[0]+' (weight '+a[1]+')').join(', ')+'।<br>সব node-এর degree-র যোগফল = '+V.reduce((s,x)=>s+adj(x).length,0)+' = 2 × '+EG.length+' (প্রতিটি edge দুই প্রান্তে গোনা হয়)।'};
 $('#rep').innerHTML='<p><b>Adjacency list:</b></p>'+tb(['Vertex','প্রতিবেশী (weight)'],V.map(v=>[v,adj(v).map(a=>a[0]+'('+a[1]+')').join(', ')]))+'<p><b>Adjacency matrix (weight):</b></p>'+tb([''].concat(V),V.map(a=>[a].concat(V.map(b=>{const e=EG.find(e=>key(e[0],e[1])==key(a,b));return e?e[2]:'–'}))));
-async function tr(t){const seen=['A'],q=['A'],o=[];while(q.length){const n=t=='bfs'?q.shift():q.pop();o.push(n);dg('g1',o);$('#m1').textContent=o.join(' → ');await sleep(700);const a=adj(n).map(x=>x[0]);(t=='bfs'?a:a.reverse()).forEach(x=>{if(!seen.includes(x)){seen.push(x);q.push(x)}})}}
-function dijF(){const d={},vis=[],pv={},fr=[];V.forEach(v=>d[v]=INF);d.A=0;for(let k=0;k<V.length;k++){let u=null;V.forEach(v=>{if(!vis.includes(v)&&(u===null||d[v]<d[u]))u=v});vis.push(u);adj(u).forEach(a=>{if(d[u]+a[1]<d[a[0]]){d[a[0]]=d[u]+a[1];pv[a[0]]=u}});fr.push({u,d:{...d},vis:[...vis],pv:{...pv}})}return fr}
-const DF=dijF();let di=-1;
-function dj(s){di=s?Math.min(di+1,DF.length-1):-1;if(di<0){dg('g2',[],[],{A:0});$('#d2').innerHTML='<p>শুরু: A = 0, বাকি সব ∞</p>';return}const f=DF[di];dg('g2',f.vis,Object.keys(f.pv).filter(v=>f.vis.includes(v)).map(v=>key(v,f.pv[v])),Object.fromEntries(V.map(v=>[v,f.d[v]>=INF?'∞':f.d[v]])));
-$('#d2').innerHTML='<p>ধাপ '+(di+1)+': <b>'+f.u+'</b> চূড়ান্ত (দূরত্ব '+f.d[f.u]+') এবং তার প্রতিবেশীদের দূরত্ব আপডেট।</p>'+tb(['Vertex'].concat(V),[['দূরত্ব'].concat(V.map(v=>f.d[v]>=INF?'∞':f.d[v])),['চূড়ান্ত?'].concat(V.map(v=>f.vis.includes(v)?'✔':''))])}dj(0);
-(function(){const E=[['A','B',4],['A','C',5],['B','C',-3],['C','D',2]],N=['A','B','C','D'],d={A:0,B:INF,C:INF,D:INF},rows=[['শুরু'].concat(N.map(v=>d[v]>=INF?'∞':d[v]))];for(let i=1;i<N.length;i++){E.forEach(e=>{if(d[e[0]]<INF&&d[e[0]]+e[2]<d[e[1]])d[e[1]]=d[e[0]]+e[2]});rows.push(['Pass '+i].concat(N.map(v=>d[v]>=INF?'∞':d[v])))}$('#bf').innerHTML=tb(['ধাপ'].concat(N),rows)+'<p>B→C = −3 থাকায় C-এর দূরত্ব 5 থেকে কমে 4−3 = 1 হয়েছে; Dijkstra এখানে ভুল ফল দিতে পারত।</p>'})();
-const FW=(()=>{let D=V.map(a=>V.map(b=>a==b?0:(EG.find(e=>key(e[0],e[1])==key(a,b))||[0,0,INF])[2])),fr=[{k:-1,D:D.map(r=>[...r]),ch:[]}];for(let k=0;k<V.length;k++){const ch=[];D=D.map(r=>[...r]);for(let i=0;i<V.length;i++)for(let j=0;j<V.length;j++)if(D[i][k]+D[k][j]<D[i][j]){D[i][j]=D[i][k]+D[k][j];ch.push(i+','+j)}fr.push({k,D:D.map(r=>[...r]),ch})}return fr})();let fi=0;
-function fw(s){fi=s?Math.min(fi+1,FW.length-1):0;const f=FW[fi];$('#fw').innerHTML='<p>'+(f.k<0?'শুরু: সরাসরি edge-এর খরচ (∞ = সংযোগ নেই)':'k = '+V[f.k]+' মাঝের স্টেশন; '+f.ch.length+'টি দূরত্ব কমেছে')+'</p>'+tb([''].concat(V),V.map((a,i)=>['<b>'+a+'</b>'].concat(V.map((b,j)=>(f.ch.includes(i+','+j)?'<span style="background:var(--hl);color:#000;padding:0 4px">':'<span>')+(f.D[i][j]>=INF?'∞':f.D[i][j])+'</span>'))))}fw(0);
-function kF(){const S=[...EG].sort((a,b)=>a[2]-b[2]),p={};V.forEach(v=>p[v]=v);const f=x=>p[x]==x?x:(p[x]=f(p[x]));const ch=[],fr=[];let tot=0;S.forEach(e=>{const a=f(e[0]),b=f(e[1]);let ok=a!=b;if(ok){p[a]=b;ch.push(key(e[0],e[1]));tot+=e[2]}fr.push({e,ok,ch:[...ch],tot})});return fr}
-function pF(){const inn=['A'],ch=[],fr=[];let tot=0;while(inn.length<V.length){let best=null;EG.forEach(e=>{const a=inn.includes(e[0]),b=inn.includes(e[1]);if(a!=b&&(!best||e[2]<best[2]))best=e});const nv=inn.includes(best[0])?best[1]:best[0];inn.push(nv);ch.push(key(best[0],best[1]));tot+=best[2];fr.push({e:best,nv,ch:[...ch],tot,inn:[...inn]})}return fr}
-const KF=kF(),PF=pF();let ki=-1,pi=-1;
-function mst(t,s){if(t=='k'){ki=s?Math.min(ki+1,KF.length-1):-1;if(ki<0){dg('g3');$('#m3').textContent='Kruskal: edge-গুলো weight অনুযায়ী: '+[...EG].sort((a,b)=>a[2]-b[2]).map(e=>e[0]+e[1]+'('+e[2]+')').join(', ');return}const f=KF[ki];dg('g3',[],f.ch);$('#m3').textContent='edge '+f.e[0]+f.e[1]+' (weight '+f.e[2]+'): '+(f.ok?'নেওয়া হলো (cycle হয়নি)':'বাদ — cycle তৈরি হতো')+'। এ পর্যন্ত মোট weight = '+f.tot+(ki==KF.length-1?' ⇒ MST মোট = '+f.tot:'')}
-else{pi=s?Math.min(pi+1,PF.length-1):-1;if(pi<0){dg('g3',['A']);$('#m3').textContent='Prim: A থেকে শুরু';return}const f=PF[pi];dg('g3',f.inn,f.ch);$('#m3').textContent='সবচেয়ে সস্তা বেরোনো edge '+f.e[0]+f.e[1]+' ('+f.e[2]+') ⇒ '+f.nv+' যুক্ত। মোট weight = '+f.tot}}
+
+/* ---- BFS / DFS ---- */
+function bfsF(S){S=S||'A';const vis=[S],q=[S],order=[],te=[],fr=[];
+fr.push({g:{n:[],e:[]},msg:'শুরু: '+S+'-কে queue-তে রাখলাম এবং “দেখা হয়েছে” চিহ্ন দিলাম।',ex:box('queue (সামনে → পেছনে)',[...q])+box('visit-এর ক্রম',[])});
+while(q.length){const u=q.shift();order.push(u);const nb=adj(u).map(x=>x[0]),nw=nb.filter(x=>!vis.includes(x));nw.forEach(x=>{vis.push(x);q.push(x);te.push(key(u,x))});
+fr.push({g:{n:[...order],e:[...te],cur:u},msg:'queue-র সামনে থেকে <b>'+u+'</b> বের করলাম (visit)। প্রতিবেশী: '+nb.join(', ')+'। এর মধ্যে নতুন: '+(nw.length?nw.join(', ')+' ⇒ queue-র পেছনে যোগ করলাম।':'নেই।'),ex:box('queue (সামনে → পেছনে)',[...q])+box('visit-এর ক্রম',[...order])})}
+fr.push({g:{n:[...order],e:[...te]},msg:'queue ফাঁকা ⇒ শেষ। BFS-এর ক্রম: <b>'+order.join(' → ')+'</b>। '+S+' থেকে কাছের node আগে এসেছে।',ex:box('visit-এর ক্রম',[...order])});return fr}
+function dfsF(S){S=S||'A';const vis=[],st=[[S,null]],te=[],fr=[];const sv=()=>st.slice().reverse().map(x=>x[0]);
+fr.push({g:{n:[],e:[]},msg:'শুরু: '+S+'-কে stack-এ রাখলাম।',ex:box('stack (ওপর → নিচ)',sv())+box('visit-এর ক্রম',[])});
+while(st.length){const x=st.pop(),u=x[0],p=x[1];
+if(vis.includes(u)){fr.push({g:{n:[...vis],e:[...te],cur:u},msg:'stack-এর মাথা <b>'+u+'</b> আগেই দেখা হয়েছে ⇒ বাদ দিলাম।',ex:box('stack (ওপর → নিচ)',sv())+box('visit-এর ক্রম',[...vis])});continue}
+vis.push(u);if(p)te.push(key(p,u));const nb=adj(u).map(a=>a[0]),nw=nb.filter(a=>!vis.includes(a));nw.slice().reverse().forEach(a=>st.push([a,u]));
+fr.push({g:{n:[...vis],e:[...te],cur:u},msg:'stack-এর মাথা থেকে <b>'+u+'</b> নিলাম (visit)। প্রতিবেশী: '+nb.join(', ')+'। '+(nw.length?'নতুনগুলো stack-এ রাখলাম — '+nw[0]+' সবার ওপরে, তাই পরেরবার ওটাতেই যাব (গভীরে)।':'নতুন প্রতিবেশী নেই ⇒ পেছনে ফিরব (backtrack)।'),ex:box('stack (ওপর → নিচ)',sv())+box('visit-এর ক্রম',[...vis])})}
+fr.push({g:{n:[...vis],e:[...te]},msg:'stack ফাঁকা ⇒ শেষ। DFS-এর ক্রম: <b>'+vis.join(' → ')+'</b>। হলুদ edge-গুলো DFS tree।',ex:box('visit-এর ক্রম',[...vis])});return fr}
+window.setTrav=function(k,v){if(k=='b')player('pbfs',bfsF(v),gU);else player('pdfs',dfsF(v),gU)};setTrav('b','A');setTrav('d','A');
+
+/* ---- Dijkstra ---- */
+function dijF(S){S=S||'A';const d={},vis=[],pv={},fr=[];V.forEach(v=>d[v]=INF);d[S]=0;
+const labs=()=>Object.fromEntries(V.map(v=>[v,ef(d[v])]));
+const ex=()=>tb(['Vertex'].concat(V),[['দূরত্ব'].concat(V.map(v=>ef(d[v]))),['চূড়ান্ত?'].concat(V.map(v=>vis.includes(v)?'✔':'')),['আগের node'].concat(V.map(v=>pv[v]||'—'))]);
+fr.push({g:{lab:labs()},msg:'শুরু: '+S+' = 0, বাকি সব ∞।',ex:ex()});
+for(let k=0;k<V.length;k++){let u=null;V.forEach(v=>{if(!vis.includes(v)&&(u===null||d[v]<d[u]))u=v});vis.push(u);const L=[];
+adj(u).forEach(a=>{const v=a[0],w=a[1];if(vis.includes(v))return;const nd=d[u]+w;if(nd<d[v]){L.push(v+': '+ef(d[v])+' → <b>'+nd+'</b> ('+d[u]+'+'+w+') ✔ আপডেট');d[v]=nd;pv[v]=u}else L.push(v+': '+d[u]+'+'+w+' = '+nd+', এখন '+ef(d[v])+' ⇒ কমেনি')});
+fr.push({g:{n:[...vis],e:Object.keys(pv).filter(v=>vis.includes(v)).map(v=>key(v,pv[v])),lab:labs(),cur:u},msg:'<b>ধাপ '+(k+1)+':</b> অনির্ধারিতদের মধ্যে সবচেয়ে ছোট দূরত্ব <b>'+u+'</b> (= '+d[u]+') ⇒ '+u+' চূড়ান্ত।<br>'+(L.length?L.join('<br>'):'চূড়ান্ত নয় এমন প্রতিবেশী নেই।'),ex:ex()})}
+return fr}
+window.setDj=function(v){player('pdj',dijF(v),gU)};setDj('A');
+
+/* ---- Bellman-Ford ---- */
+const BF1={E:[['C','D',2],['B','C',-3],['A','B',4],['A','C',5]],N:['A','B','C','D']};
+const BF2={E:[['C','B',-4],['B','C',2],['C','D',1],['A','B',1]],N:['A','B','C','D']};
+function bfF(S){const E=S.E,N=S.N,d={};N.forEach(v=>d[v]=INF);d.A=0;const fr=[];
+const labs=()=>Object.fromEntries(N.map(v=>[v,ef(d[v])]));const ex=()=>tb(['Vertex'].concat(N),[['d'].concat(N.map(v=>ef(d[v])))]);
+const nodesOn=()=>N.filter(v=>d[v]<INF);
+fr.push({g:{E,hi:-1,lab:labs(),n:nodesOn()},msg:'শুরু: d[A] = 0, বাকি ∞। edge-এর ক্রম: '+E.map(e=>e[0]+'→'+e[1]+'('+e[2]+')').join(', ')+'। মোট '+(N.length-1)+'টি pass, তারপর ১টি যাচাই-pass।',ex:ex()});
+let lastChanged=false;
+for(let p=1;p<=N.length;p++){let changed=false;
+E.forEach((e,i)=>{const u=e[0],v=e[1],w=e[2];let m;
+if(d[u]>=INF){m='d['+u+'] = ∞ ⇒ এই edge দিয়ে এখনো কিছু করা যায় না।'}
+else{const nd=d[u]+w;if(nd<d[v]){m='d['+u+'] + '+w+' = '+nd+' &lt; d['+v+'] ('+ef(d[v])+') ⇒ <b>আপডেট</b>: d['+v+'] = '+nd+(p==N.length?'<br>⚠ যাচাই-pass-এও কমল ⇒ <b>negative cycle</b>!':'');d[v]=nd;changed=true}else m='d['+u+'] + '+w+' = '+nd+', d['+v+'] = '+ef(d[v])+' ⇒ কমেনি।'}
+fr.push({g:{E,hi:i,lab:labs(),n:nodesOn(),cur:u},msg:'<b>'+(p==N.length?'যাচাই-pass':'Pass '+p)+'</b>, edge '+u+'→'+v+' ('+w+'): '+m,ex:ex()})});
+lastChanged=changed;if(!changed&&p<N.length){fr.push({g:{E,hi:-1,lab:labs(),n:nodesOn()},msg:'Pass '+p+'-এ কিছুই বদলায়নি ⇒ আর pass লাগবে না (early stop)। উত্তর চূড়ান্ত: '+N.map(v=>v+' = '+ef(d[v])).join(', ')+'।',ex:ex()});return fr}}
+fr.push({g:{E,hi:-1,lab:labs(),n:nodesOn()},msg:lastChanged?'যাচাই-pass-এও দূরত্ব কমেছে ⇒ <b>negative cycle আছে</b>; shortest path অর্থহীন (যতবার ঘুরবে ততই কমবে)।':'যাচাই-pass-এ কোনো পরিবর্তন নেই ⇒ negative cycle নেই; উত্তর চূড়ান্ত: '+N.map(v=>v+' = '+ef(d[v])).join(', ')+'।',ex:ex()});return fr}
+const dD=(c,f)=>dgd(c,f.g);
+window.setBF=function(k){player('pbf',bfF(k==2?BF2:BF1),dD)};setBF(1);
+
+/* ---- SPFA ---- */
+function spfaF(){const E=BF1.E,N=BF1.N,d={},inq={A:true},q=['A'],fr=[];N.forEach(v=>d[v]=INF);d.A=0;
+const labs=()=>Object.fromEntries(N.map(v=>[v,ef(d[v])]));const ex=()=>box('queue (সামনে → পেছনে)',[...q])+tb(['Vertex'].concat(N),[['d'].concat(N.map(v=>ef(d[v])))]);
+fr.push({g:{E,hi:-1,lab:labs(),n:['A']},msg:'শুরু: d[A] = 0; A-কে queue-তে রাখলাম।',ex:ex()});
+while(q.length){const u=q.shift();inq[u]=false;const L=[];
+E.forEach(e=>{if(e[0]!=u)return;const v=e[1],w=e[2],nd=d[u]+w;if(nd<d[v]){let t=v+': '+ef(d[v])+' → <b>'+nd+'</b> ✔';d[v]=nd;if(!inq[v]){inq[v]=true;q.push(v);t+=' (queue-তে ছিল না ⇒ পেছনে যোগ)'}else t+=' (আগে থেকেই queue-তে আছে)';L.push(t)}else L.push(v+': '+d[u]+'+'+w+' = '+nd+' ⇒ কমেনি')});
+fr.push({g:{E,hi:-1,lab:labs(),n:N.filter(v=>d[v]<INF),cur:u},msg:'queue-র সামনে থেকে <b>'+u+'</b> বের করলাম; এর edge relax করলাম:<br>'+(L.length?L.join('<br>'):'বের হওয়া edge নেই।'),ex:ex()})}
+fr.push({g:{E,hi:-1,lab:labs(),n:N.filter(v=>d[v]<INF)},msg:'queue ফাঁকা ⇒ শেষ: '+N.map(v=>v+' = '+ef(d[v])).join(', ')+'। দেখো, Bellman-Ford-এর মতো সব edge বারবার দেখতে হয়নি — শুধু বদলানো node-গুলো।',ex:ex()});return fr}
+player('pspfa',spfaF(),dD);
+
+/* ---- Floyd-Warshall ---- */
+function fwF(){let D=V.map(a=>V.map(b=>a==b?0:(EG.find(e=>key(e[0],e[1])==key(a,b))||[0,0,INF])[2]));const fr=[];
+const mat=(ch)=>tb([''].concat(V),V.map((a,i)=>['<b>'+a+'</b>'].concat(V.map((b,j)=>(ch.some(c=>(c[0]==i&&c[1]==j)||(c[0]==j&&c[1]==i))?'<span style="background:var(--hl,#ffd54a);color:#000;padding:0 4px">':'<span>')+ef(D[i][j])+'</span>'))));
+fr.push({g:{},msg:'শুরু: সরাসরি edge-এর খরচ (∞ = সরাসরি সংযোগ নেই, নিজের থেকে নিজে 0)।',ex:mat([])});
+for(let k=0;k<V.length;k++){const ch=[];D=D.map(r=>[...r]);
+for(let i=0;i<V.length;i++)for(let j=0;j<V.length;j++)if(D[i][k]<INF&&D[k][j]<INF&&D[i][k]+D[k][j]<D[i][j]){ch.push([i,j,D[i][j],D[i][k]+D[k][j]]);D[i][j]=D[i][k]+D[k][j]}
+const L=ch.filter(c=>c[0]<c[1]).map(c=>V[c[0]]+'–'+V[c[1]]+': '+ef(c[2])+' → <b>'+c[3]+'</b> ('+V[c[0]]+'→'+V[k]+'→'+V[c[1]]+')');
+fr.push({g:{cur:V[k]},msg:'<b>k = '+V[k]+'</b> কে মাঝের স্টেশন ধরলাম: প্রতিটি i→j-এর জন্য d[i]['+V[k]+'] + d['+V[k]+'][j] দেখলাম।<br>'+(L.length?'কমেছে:<br>'+L.join('<br>'):'কোনো দূরত্ব কমেনি।'),ex:mat(ch)})}
+fr.push({g:{},msg:'সব k শেষ ⇒ টেবিলের প্রতিটি ঘরে ওই দুই node-এর সবচেয়ে ছোট দূরত্ব।',ex:mat([])});return fr}
+player('pfw',fwF(),(c,f)=>dgx(c,{cur:f.g.cur}));
+
+/* ---- Kruskal ---- */
+function kF(){const S=[...EG].sort((a,b)=>a[2]-b[2]),p={};V.forEach(v=>p[v]=v);const f=x=>p[x]==x?x:(p[x]=f(p[x]));const st=S.map(()=>''),ch=[],fr=[];let tot=0,cnt=0,cu=-1;
+const comps=()=>{const g={};V.forEach(v=>{(g[f(v)]=g[f(v)]||[]).push(v)});return Object.values(g).map(a=>'{'+a.join(',')+'}').join(' ')};
+const ex=()=>'<div class="qb"><b>সাজানো edge:</b> '+S.map((e,i)=>chip(e[0]+e[1]+'('+e[2]+')',st[i]+(i==cu?' cur':''))).join('')+'</div><div class="qb"><b>গ্রুপ:</b> '+comps()+'</div>';
+fr.push({g:{},msg:'সব edge ছোট → বড় সাজালাম। শুরুতে প্রতিটি node নিজেই একটা গ্রুপ।',ex:ex()});
+for(let i=0;i<S.length;i++){const e=S[i],a=f(e[0]),b=f(e[1]),ok=a!=b;cu=i;
+if(ok){p[a]=b;ch.push(key(e[0],e[1]));tot+=e[2];cnt++;st[i]='ok'}else st[i]='no';
+fr.push({g:{e:[...ch],r:ok?[]:[key(e[0],e[1])]},msg:'edge <b>'+e[0]+e[1]+'</b> (weight '+e[2]+'): '+(ok?e[0]+' ও '+e[1]+' আলাদা গ্রুপে ⇒ <b>নিলাম</b>, গ্রুপ দুটো এক হলো।':e[0]+' ও '+e[1]+' একই গ্রুপে ⇒ নিলে cycle হতো, <b>বাদ</b> (লাল ডট edge)।')+'<br>এ পর্যন্ত নেওয়া edge = '+cnt+', মোট weight = '+tot,ex:ex()});
+if(cnt==V.length-1){cu=-1;fr.push({g:{e:[...ch]},msg:'V−1 = '+cnt+'টি edge হয়ে গেছে ⇒ থামলাম। <b>MST-এর মোট weight = '+tot+'</b>। বাকি edge দেখার দরকার নেই।',ex:ex()});break}}
+return fr}
+player('pk',kF(),gU);
+
+/* ---- Prim ---- */
+function pF(){const inn=['A'],ch=[],fr=[];let tot=0;
+fr.push({g:{n:['A'],cur:'A'},msg:'শুরু: A-কে গাছে নিলাম।',ex:'<div class="qb"><b>গাছের ভেতরে:</b> '+chip('A','ok')+'</div>'});
+while(inn.length<V.length){const cand=EG.filter(e=>inn.includes(e[0])!=inn.includes(e[1])).sort((a,b)=>a[2]-b[2]),best=cand[0],nv=inn.includes(best[0])?best[1]:best[0];
+const cs=cand.map((e,i)=>chip(e[0]+e[1]+'('+e[2]+')',i==0?'ok':'')).join('');
+inn.push(nv);ch.push(key(best[0],best[1]));tot+=best[2];
+fr.push({g:{n:[...inn],e:[...ch],cur:nv},msg:'গাছ থেকে বেরোনো edge-গুলোর মধ্যে সবচেয়ে সস্তা <b>'+best[0]+best[1]+'</b> ('+best[2]+') ⇒ <b>'+nv+'</b> গাছে ঢুকল। মোট weight = '+tot,ex:'<div class="qb"><b>বেরোনো edge (হলুদ = বাছাই):</b> '+cs+'</div><div class="qb"><b>গাছের ভেতরে:</b> '+inn.map(x=>chip(x,'ok')).join('')+'</div>'})}
+fr.push({g:{n:[...inn],e:[...ch]},msg:'সব node গাছে ঢুকেছে ⇒ শেষ। <b>MST-এর মোট weight = '+tot+'</b> (Kruskal-এর সাথে একই)।',ex:''});return fr}
+player('pp',pF(),gU);
+
+/* ---- কোনটা কখন ---- */
+const AD={1:'<b>BFS</b> — unweighted graph-এ কম edge-এর পথ।',2:'<b>DFS</b> — গভীরে গিয়ে সব পথ দেখা, cycle ও maze-এর কাজে।',3:'<b>Dijkstra</b> — non-negative weight, এক উৎস থেকে সবার ছোট পথ।',4:'<b>Bellman-Ford</b> (বা দ্রুত রূপ <b>SPFA</b>) — নেগেটিভ weight চলে; negative cycle ধরা যায়।',5:'<b>Floyd-Warshall</b> — সব জোড়ার shortest path, O(V³)।',6:'<b>Kruskal</b> বা <b>Prim</b> — MST, মোট খরচ সবচেয়ে কম।'};
+window.adv=function(k){$('#adv').innerHTML=AD[k]||''};
+
+/* ---- অতিরিক্ত কুইজ ---- */
+const QS=[['Graph-এর Vertex কী বোঝায়?',['সংযোগ','Node বা শীর্ষবিন্দু','Weight','Queue'],'Node বা শীর্ষবিন্দু'],['BFS কোন Data Structure ব্যবহার করে?',['Stack','Queue','Heap','Tree'],'Queue'],['DFS সাধারণত কোন পদ্ধতিতে গভীরে যায়?',['Level ধরে','একটি পথ ধরে','Weight সাজিয়ে','Matrix গুণ করে'],'একটি পথ ধরে'],['Negative Edge থাকলে কোনটি উপযুক্ত?',['Dijkstra','Bellman-Ford','Prim','BFS'],'Bellman-Ford'],['সব জোড়ার shortest path কোনটি বের করে?',['DFS','Kruskal','Floyd-Warshall','Prim'],'Floyd-Warshall'],['MST-তে V টি Vertex থাকলে কয়টি Edge থাকে?',['V','V+1','V−1','E²'],'V−1'],['Kruskal Edge কীভাবে বেছে নেয়?',['বড় থেকে ছোট','ছোট থেকে বড়','ইচ্ছেমতো','Node alphabetically'],'ছোট থেকে বড়']];
+$('#qz2').innerHTML=QS.map((q,i)=>'<div class="qq"><b>'+(i+1)+'. '+q[0]+'</b><div>'+q[1].map(x=>'<label style="display:block"><input type="radio" name="q2_'+i+'" value="'+x+'"> '+x+'</label>').join('')+'</div><div id="a2_'+i+'" style="font-weight:600;margin-top:6px"></div></div>').join('')+'<button onclick="checkQ2()">উত্তর যাচাই</button> <span id="sc2"></span>';
+window.checkQ2=function(){let sc=0;QS.forEach((q,i)=>{const a=document.querySelector('input[name=q2_'+i+']:checked'),el=document.getElementById('a2_'+i);if(a&&a.value===q[2]){sc++;el.textContent='সঠিক উত্তর!';el.style.color='#21834d'}else{el.textContent='সঠিক উত্তর: '+q[2];el.style.color='#bf4545'}});document.getElementById('sc2').textContent=QS.length+'টির মধ্যে '+sc+'টি সঠিক।'};
+})();
 </script></body></html>
